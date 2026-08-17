@@ -65,8 +65,8 @@ app = FastAPI(title="AI Quiz Generator API", version="1.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=False,  # ✅ UPDATE: Isay False kar diya gaya hai
+    allow_origins=["*"],  # Yeh har jagah se aane wali request ko allow karega
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
