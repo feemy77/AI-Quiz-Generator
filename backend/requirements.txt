@@ -14,3 +14,4 @@ python-docx
 reportlab
 Pillow
 youtube-transcript-api
+yt_dlp
