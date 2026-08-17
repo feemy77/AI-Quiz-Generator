@@ -11,3 +11,6 @@ langchain-core
 langchain-text-splitters
 pytesseract
 python-docx
+reportlab
+Pillow
+youtube-transcript-api
