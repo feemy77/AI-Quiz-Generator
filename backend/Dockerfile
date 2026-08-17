@@ -14,5 +14,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # 5. Copy your whole backend code
 COPY . .
 
-# 6. Run the FastAPI App (Back4App Port 7860)
+# 6. Expose the port for Back4App
+EXPOSE 7860
+
+# 7. Run the FastAPI App
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "7860"]
