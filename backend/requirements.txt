@@ -10,3 +10,4 @@ langchain-groq
 langchain-core
 langchain-text-splitters
 pytesseract
+python-docx
