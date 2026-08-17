@@ -37,7 +37,7 @@ from reportlab.lib.utils import ImageReader
 from reportlab.lib import colors
 
 # NOTE FOR WINDOWS: Point pytesseract to the installed executable
-pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+#pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
 # Existing modules (UNTOUCHED)
 import database
