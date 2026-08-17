@@ -1,0 +1,9 @@
+streamlit
+python-docx
+pdfplumber
+python-dotenv
+pydantic
+langchain
+langchain-groq
+langchain-core
+langchain-text-splitters

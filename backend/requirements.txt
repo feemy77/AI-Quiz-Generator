@@ -1,0 +1,11 @@
+fastapi
+uvicorn[standard]
+python-multipart
+pydantic[email]
+email-validator
+python-dotenv
+pdfplumber
+langchain
+langchain-groq
+langchain-core
+langchain-text-splitters

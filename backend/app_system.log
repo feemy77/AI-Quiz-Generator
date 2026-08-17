@@ -1,0 +1,1815 @@
+2026-08-12 22:45:22,597 [INFO] [ReqID: bd174c86] User ID: 2 requested quiz generation.
+2026-08-12 22:45:22,597 [INFO] [ReqID: bd174c86] Source: Document -> Faheem Agriculture in pakistan Report.docx
+2026-08-12 22:45:22,652 [INFO] [ReqID: bd174c86] Cache miss. Routing to AI Engine for Heavy Processing (No Timeouts applied).
+2026-08-12 22:45:22,688 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-12 22:45:28,453 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-12 22:45:30,471 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-12 22:45:32,749 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-12 22:45:34,763 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-12 22:45:36,232 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-12 22:45:38,240 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-12 22:45:41,248 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-12 22:45:43,255 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-12 22:45:46,982 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-12 22:45:48,987 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-12 22:45:51,386 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-12 22:45:53,391 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-12 22:45:59,783 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-12 22:46:01,808 [INFO] [ReqID: bd174c86] AI processing complete and cached.
+2026-08-12 22:46:01,822 [INFO] [ReqID: bd174c86] Quiz saved in Database with Quiz ID: 25
+2026-08-12 23:37:51,181 [INFO] [ReqID: cf7a1a79] User ID: 2 requested quiz generation.
+2026-08-12 23:37:51,181 [INFO] [ReqID: cf7a1a79] Source: Document -> Faheem Agriculture in Pakistan Report pdf.pdf
+2026-08-12 23:37:53,084 [INFO] [ReqID: cf7a1a79] Cache miss. Routing to 3-Tier AI Engine.
+2026-08-12 23:37:53,112 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-12 23:37:58,075 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-12 23:38:00,084 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-12 23:38:01,965 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-12 23:38:03,971 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-12 23:38:05,548 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-12 23:38:07,553 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-12 23:38:09,132 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-12 23:38:11,138 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-12 23:38:15,074 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-12 23:38:17,080 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-12 23:38:18,348 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-12 23:38:20,355 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-12 23:38:28,589 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-12 23:38:30,594 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-12 23:38:32,684 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-12 23:38:34,704 [INFO] [ReqID: cf7a1a79] AI processing complete and cached.
+2026-08-12 23:38:34,715 [INFO] [ReqID: cf7a1a79] Quiz saved in Database with Quiz ID: 26
+2026-08-12 23:39:28,035 [INFO] [ReqID: 2ed7b749] Student Malik submitting attempt for Quiz ID 26
+2026-08-12 23:39:29,109 [INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-08-12 23:39:29,824 [INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-08-12 23:39:30,502 [INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-08-12 23:39:31,055 [INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-08-12 23:39:31,463 [INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-08-12 23:39:31,557 [INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-08-12 23:39:31,558 [INFO] Retrying request to /openai/v1/chat/completions in 4.000000 seconds
+2026-08-12 23:39:36,086 [INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-08-12 23:39:36,788 [INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-08-12 23:39:36,830 [INFO] [ReqID: 2ed7b749] Grading Complete. Score: 2.0/25
+2026-08-13 12:54:35,844 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 12:54:39,016 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 12:54:41,022 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 12:54:43,492 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 12:54:45,498 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 12:54:47,911 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 12:54:49,919 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 12:54:54,578 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 12:54:56,584 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 12:54:59,197 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 12:55:01,203 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 12:55:04,639 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 12:55:06,653 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 12:55:09,128 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 12:55:11,434 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 12:55:13,621 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 12:55:15,629 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 12:55:19,780 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 12:55:21,786 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 12:55:23,883 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 13:12:09,293 [INFO] [ReqID: 4a11631f] STARTED: OPTIONS /teacher/quizzes
+2026-08-13 13:12:09,294 [INFO] [ReqID: 4a11631f] COMPLETED: Status 200 in 0.00s
+2026-08-13 13:12:09,295 [INFO] [ReqID: f0059ae2] STARTED: OPTIONS /teacher/quizzes
+2026-08-13 13:12:09,297 [INFO] [ReqID: f0059ae2] COMPLETED: Status 200 in 0.00s
+2026-08-13 13:12:09,299 [INFO] [ReqID: bb1c7c7a] STARTED: GET /teacher/quizzes
+2026-08-13 13:12:09,309 [INFO] [ReqID: bb1c7c7a] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:12:09,311 [INFO] [ReqID: bf55c610] STARTED: GET /teacher/quizzes
+2026-08-13 13:12:09,314 [INFO] [ReqID: 9524a3b4] STARTED: OPTIONS /teacher/overview
+2026-08-13 13:12:09,314 [INFO] [ReqID: 9524a3b4] COMPLETED: Status 200 in 0.00s
+2026-08-13 13:12:09,318 [INFO] [ReqID: 271ea9cd] STARTED: GET /teacher/overview
+2026-08-13 13:12:09,320 [INFO] [ReqID: bf55c610] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:12:09,327 [INFO] [ReqID: 271ea9cd] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:12:09,329 [INFO] [ReqID: b00bd622] STARTED: GET /teacher/overview
+2026-08-13 13:12:09,333 [INFO] [ReqID: f08694ad] STARTED: OPTIONS /teacher/classrooms
+2026-08-13 13:12:09,333 [INFO] [ReqID: f08694ad] COMPLETED: Status 200 in 0.00s
+2026-08-13 13:12:09,336 [INFO] [ReqID: 28c2d92b] STARTED: GET /teacher/classrooms
+2026-08-13 13:12:09,338 [INFO] [ReqID: b00bd622] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:12:09,342 [INFO] [ReqID: 28c2d92b] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:12:09,344 [INFO] [ReqID: 66a92ab0] STARTED: GET /teacher/classrooms
+2026-08-13 13:12:09,351 [INFO] [ReqID: 66a92ab0] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:12:09,370 [INFO] [ReqID: 98454e84] STARTED: OPTIONS /teacher/analytics/recent-attempts
+2026-08-13 13:12:09,370 [INFO] [ReqID: 98454e84] COMPLETED: Status 200 in 0.00s
+2026-08-13 13:12:09,374 [INFO] [ReqID: 7b93fc61] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-13 13:12:09,382 [INFO] [ReqID: 7b93fc61] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:12:09,397 [INFO] [ReqID: 4d85ac60] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-13 13:12:09,406 [INFO] [ReqID: b1c28aa9] STARTED: OPTIONS /teacher/branding
+2026-08-13 13:12:09,408 [INFO] [ReqID: b1c28aa9] COMPLETED: Status 200 in 0.00s
+2026-08-13 13:12:09,413 [INFO] [ReqID: 4d85ac60] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:12:09,414 [INFO] [ReqID: 16fbf105] STARTED: GET /teacher/branding
+2026-08-13 13:12:09,416 [INFO] [ReqID: 16fbf105] COMPLETED: Status 404 in 0.00s
+2026-08-13 13:12:09,422 [INFO] [ReqID: cc0a8c8b] STARTED: GET /teacher/branding
+2026-08-13 13:12:09,423 [INFO] [ReqID: cc0a8c8b] COMPLETED: Status 404 in 0.00s
+2026-08-13 13:15:06,389 [INFO] [ReqID: 30b0ba6f] STARTED: GET /teacher/quizzes
+2026-08-13 13:15:06,397 [INFO] [ReqID: 30b0ba6f] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:15:06,400 [INFO] [ReqID: 67094a51] STARTED: GET /teacher/quizzes
+2026-08-13 13:15:06,405 [INFO] [ReqID: 67094a51] COMPLETED: Status 200 in 0.00s
+2026-08-13 13:15:06,411 [INFO] [ReqID: fa0252a5] STARTED: GET /teacher/overview
+2026-08-13 13:15:06,418 [INFO] [ReqID: fa0252a5] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:15:06,419 [INFO] [ReqID: 1e61055c] STARTED: GET /teacher/overview
+2026-08-13 13:15:06,425 [INFO] [ReqID: 2d9cfc67] STARTED: GET /teacher/classrooms
+2026-08-13 13:15:06,430 [INFO] [ReqID: 1e61055c] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:15:06,433 [INFO] [ReqID: 2d9cfc67] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:15:06,435 [INFO] [ReqID: 000d4afa] STARTED: GET /teacher/classrooms
+2026-08-13 13:15:06,440 [INFO] [ReqID: 7c1c16f7] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-13 13:15:06,457 [INFO] [ReqID: 000d4afa] COMPLETED: Status 200 in 0.02s
+2026-08-13 13:15:06,462 [INFO] [ReqID: 7c1c16f7] COMPLETED: Status 200 in 0.02s
+2026-08-13 13:15:06,467 [INFO] [ReqID: c2610d6b] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-13 13:15:06,469 [INFO] [ReqID: ab21efcb] STARTED: GET /teacher/branding
+2026-08-13 13:15:06,475 [INFO] [ReqID: c2610d6b] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:15:06,477 [INFO] [ReqID: ab21efcb] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:15:06,479 [INFO] [ReqID: 17b98dbc] STARTED: GET /teacher/branding
+2026-08-13 13:15:06,483 [INFO] [ReqID: 17b98dbc] COMPLETED: Status 200 in 0.00s
+2026-08-13 13:21:49,251 [INFO] [ReqID: 6fde05d8] STARTED: GET /teacher/quizzes
+2026-08-13 13:21:49,258 [INFO] [ReqID: 6fde05d8] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:21:49,260 [INFO] [ReqID: 9ef1251b] STARTED: GET /teacher/quizzes
+2026-08-13 13:21:49,265 [INFO] [ReqID: 42de6682] STARTED: GET /teacher/overview
+2026-08-13 13:21:49,270 [INFO] [ReqID: 9ef1251b] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:21:49,274 [INFO] [ReqID: 42de6682] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:21:49,284 [INFO] [ReqID: 89de6bb9] STARTED: GET /teacher/overview
+2026-08-13 13:21:49,290 [INFO] [ReqID: 89de6bb9] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:21:49,295 [INFO] [ReqID: 22186793] STARTED: GET /teacher/classrooms
+2026-08-13 13:21:49,302 [INFO] [ReqID: 22186793] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:21:49,303 [INFO] [ReqID: 98dcf79b] STARTED: GET /teacher/classrooms
+2026-08-13 13:21:49,306 [INFO] [ReqID: 72187c2c] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-13 13:21:49,309 [INFO] [ReqID: 98dcf79b] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:21:49,314 [INFO] [ReqID: 72187c2c] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:21:49,315 [INFO] [ReqID: e3085c3e] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-13 13:21:49,318 [INFO] [ReqID: b9abe905] STARTED: GET /teacher/branding
+2026-08-13 13:21:49,321 [INFO] [ReqID: e3085c3e] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:21:49,323 [INFO] [ReqID: b9abe905] COMPLETED: Status 200 in 0.00s
+2026-08-13 13:21:49,325 [INFO] [ReqID: 66eee7b3] STARTED: GET /teacher/branding
+2026-08-13 13:21:49,330 [INFO] [ReqID: 66eee7b3] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:22:13,636 [INFO] [ReqID: f72887f0] STARTED: OPTIONS /teacher/quizzes
+2026-08-13 13:22:13,637 [INFO] [ReqID: f72887f0] COMPLETED: Status 200 in 0.00s
+2026-08-13 13:22:13,638 [INFO] [ReqID: dd38a6d6] STARTED: OPTIONS /teacher/quizzes
+2026-08-13 13:22:13,639 [INFO] [ReqID: dd38a6d6] COMPLETED: Status 200 in 0.00s
+2026-08-13 13:22:13,644 [INFO] [ReqID: e1c81528] STARTED: GET /teacher/quizzes
+2026-08-13 13:22:13,657 [INFO] [ReqID: e1c81528] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:22:13,659 [INFO] [ReqID: 0459063f] STARTED: GET /teacher/quizzes
+2026-08-13 13:22:13,662 [INFO] [ReqID: edbb9d0c] STARTED: OPTIONS /teacher/overview
+2026-08-13 13:22:13,664 [INFO] [ReqID: edbb9d0c] COMPLETED: Status 200 in 0.00s
+2026-08-13 13:22:13,667 [INFO] [ReqID: a8046b7c] STARTED: GET /teacher/overview
+2026-08-13 13:22:13,669 [INFO] [ReqID: 0459063f] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:22:13,677 [INFO] [ReqID: a8046b7c] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:22:13,679 [INFO] [ReqID: afdd90b7] STARTED: GET /teacher/overview
+2026-08-13 13:22:13,681 [INFO] [ReqID: 19d7e0bd] STARTED: OPTIONS /teacher/classrooms
+2026-08-13 13:22:13,682 [INFO] [ReqID: 19d7e0bd] COMPLETED: Status 200 in 0.00s
+2026-08-13 13:22:13,684 [INFO] [ReqID: 5b4c1462] STARTED: GET /teacher/classrooms
+2026-08-13 13:22:13,686 [INFO] [ReqID: afdd90b7] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:22:13,699 [INFO] [ReqID: 5b4c1462] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:22:13,701 [INFO] [ReqID: e913d8ac] STARTED: GET /teacher/classrooms
+2026-08-13 13:22:13,709 [INFO] [ReqID: e913d8ac] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:22:13,711 [INFO] [ReqID: e1e44549] STARTED: OPTIONS /teacher/analytics/recent-attempts
+2026-08-13 13:22:13,712 [INFO] [ReqID: e1e44549] COMPLETED: Status 200 in 0.00s
+2026-08-13 13:22:13,714 [INFO] [ReqID: fbb46df5] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-13 13:22:13,718 [INFO] [ReqID: fbb46df5] COMPLETED: Status 200 in 0.00s
+2026-08-13 13:22:13,720 [INFO] [ReqID: 6e1eb704] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-13 13:22:13,725 [INFO] [ReqID: e546a0d7] STARTED: OPTIONS /teacher/branding
+2026-08-13 13:22:13,725 [INFO] [ReqID: e546a0d7] COMPLETED: Status 200 in 0.00s
+2026-08-13 13:22:13,728 [INFO] [ReqID: cb226b6b] STARTED: GET /teacher/branding
+2026-08-13 13:22:13,729 [INFO] [ReqID: 6e1eb704] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:22:13,734 [INFO] [ReqID: cb226b6b] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:22:13,735 [INFO] [ReqID: 38de315f] STARTED: GET /teacher/branding
+2026-08-13 13:22:13,742 [INFO] [ReqID: 38de315f] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:23:39,592 [INFO] [ReqID: 5bdcfa7c] STARTED: OPTIONS /teacher/branding
+2026-08-13 13:23:39,593 [INFO] [ReqID: 5bdcfa7c] COMPLETED: Status 200 in 0.00s
+2026-08-13 13:23:39,595 [INFO] [ReqID: d4f0cca0] STARTED: POST /teacher/branding
+2026-08-13 13:23:39,614 [INFO] [ReqID: d4f0cca0] COMPLETED: Status 200 in 0.02s
+2026-08-13 13:27:00,507 [INFO] [ReqID: de44788e] STARTED: GET /teacher/quizzes
+2026-08-13 13:27:00,513 [INFO] [ReqID: de44788e] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:27:00,517 [INFO] [ReqID: c64c53be] STARTED: GET /teacher/quizzes
+2026-08-13 13:27:00,522 [INFO] [ReqID: c64c53be] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:27:00,531 [INFO] [ReqID: 18c89720] STARTED: GET /teacher/overview
+2026-08-13 13:27:00,537 [INFO] [ReqID: 18c89720] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:27:00,538 [INFO] [ReqID: 4d02821e] STARTED: GET /teacher/overview
+2026-08-13 13:27:00,542 [INFO] [ReqID: 4d02821e] COMPLETED: Status 200 in 0.00s
+2026-08-13 13:27:00,569 [INFO] [ReqID: 3d95c33c] STARTED: GET /teacher/classrooms
+2026-08-13 13:27:00,574 [INFO] [ReqID: 3d95c33c] COMPLETED: Status 200 in 0.00s
+2026-08-13 13:27:00,575 [INFO] [ReqID: 52bdadf9] STARTED: GET /teacher/classrooms
+2026-08-13 13:27:00,580 [INFO] [ReqID: e7be6c8d] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-13 13:27:00,584 [INFO] [ReqID: 52bdadf9] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:27:00,587 [INFO] [ReqID: e7be6c8d] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:27:00,588 [INFO] [ReqID: e47dfc91] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-13 13:27:00,591 [INFO] [ReqID: 2f8e3e2f] STARTED: GET /teacher/branding
+2026-08-13 13:27:00,596 [INFO] [ReqID: e47dfc91] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:27:00,601 [INFO] [ReqID: 2f8e3e2f] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:27:00,602 [INFO] [ReqID: ff27894e] STARTED: GET /teacher/branding
+2026-08-13 13:27:00,608 [INFO] [ReqID: ff27894e] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:27:08,266 [INFO] [ReqID: 95de4ae9] STARTED: GET /teacher/quizzes
+2026-08-13 13:27:08,272 [INFO] [ReqID: 95de4ae9] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:27:08,275 [INFO] [ReqID: ff7dc216] STARTED: GET /teacher/quizzes
+2026-08-13 13:27:08,282 [INFO] [ReqID: 29d55377] STARTED: GET /teacher/overview
+2026-08-13 13:27:08,286 [INFO] [ReqID: ff7dc216] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:27:08,290 [INFO] [ReqID: 29d55377] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:27:08,291 [INFO] [ReqID: 57593b78] STARTED: GET /teacher/overview
+2026-08-13 13:27:08,298 [INFO] [ReqID: fed2c776] STARTED: GET /teacher/classrooms
+2026-08-13 13:27:08,302 [INFO] [ReqID: 57593b78] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:27:08,303 [INFO] [ReqID: fed2c776] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:27:08,307 [INFO] [ReqID: fef526da] STARTED: GET /teacher/classrooms
+2026-08-13 13:27:08,309 [INFO] [ReqID: 65866905] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-13 13:27:08,318 [INFO] [ReqID: fef526da] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:27:08,327 [INFO] [ReqID: 65866905] COMPLETED: Status 200 in 0.02s
+2026-08-13 13:27:08,338 [INFO] [ReqID: 8b6579e7] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-13 13:27:08,339 [INFO] [ReqID: dc18f52e] STARTED: GET /teacher/branding
+2026-08-13 13:27:08,345 [INFO] [ReqID: 8b6579e7] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:27:08,348 [INFO] [ReqID: dc18f52e] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:27:08,350 [INFO] [ReqID: 04d8515f] STARTED: GET /teacher/branding
+2026-08-13 13:27:08,354 [INFO] [ReqID: 04d8515f] COMPLETED: Status 200 in 0.00s
+2026-08-13 13:27:13,854 [INFO] [ReqID: 652e4ab5] STARTED: POST /teacher/branding
+2026-08-13 13:27:13,859 [INFO] [ReqID: 652e4ab5] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:27:31,913 [INFO] [ReqID: b3b0ac63] STARTED: OPTIONS /user/dashboard
+2026-08-13 13:27:31,914 [INFO] [ReqID: f64bfa1d] STARTED: OPTIONS /user/dashboard
+2026-08-13 13:27:31,914 [INFO] [ReqID: b3b0ac63] COMPLETED: Status 200 in 0.00s
+2026-08-13 13:27:31,916 [INFO] [ReqID: f64bfa1d] COMPLETED: Status 200 in 0.00s
+2026-08-13 13:27:31,919 [INFO] [ReqID: f86920e5] STARTED: GET /user/dashboard
+2026-08-13 13:27:31,926 [INFO] [ReqID: f86920e5] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:27:31,928 [INFO] [ReqID: 7e2d057f] STARTED: GET /user/dashboard
+2026-08-13 13:27:31,931 [INFO] [ReqID: 7e2d057f] COMPLETED: Status 200 in 0.00s
+2026-08-13 13:27:31,960 [INFO] [ReqID: 6bc93a83] STARTED: OPTIONS /flashcards/due
+2026-08-13 13:27:31,961 [INFO] [ReqID: 8272c2fe] STARTED: OPTIONS /flashcards/due
+2026-08-13 13:27:31,962 [INFO] [ReqID: 6bc93a83] COMPLETED: Status 200 in 0.00s
+2026-08-13 13:27:31,964 [INFO] [ReqID: 8272c2fe] COMPLETED: Status 200 in 0.00s
+2026-08-13 13:27:31,966 [INFO] [ReqID: 6690eaa8] STARTED: GET /flashcards/due
+2026-08-13 13:27:31,971 [INFO] [ReqID: 6690eaa8] COMPLETED: Status 200 in 0.00s
+2026-08-13 13:27:31,974 [INFO] [ReqID: da93b0ed] STARTED: GET /flashcards/due
+2026-08-13 13:27:31,979 [INFO] [ReqID: da93b0ed] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:27:32,008 [INFO] [ReqID: d1345bcc] STARTED: GET /teacher/quizzes
+2026-08-13 13:27:32,012 [INFO] [ReqID: d1345bcc] COMPLETED: Status 200 in 0.00s
+2026-08-13 13:27:32,014 [INFO] [ReqID: d9e78b5e] STARTED: GET /teacher/quizzes
+2026-08-13 13:27:32,017 [INFO] [ReqID: 9f62a29f] STARTED: GET /teacher/overview
+2026-08-13 13:27:32,020 [INFO] [ReqID: d9e78b5e] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:27:32,026 [INFO] [ReqID: 9f62a29f] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:27:32,028 [INFO] [ReqID: d11334e5] STARTED: GET /teacher/overview
+2026-08-13 13:27:32,031 [INFO] [ReqID: 75d52bc8] STARTED: GET /teacher/classrooms
+2026-08-13 13:27:32,039 [INFO] [ReqID: 75d52bc8] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:27:32,043 [INFO] [ReqID: d11334e5] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:27:32,049 [INFO] [ReqID: c4c97653] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-13 13:27:32,050 [INFO] [ReqID: b11cbda8] STARTED: GET /teacher/classrooms
+2026-08-13 13:27:32,057 [INFO] [ReqID: c4c97653] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:27:32,063 [INFO] [ReqID: b11cbda8] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:27:32,069 [INFO] [ReqID: 6fa15889] STARTED: GET /teacher/branding
+2026-08-13 13:27:32,083 [INFO] [ReqID: 6fa15889] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:27:32,084 [INFO] [ReqID: b784cdbf] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-13 13:27:32,095 [INFO] [ReqID: b784cdbf] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:27:32,101 [INFO] [ReqID: 56db701a] STARTED: GET /teacher/branding
+2026-08-13 13:27:32,107 [INFO] [ReqID: 56db701a] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:27:36,955 [INFO] [ReqID: ddf75070] STARTED: GET /user/dashboard
+2026-08-13 13:27:36,960 [INFO] [ReqID: ddf75070] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:27:36,962 [INFO] [ReqID: 1820767f] STARTED: GET /user/dashboard
+2026-08-13 13:27:36,965 [INFO] [ReqID: 7e28674e] STARTED: GET /flashcards/due
+2026-08-13 13:27:36,971 [INFO] [ReqID: 1820767f] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:27:36,973 [INFO] [ReqID: 7e28674e] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:27:36,977 [INFO] [ReqID: c0efdd28] STARTED: GET /flashcards/due
+2026-08-13 13:27:36,983 [INFO] [ReqID: c0efdd28] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:27:37,044 [INFO] [ReqID: a70459e1] STARTED: GET /teacher/quizzes
+2026-08-13 13:27:37,051 [INFO] [ReqID: a70459e1] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:27:37,053 [INFO] [ReqID: 9b127210] STARTED: GET /teacher/quizzes
+2026-08-13 13:27:37,056 [INFO] [ReqID: cdbe856a] STARTED: GET /teacher/overview
+2026-08-13 13:27:37,059 [INFO] [ReqID: 9b127210] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:27:37,062 [INFO] [ReqID: cdbe856a] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:27:37,063 [INFO] [ReqID: 09928d97] STARTED: GET /teacher/overview
+2026-08-13 13:27:37,067 [INFO] [ReqID: 172f5315] STARTED: GET /teacher/classrooms
+2026-08-13 13:27:37,071 [INFO] [ReqID: 09928d97] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:27:37,073 [INFO] [ReqID: 172f5315] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:27:37,076 [INFO] [ReqID: 9e9fe934] STARTED: GET /teacher/classrooms
+2026-08-13 13:27:37,077 [INFO] [ReqID: e917104b] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-13 13:27:37,082 [INFO] [ReqID: 9e9fe934] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:27:37,084 [INFO] [ReqID: e917104b] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:27:37,087 [INFO] [ReqID: 8ee77d15] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-13 13:27:37,089 [INFO] [ReqID: 9530542d] STARTED: GET /teacher/branding
+2026-08-13 13:27:37,093 [INFO] [ReqID: 8ee77d15] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:27:37,096 [INFO] [ReqID: 9530542d] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:27:37,098 [INFO] [ReqID: e5e564a3] STARTED: GET /teacher/branding
+2026-08-13 13:27:37,105 [INFO] [ReqID: e5e564a3] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:28:19,397 [INFO] [ReqID: db7c4757] STARTED: GET /user/dashboard
+2026-08-13 13:28:19,403 [INFO] [ReqID: db7c4757] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:28:19,406 [INFO] [ReqID: 7751f9b3] STARTED: GET /user/dashboard
+2026-08-13 13:28:19,408 [INFO] [ReqID: a02c1162] STARTED: GET /flashcards/due
+2026-08-13 13:28:19,413 [INFO] [ReqID: 7751f9b3] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:28:19,416 [INFO] [ReqID: a02c1162] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:28:19,418 [INFO] [ReqID: 44732c48] STARTED: GET /flashcards/due
+2026-08-13 13:28:19,427 [INFO] [ReqID: 44732c48] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:28:19,481 [INFO] [ReqID: b084b3f3] STARTED: GET /teacher/quizzes
+2026-08-13 13:28:19,486 [INFO] [ReqID: b084b3f3] COMPLETED: Status 200 in 0.00s
+2026-08-13 13:28:19,488 [INFO] [ReqID: 512e20ac] STARTED: GET /teacher/quizzes
+2026-08-13 13:28:19,492 [INFO] [ReqID: 56049a8a] STARTED: GET /teacher/overview
+2026-08-13 13:28:19,496 [INFO] [ReqID: 512e20ac] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:28:19,498 [INFO] [ReqID: 56049a8a] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:28:19,500 [INFO] [ReqID: d1c71d3d] STARTED: GET /teacher/overview
+2026-08-13 13:28:19,502 [INFO] [ReqID: 3e8ba7e6] STARTED: GET /teacher/classrooms
+2026-08-13 13:28:19,507 [INFO] [ReqID: d1c71d3d] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:28:19,509 [INFO] [ReqID: 3e8ba7e6] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:28:19,511 [INFO] [ReqID: 2e6aa6d1] STARTED: GET /teacher/classrooms
+2026-08-13 13:28:19,514 [INFO] [ReqID: c2a203a0] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-13 13:28:19,517 [INFO] [ReqID: 2e6aa6d1] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:28:19,521 [INFO] [ReqID: c2a203a0] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:28:19,522 [INFO] [ReqID: 7d38b83b] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-13 13:28:19,526 [INFO] [ReqID: d37f6d15] STARTED: GET /teacher/branding
+2026-08-13 13:28:19,528 [INFO] [ReqID: 7d38b83b] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:28:19,533 [INFO] [ReqID: d37f6d15] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:28:19,535 [INFO] [ReqID: a49abada] STARTED: GET /teacher/branding
+2026-08-13 13:28:19,542 [INFO] [ReqID: a49abada] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:31:29,851 [INFO] [ReqID: 15e88e55] STARTED: GET /teacher/quizzes
+2026-08-13 13:31:29,855 [INFO] [ReqID: 15e88e55] COMPLETED: Status 200 in 0.00s
+2026-08-13 13:31:29,858 [INFO] [ReqID: a10bf30e] STARTED: GET /teacher/quizzes
+2026-08-13 13:31:29,860 [INFO] [ReqID: a47b9b49] STARTED: GET /teacher/overview
+2026-08-13 13:31:29,866 [INFO] [ReqID: a10bf30e] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:31:29,869 [INFO] [ReqID: a47b9b49] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:31:29,883 [INFO] [ReqID: 2b72296b] STARTED: GET /teacher/overview
+2026-08-13 13:31:29,886 [INFO] [ReqID: a9788e5c] STARTED: GET /teacher/classrooms
+2026-08-13 13:31:29,889 [INFO] [ReqID: 2b72296b] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:31:29,892 [INFO] [ReqID: a9788e5c] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:31:29,912 [INFO] [ReqID: 5b0e607b] STARTED: GET /teacher/classrooms
+2026-08-13 13:31:29,914 [INFO] [ReqID: f6ae58d4] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-13 13:31:29,922 [INFO] [ReqID: 5b0e607b] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:31:29,923 [INFO] [ReqID: f6ae58d4] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:31:29,928 [INFO] [ReqID: b18db82e] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-13 13:31:29,931 [INFO] [ReqID: 4abb1f43] STARTED: GET /teacher/branding
+2026-08-13 13:31:29,935 [INFO] [ReqID: b18db82e] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:31:29,939 [INFO] [ReqID: 4abb1f43] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:31:29,941 [INFO] [ReqID: dfe0d727] STARTED: GET /teacher/branding
+2026-08-13 13:31:29,948 [INFO] [ReqID: dfe0d727] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:31:51,804 [INFO] [ReqID: 351ff778] STARTED: GET /teacher/quizzes
+2026-08-13 13:31:51,812 [INFO] [ReqID: 351ff778] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:31:51,815 [INFO] [ReqID: 67f84f39] STARTED: GET /teacher/quizzes
+2026-08-13 13:31:51,822 [INFO] [ReqID: b97aaf0e] STARTED: GET /teacher/overview
+2026-08-13 13:31:51,832 [INFO] [ReqID: 67f84f39] COMPLETED: Status 200 in 0.02s
+2026-08-13 13:31:51,835 [INFO] [ReqID: b97aaf0e] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:31:51,837 [INFO] [ReqID: 511e3ae8] STARTED: GET /teacher/overview
+2026-08-13 13:31:51,842 [INFO] [ReqID: 69b5f64b] STARTED: GET /teacher/classrooms
+2026-08-13 13:31:51,846 [INFO] [ReqID: 511e3ae8] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:31:51,850 [INFO] [ReqID: 69b5f64b] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:31:51,851 [INFO] [ReqID: 6ba33bd5] STARTED: GET /teacher/classrooms
+2026-08-13 13:31:51,854 [INFO] [ReqID: a9d4a579] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-13 13:31:51,863 [INFO] [ReqID: 6ba33bd5] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:31:51,877 [INFO] [ReqID: a9d4a579] COMPLETED: Status 200 in 0.02s
+2026-08-13 13:31:51,879 [INFO] [ReqID: fb424fc3] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-13 13:31:51,884 [INFO] [ReqID: fb424fc3] COMPLETED: Status 200 in 0.00s
+2026-08-13 13:31:51,887 [INFO] [ReqID: 77e0b662] STARTED: GET /teacher/branding
+2026-08-13 13:31:51,895 [INFO] [ReqID: 77e0b662] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:31:51,897 [INFO] [ReqID: ad4669f2] STARTED: GET /teacher/branding
+2026-08-13 13:31:51,902 [INFO] [ReqID: ad4669f2] COMPLETED: Status 200 in 0.00s
+2026-08-13 13:32:21,783 [INFO] [ReqID: 4b0c1e7d] STARTED: POST /quiz/analyze-document
+2026-08-13 13:32:21,808 [INFO] [ReqID: 4b0c1e7d] COMPLETED: Status 200 in 0.03s
+2026-08-13 13:32:45,238 [INFO] [ReqID: 0517fad3] STARTED: OPTIONS /quiz/generate
+2026-08-13 13:32:45,238 [INFO] [ReqID: 0517fad3] COMPLETED: Status 200 in 0.00s
+2026-08-13 13:32:45,241 [INFO] [ReqID: 0177ab86] STARTED: POST /quiz/generate
+2026-08-13 13:32:45,734 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 13:32:53,590 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 13:32:55,596 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 13:33:02,151 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 13:33:04,156 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 13:33:08,311 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 13:33:10,318 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 13:33:13,277 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 13:33:15,286 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 13:33:18,067 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 13:33:20,073 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 13:33:24,082 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 13:33:26,116 [INFO] [ReqID: 0177ab86] COMPLETED: Status 200 in 40.88s
+2026-08-13 13:33:26,121 [INFO] [ReqID: 7aca58dc] STARTED: OPTIONS /teacher/quizzes
+2026-08-13 13:33:26,122 [INFO] [ReqID: 7aca58dc] COMPLETED: Status 200 in 0.00s
+2026-08-13 13:33:26,125 [INFO] [ReqID: b9a9ee54] STARTED: GET /teacher/quizzes
+2026-08-13 13:33:26,129 [INFO] [ReqID: b9a9ee54] COMPLETED: Status 200 in 0.00s
+2026-08-13 13:33:26,133 [INFO] [ReqID: 94778049] STARTED: OPTIONS /teacher/overview
+2026-08-13 13:33:26,134 [INFO] [ReqID: 94778049] COMPLETED: Status 200 in 0.00s
+2026-08-13 13:33:26,137 [INFO] [ReqID: 58bc5182] STARTED: GET /teacher/overview
+2026-08-13 13:33:26,141 [INFO] [ReqID: 58bc5182] COMPLETED: Status 200 in 0.00s
+2026-08-13 13:33:26,146 [INFO] [ReqID: 079910ad] STARTED: OPTIONS /teacher/classrooms
+2026-08-13 13:33:26,146 [INFO] [ReqID: 079910ad] COMPLETED: Status 200 in 0.00s
+2026-08-13 13:33:26,149 [INFO] [ReqID: c24cce7d] STARTED: GET /teacher/classrooms
+2026-08-13 13:33:26,155 [INFO] [ReqID: c24cce7d] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:33:26,160 [INFO] [ReqID: 28892d51] STARTED: OPTIONS /teacher/analytics/recent-attempts
+2026-08-13 13:33:26,161 [INFO] [ReqID: 28892d51] COMPLETED: Status 200 in 0.00s
+2026-08-13 13:33:26,165 [INFO] [ReqID: 55b3b053] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-13 13:33:26,175 [INFO] [ReqID: 55b3b053] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:33:26,180 [INFO] [ReqID: c79a97db] STARTED: GET /teacher/branding
+2026-08-13 13:33:26,187 [INFO] [ReqID: c79a97db] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:34:53,629 [INFO] [ReqID: 25b527f9] STARTED: OPTIONS /quiz/28/export/pdf
+2026-08-13 13:34:53,629 [INFO] [ReqID: 25b527f9] COMPLETED: Status 200 in 0.00s
+2026-08-13 13:34:53,633 [INFO] [ReqID: 9746fc87] STARTED: POST /quiz/28/export/pdf
+2026-08-13 13:34:54,358 [ERROR] Failed to add logo to PDF: expected str, bytes or os.PathLike object, not ImageReader
+2026-08-13 13:34:54,413 [INFO] [ReqID: 9746fc87] COMPLETED: Status 200 in 0.78s
+2026-08-13 13:38:01,481 [INFO] [ReqID: eebc620c] STARTED: GET /teacher/quizzes
+2026-08-13 13:38:01,488 [INFO] [ReqID: eebc620c] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:38:01,491 [INFO] [ReqID: 6bcc52b3] STARTED: GET /teacher/quizzes
+2026-08-13 13:38:01,499 [INFO] [ReqID: 6bcc52b3] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:38:01,505 [INFO] [ReqID: ecd631ab] STARTED: GET /teacher/overview
+2026-08-13 13:38:01,512 [INFO] [ReqID: ecd631ab] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:38:01,513 [INFO] [ReqID: 752bfee9] STARTED: GET /teacher/overview
+2026-08-13 13:38:01,517 [INFO] [ReqID: 70d0ab10] STARTED: GET /teacher/classrooms
+2026-08-13 13:38:01,525 [INFO] [ReqID: 752bfee9] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:38:01,528 [INFO] [ReqID: 70d0ab10] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:38:01,532 [INFO] [ReqID: 8b947a8f] STARTED: GET /teacher/classrooms
+2026-08-13 13:38:01,539 [INFO] [ReqID: 8b947a8f] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:38:01,542 [INFO] [ReqID: b6ca8184] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-13 13:38:01,548 [INFO] [ReqID: b6ca8184] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:38:01,551 [INFO] [ReqID: 371f118c] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-13 13:38:01,556 [INFO] [ReqID: f1570103] STARTED: OPTIONS /teacher/branding
+2026-08-13 13:38:01,558 [INFO] [ReqID: f1570103] COMPLETED: Status 200 in 0.00s
+2026-08-13 13:38:01,560 [INFO] [ReqID: 371f118c] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:38:01,561 [INFO] [ReqID: 01844ddc] STARTED: GET /teacher/branding
+2026-08-13 13:38:01,568 [INFO] [ReqID: 01844ddc] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:38:01,593 [INFO] [ReqID: a807e310] STARTED: GET /teacher/branding
+2026-08-13 13:38:01,600 [INFO] [ReqID: a807e310] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:47:22,358 [INFO] [ReqID: d73ffbe7] STARTED: OPTIONS /teacher/quizzes
+2026-08-13 13:47:22,360 [INFO] [ReqID: d73ffbe7] COMPLETED: Status 200 in 0.00s
+2026-08-13 13:47:22,362 [INFO] [ReqID: 9464e804] STARTED: OPTIONS /teacher/quizzes
+2026-08-13 13:47:22,363 [INFO] [ReqID: 9464e804] COMPLETED: Status 200 in 0.00s
+2026-08-13 13:47:22,364 [INFO] [ReqID: 867424ef] STARTED: GET /teacher/quizzes
+2026-08-13 13:47:22,373 [INFO] [ReqID: 867424ef] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:47:22,375 [INFO] [ReqID: 85f34dfe] STARTED: GET /teacher/quizzes
+2026-08-13 13:47:22,378 [INFO] [ReqID: 6656ca8e] STARTED: OPTIONS /teacher/overview
+2026-08-13 13:47:22,378 [INFO] [ReqID: 6656ca8e] COMPLETED: Status 200 in 0.00s
+2026-08-13 13:47:22,382 [INFO] [ReqID: edd1c67a] STARTED: GET /teacher/overview
+2026-08-13 13:47:22,384 [INFO] [ReqID: 85f34dfe] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:47:22,388 [INFO] [ReqID: edd1c67a] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:47:22,390 [INFO] [ReqID: 4c7ed7bd] STARTED: GET /teacher/overview
+2026-08-13 13:47:22,392 [INFO] [ReqID: 33de7310] STARTED: OPTIONS /teacher/classrooms
+2026-08-13 13:47:22,393 [INFO] [ReqID: 33de7310] COMPLETED: Status 200 in 0.00s
+2026-08-13 13:47:22,396 [INFO] [ReqID: 72233ac9] STARTED: GET /teacher/classrooms
+2026-08-13 13:47:22,400 [INFO] [ReqID: 4c7ed7bd] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:47:22,405 [INFO] [ReqID: 72233ac9] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:47:22,407 [INFO] [ReqID: ffb9f5c7] STARTED: GET /teacher/classrooms
+2026-08-13 13:47:22,411 [INFO] [ReqID: c1d6ae8d] STARTED: OPTIONS /teacher/analytics/recent-attempts
+2026-08-13 13:47:22,412 [INFO] [ReqID: c1d6ae8d] COMPLETED: Status 200 in 0.00s
+2026-08-13 13:47:22,415 [INFO] [ReqID: ffb9f5c7] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:47:22,416 [INFO] [ReqID: 797d766a] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-13 13:47:22,422 [INFO] [ReqID: 797d766a] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:47:22,424 [INFO] [ReqID: cb32e57a] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-13 13:47:22,427 [INFO] [ReqID: 3f70ef83] STARTED: GET /teacher/branding
+2026-08-13 13:47:22,431 [INFO] [ReqID: cb32e57a] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:47:22,435 [INFO] [ReqID: 3f70ef83] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:47:22,437 [INFO] [ReqID: bcf2dc64] STARTED: GET /teacher/branding
+2026-08-13 13:47:22,445 [INFO] [ReqID: bcf2dc64] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:47:48,175 [INFO] [ReqID: c98b7a07] STARTED: GET /teacher/quizzes
+2026-08-13 13:47:48,184 [INFO] [ReqID: c98b7a07] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:47:48,188 [INFO] [ReqID: 3f656dd7] STARTED: GET /teacher/quizzes
+2026-08-13 13:47:48,192 [INFO] [ReqID: 3f656dd7] COMPLETED: Status 200 in 0.00s
+2026-08-13 13:47:48,203 [INFO] [ReqID: 9b455700] STARTED: GET /teacher/overview
+2026-08-13 13:47:48,208 [INFO] [ReqID: 9b455700] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:47:48,210 [INFO] [ReqID: 04ee9ef7] STARTED: GET /teacher/overview
+2026-08-13 13:47:48,215 [INFO] [ReqID: b6aba682] STARTED: GET /teacher/classrooms
+2026-08-13 13:47:48,220 [INFO] [ReqID: 04ee9ef7] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:47:48,221 [INFO] [ReqID: b6aba682] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:47:48,224 [INFO] [ReqID: 7e62f882] STARTED: GET /teacher/classrooms
+2026-08-13 13:47:48,228 [INFO] [ReqID: 07a0c123] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-13 13:47:48,239 [INFO] [ReqID: 7e62f882] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:47:48,242 [INFO] [ReqID: 07a0c123] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:47:48,250 [INFO] [ReqID: 701ee98b] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-13 13:47:48,252 [INFO] [ReqID: 8986b14c] STARTED: GET /teacher/branding
+2026-08-13 13:47:48,257 [INFO] [ReqID: 701ee98b] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:47:48,260 [INFO] [ReqID: 8986b14c] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:47:48,264 [INFO] [ReqID: 350d6ac8] STARTED: GET /teacher/branding
+2026-08-13 13:47:48,268 [INFO] [ReqID: 350d6ac8] COMPLETED: Status 200 in 0.00s
+2026-08-13 13:49:31,659 [INFO] [ReqID: 0f1a0482] STARTED: POST /quiz/analyze-document
+2026-08-13 13:49:31,682 [INFO] [ReqID: 0f1a0482] COMPLETED: Status 200 in 0.02s
+2026-08-13 13:50:30,873 [INFO] [ReqID: 90c6ac37] STARTED: OPTIONS /quiz/generate
+2026-08-13 13:50:30,874 [INFO] [ReqID: 90c6ac37] COMPLETED: Status 200 in 0.00s
+2026-08-13 13:50:30,880 [INFO] [ReqID: 9e7f6d39] STARTED: POST /quiz/generate
+2026-08-13 13:50:31,350 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 13:50:36,320 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 13:50:38,326 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 13:50:44,943 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 13:50:46,950 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 13:50:50,099 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 13:50:52,107 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 13:50:55,605 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 13:50:57,635 [INFO] [ReqID: 9e7f6d39] COMPLETED: Status 200 in 26.75s
+2026-08-13 13:50:57,639 [INFO] [ReqID: d1f09fc4] STARTED: GET /teacher/quizzes
+2026-08-13 13:50:57,645 [INFO] [ReqID: d1f09fc4] COMPLETED: Status 200 in 0.00s
+2026-08-13 13:50:57,654 [INFO] [ReqID: bf667620] STARTED: GET /teacher/overview
+2026-08-13 13:50:57,658 [INFO] [ReqID: bf667620] COMPLETED: Status 200 in 0.00s
+2026-08-13 13:50:57,664 [INFO] [ReqID: 35011141] STARTED: GET /teacher/classrooms
+2026-08-13 13:50:57,668 [INFO] [ReqID: 35011141] COMPLETED: Status 200 in 0.00s
+2026-08-13 13:50:57,673 [INFO] [ReqID: 53de819e] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-13 13:50:57,678 [INFO] [ReqID: 53de819e] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:50:57,684 [INFO] [ReqID: 0e608e2a] STARTED: OPTIONS /teacher/branding
+2026-08-13 13:50:57,685 [INFO] [ReqID: 0e608e2a] COMPLETED: Status 200 in 0.00s
+2026-08-13 13:50:57,689 [INFO] [ReqID: 24424664] STARTED: GET /teacher/branding
+2026-08-13 13:50:57,698 [INFO] [ReqID: 24424664] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:51:36,549 [INFO] [ReqID: 9883dd77] STARTED: OPTIONS /quiz/29/export/pdf
+2026-08-13 13:51:36,549 [INFO] [ReqID: 9883dd77] COMPLETED: Status 200 in 0.00s
+2026-08-13 13:51:36,551 [INFO] [ReqID: 0d61a9c4] STARTED: POST /quiz/29/export/pdf
+2026-08-13 13:51:36,576 [ERROR] Failed to add logo to PDF: expected str, bytes or os.PathLike object, not ImageReader
+2026-08-13 13:51:36,593 [INFO] [ReqID: 0d61a9c4] COMPLETED: Status 200 in 0.04s
+2026-08-13 13:52:59,001 [INFO] [ReqID: 63747982] STARTED: GET /teacher/quizzes
+2026-08-13 13:52:59,011 [INFO] [ReqID: 63747982] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:52:59,014 [INFO] [ReqID: 7e9f96f0] STARTED: GET /teacher/quizzes
+2026-08-13 13:52:59,020 [INFO] [ReqID: 7e9f96f0] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:52:59,031 [INFO] [ReqID: 3763eced] STARTED: GET /teacher/overview
+2026-08-13 13:52:59,037 [INFO] [ReqID: 3763eced] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:52:59,041 [INFO] [ReqID: 1706bb2e] STARTED: GET /teacher/overview
+2026-08-13 13:52:59,048 [INFO] [ReqID: 4e385b3d] STARTED: GET /teacher/classrooms
+2026-08-13 13:52:59,050 [INFO] [ReqID: 1706bb2e] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:52:59,056 [INFO] [ReqID: 4e385b3d] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:52:59,060 [INFO] [ReqID: 077b06b6] STARTED: GET /teacher/classrooms
+2026-08-13 13:52:59,066 [INFO] [ReqID: 077b06b6] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:52:59,068 [INFO] [ReqID: 446b5033] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-13 13:52:59,074 [INFO] [ReqID: 446b5033] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:52:59,076 [INFO] [ReqID: 31eb9c86] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-13 13:52:59,081 [INFO] [ReqID: 38cb71c8] STARTED: GET /teacher/branding
+2026-08-13 13:52:59,083 [INFO] [ReqID: 31eb9c86] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:52:59,090 [INFO] [ReqID: 38cb71c8] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:52:59,095 [INFO] [ReqID: 1f5535fe] STARTED: GET /teacher/branding
+2026-08-13 13:52:59,102 [INFO] [ReqID: 1f5535fe] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:54:57,223 [INFO] [ReqID: c3977e9b] STARTED: GET /teacher/quizzes
+2026-08-13 13:54:57,228 [INFO] [ReqID: c3977e9b] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:54:57,231 [INFO] [ReqID: 0a4dd97c] STARTED: GET /teacher/quizzes
+2026-08-13 13:54:57,237 [INFO] [ReqID: 2d8a89a0] STARTED: GET /teacher/overview
+2026-08-13 13:54:57,241 [INFO] [ReqID: 0a4dd97c] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:54:57,244 [INFO] [ReqID: 2d8a89a0] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:54:57,246 [INFO] [ReqID: a860d08e] STARTED: GET /teacher/overview
+2026-08-13 13:54:57,251 [INFO] [ReqID: edc9de5b] STARTED: GET /teacher/classrooms
+2026-08-13 13:54:57,256 [INFO] [ReqID: a860d08e] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:54:57,257 [INFO] [ReqID: edc9de5b] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:54:57,261 [INFO] [ReqID: 930461cd] STARTED: GET /teacher/classrooms
+2026-08-13 13:54:57,263 [INFO] [ReqID: 6057b426] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-13 13:54:57,271 [INFO] [ReqID: 930461cd] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:54:57,278 [INFO] [ReqID: 6057b426] COMPLETED: Status 200 in 0.02s
+2026-08-13 13:54:57,286 [INFO] [ReqID: 824818b0] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-13 13:54:57,288 [INFO] [ReqID: 15458a4e] STARTED: GET /teacher/branding
+2026-08-13 13:54:57,292 [INFO] [ReqID: 824818b0] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:54:57,295 [INFO] [ReqID: 15458a4e] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:54:57,297 [INFO] [ReqID: 73fc8845] STARTED: GET /teacher/branding
+2026-08-13 13:54:57,304 [INFO] [ReqID: 73fc8845] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:55:04,365 [INFO] [ReqID: 7086fc80] STARTED: OPTIONS /quiz/28
+2026-08-13 13:55:04,365 [INFO] [ReqID: 7086fc80] COMPLETED: Status 200 in 0.00s
+2026-08-13 13:55:04,368 [INFO] [ReqID: 9ca3d7f8] STARTED: DELETE /quiz/28
+2026-08-13 13:55:04,387 [INFO] [ReqID: 9ca3d7f8] COMPLETED: Status 200 in 0.02s
+2026-08-13 13:57:41,934 [INFO] [ReqID: 12648833] STARTED: OPTIONS /teacher/quizzes
+2026-08-13 13:57:41,936 [INFO] [ReqID: 12648833] COMPLETED: Status 200 in 0.00s
+2026-08-13 13:57:41,937 [INFO] [ReqID: 3e0dd105] STARTED: OPTIONS /teacher/quizzes
+2026-08-13 13:57:41,937 [INFO] [ReqID: 3e0dd105] COMPLETED: Status 200 in 0.00s
+2026-08-13 13:57:41,938 [INFO] [ReqID: cf8f8afd] STARTED: GET /teacher/quizzes
+2026-08-13 13:57:41,952 [INFO] [ReqID: cf8f8afd] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:57:41,954 [INFO] [ReqID: b308c440] STARTED: GET /teacher/quizzes
+2026-08-13 13:57:41,960 [INFO] [ReqID: bb36dcfd] STARTED: OPTIONS /teacher/overview
+2026-08-13 13:57:41,962 [INFO] [ReqID: bb36dcfd] COMPLETED: Status 200 in 0.00s
+2026-08-13 13:57:41,964 [INFO] [ReqID: d89b48bf] STARTED: GET /teacher/overview
+2026-08-13 13:57:41,966 [INFO] [ReqID: b308c440] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:57:41,971 [INFO] [ReqID: d89b48bf] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:57:41,973 [INFO] [ReqID: 749ee6f3] STARTED: GET /teacher/overview
+2026-08-13 13:57:41,978 [INFO] [ReqID: 3fd89811] STARTED: OPTIONS /teacher/classrooms
+2026-08-13 13:57:41,979 [INFO] [ReqID: 3fd89811] COMPLETED: Status 200 in 0.00s
+2026-08-13 13:57:41,981 [INFO] [ReqID: 99a3a301] STARTED: GET /teacher/classrooms
+2026-08-13 13:57:41,983 [INFO] [ReqID: 749ee6f3] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:57:41,988 [INFO] [ReqID: 99a3a301] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:57:41,990 [INFO] [ReqID: ca04c65c] STARTED: GET /teacher/classrooms
+2026-08-13 13:57:41,995 [INFO] [ReqID: 14c666ca] STARTED: OPTIONS /teacher/analytics/recent-attempts
+2026-08-13 13:57:41,996 [INFO] [ReqID: 14c666ca] COMPLETED: Status 200 in 0.00s
+2026-08-13 13:57:41,998 [INFO] [ReqID: f0f15584] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-13 13:57:41,999 [INFO] [ReqID: ca04c65c] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:57:42,005 [INFO] [ReqID: f0f15584] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:57:42,008 [INFO] [ReqID: beeafa1e] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-13 13:57:42,012 [INFO] [ReqID: ce0ee828] STARTED: GET /teacher/branding
+2026-08-13 13:57:42,016 [INFO] [ReqID: beeafa1e] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:57:42,019 [INFO] [ReqID: ce0ee828] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:57:42,021 [INFO] [ReqID: c5a3c8ec] STARTED: GET /teacher/branding
+2026-08-13 13:57:42,028 [INFO] [ReqID: c5a3c8ec] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:58:34,196 [INFO] [ReqID: 8ddf752e] STARTED: POST /quiz/analyze-document
+2026-08-13 13:58:34,217 [INFO] [ReqID: 8ddf752e] COMPLETED: Status 200 in 0.02s
+2026-08-13 13:58:36,805 [INFO] [ReqID: 9c15f5b9] STARTED: POST /quiz/generate
+2026-08-13 13:58:37,261 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 13:58:41,906 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 13:58:43,912 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 13:58:46,966 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 13:58:48,975 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 13:58:56,073 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 13:58:58,097 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 13:59:02,910 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 13:59:04,944 [INFO] [ReqID: 9c15f5b9] COMPLETED: Status 200 in 28.14s
+2026-08-13 13:59:04,951 [INFO] [ReqID: 66cf421d] STARTED: GET /teacher/quizzes
+2026-08-13 13:59:04,956 [INFO] [ReqID: 66cf421d] COMPLETED: Status 200 in 0.00s
+2026-08-13 13:59:04,964 [INFO] [ReqID: 7245a1c8] STARTED: GET /teacher/overview
+2026-08-13 13:59:04,969 [INFO] [ReqID: 7245a1c8] COMPLETED: Status 200 in 0.00s
+2026-08-13 13:59:04,974 [INFO] [ReqID: f4e7608a] STARTED: GET /teacher/classrooms
+2026-08-13 13:59:04,980 [INFO] [ReqID: f4e7608a] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:59:04,984 [INFO] [ReqID: 5b212e83] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-13 13:59:04,996 [INFO] [ReqID: 5b212e83] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:59:05,003 [INFO] [ReqID: 09e270bd] STARTED: GET /teacher/branding
+2026-08-13 13:59:05,010 [INFO] [ReqID: 09e270bd] COMPLETED: Status 200 in 0.01s
+2026-08-13 13:59:21,665 [INFO] [ReqID: b20ae2c2] STARTED: OPTIONS /quiz/30/export/docx
+2026-08-13 13:59:21,665 [INFO] [ReqID: b20ae2c2] COMPLETED: Status 200 in 0.00s
+2026-08-13 13:59:21,667 [INFO] [ReqID: b01b7033] STARTED: POST /quiz/30/export/docx
+2026-08-13 13:59:21,776 [INFO] [ReqID: b01b7033] COMPLETED: Status 200 in 0.11s
+2026-08-13 14:05:40,889 [INFO] [ReqID: 474f1a5d] STARTED: POST /quiz/analyze-document
+2026-08-13 14:05:40,920 [INFO] [ReqID: 474f1a5d] COMPLETED: Status 200 in 0.03s
+2026-08-13 14:06:15,782 [INFO] [ReqID: 6584034c] STARTED: OPTIONS /quiz/generate
+2026-08-13 14:06:15,783 [INFO] [ReqID: 6584034c] COMPLETED: Status 200 in 0.00s
+2026-08-13 14:06:15,786 [INFO] [ReqID: de494d88] STARTED: POST /quiz/generate
+2026-08-13 14:06:16,187 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 14:06:24,207 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 14:06:26,212 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 14:06:30,851 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 14:06:32,888 [INFO] [ReqID: de494d88] COMPLETED: Status 200 in 17.10s
+2026-08-13 14:06:32,892 [INFO] [ReqID: 5aa801cd] STARTED: GET /teacher/quizzes
+2026-08-13 14:06:32,896 [INFO] [ReqID: 5aa801cd] COMPLETED: Status 200 in 0.00s
+2026-08-13 14:06:32,906 [INFO] [ReqID: 40ad35c8] STARTED: GET /teacher/overview
+2026-08-13 14:06:32,911 [INFO] [ReqID: 40ad35c8] COMPLETED: Status 200 in 0.00s
+2026-08-13 14:06:32,917 [INFO] [ReqID: 45350c74] STARTED: GET /teacher/classrooms
+2026-08-13 14:06:32,921 [INFO] [ReqID: 45350c74] COMPLETED: Status 200 in 0.00s
+2026-08-13 14:06:32,925 [INFO] [ReqID: fc365b4a] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-13 14:06:32,932 [INFO] [ReqID: fc365b4a] COMPLETED: Status 200 in 0.01s
+2026-08-13 14:06:32,939 [INFO] [ReqID: c9183f23] STARTED: OPTIONS /teacher/branding
+2026-08-13 14:06:32,940 [INFO] [ReqID: c9183f23] COMPLETED: Status 200 in 0.00s
+2026-08-13 14:06:32,943 [INFO] [ReqID: 6089a6e1] STARTED: GET /teacher/branding
+2026-08-13 14:06:32,951 [INFO] [ReqID: 6089a6e1] COMPLETED: Status 200 in 0.01s
+2026-08-13 14:06:41,834 [INFO] [ReqID: 09cd7e4f] STARTED: OPTIONS /quiz/31/export/pdf
+2026-08-13 14:06:41,835 [INFO] [ReqID: 09cd7e4f] COMPLETED: Status 200 in 0.00s
+2026-08-13 14:06:41,838 [INFO] [ReqID: 8f5166ed] STARTED: POST /quiz/31/export/pdf
+2026-08-13 14:06:41,868 [ERROR] Failed to add logo to PDF: expected str, bytes or os.PathLike object, not ImageReader
+2026-08-13 14:06:41,896 [INFO] [ReqID: 8f5166ed] COMPLETED: Status 200 in 0.06s
+2026-08-13 14:07:26,614 [INFO] [ReqID: 9f4389ce] STARTED: OPTIONS /quiz/31/export/docx
+2026-08-13 14:07:26,615 [INFO] [ReqID: 9f4389ce] COMPLETED: Status 200 in 0.00s
+2026-08-13 14:07:26,617 [INFO] [ReqID: 6ca3058b] STARTED: POST /quiz/31/export/docx
+2026-08-13 14:07:26,670 [INFO] [ReqID: 6ca3058b] COMPLETED: Status 200 in 0.05s
+2026-08-13 14:14:15,474 [INFO] [ReqID: cbbc074d] STARTED: OPTIONS /user/dashboard
+2026-08-13 14:14:15,476 [INFO] [ReqID: b784e53c] STARTED: OPTIONS /user/dashboard
+2026-08-13 14:14:15,481 [INFO] [ReqID: cbbc074d] COMPLETED: Status 200 in 0.01s
+2026-08-13 14:14:15,485 [INFO] [ReqID: b784e53c] COMPLETED: Status 200 in 0.01s
+2026-08-13 14:14:15,490 [INFO] [ReqID: 67db7bcd] STARTED: GET /user/dashboard
+2026-08-13 14:14:15,495 [INFO] [ReqID: 67db7bcd] COMPLETED: Status 200 in 0.00s
+2026-08-13 14:14:15,497 [INFO] [ReqID: 5d5bcd25] STARTED: GET /user/dashboard
+2026-08-13 14:14:15,501 [INFO] [ReqID: 5d5bcd25] COMPLETED: Status 200 in 0.00s
+2026-08-13 14:14:15,566 [INFO] [ReqID: b0c2d4c7] STARTED: OPTIONS /flashcards/due
+2026-08-13 14:14:15,567 [INFO] [ReqID: 6b947959] STARTED: OPTIONS /flashcards/due
+2026-08-13 14:14:15,567 [INFO] [ReqID: b0c2d4c7] COMPLETED: Status 200 in 0.00s
+2026-08-13 14:14:15,568 [INFO] [ReqID: 6b947959] COMPLETED: Status 200 in 0.00s
+2026-08-13 14:14:15,574 [INFO] [ReqID: 350adb8d] STARTED: GET /flashcards/due
+2026-08-13 14:14:15,582 [INFO] [ReqID: 350adb8d] COMPLETED: Status 200 in 0.01s
+2026-08-13 14:14:15,584 [INFO] [ReqID: 9c6c414a] STARTED: GET /flashcards/due
+2026-08-13 14:14:15,589 [INFO] [ReqID: 9c6c414a] COMPLETED: Status 200 in 0.01s
+2026-08-13 14:14:15,617 [INFO] [ReqID: f58329ac] STARTED: OPTIONS /teacher/quizzes
+2026-08-13 14:14:15,618 [INFO] [ReqID: 0962386c] STARTED: OPTIONS /teacher/quizzes
+2026-08-13 14:14:15,618 [INFO] [ReqID: f58329ac] COMPLETED: Status 200 in 0.00s
+2026-08-13 14:14:15,620 [INFO] [ReqID: 0962386c] COMPLETED: Status 200 in 0.00s
+2026-08-13 14:14:15,625 [INFO] [ReqID: e26f768d] STARTED: GET /teacher/quizzes
+2026-08-13 14:14:15,630 [INFO] [ReqID: e26f768d] COMPLETED: Status 200 in 0.00s
+2026-08-13 14:14:15,631 [INFO] [ReqID: f5785f75] STARTED: GET /teacher/quizzes
+2026-08-13 14:14:15,635 [INFO] [ReqID: f5785f75] COMPLETED: Status 200 in 0.00s
+2026-08-13 14:14:15,681 [INFO] [ReqID: eee90c3a] STARTED: OPTIONS /teacher/overview
+2026-08-13 14:14:15,682 [INFO] [ReqID: b9cdadb6] STARTED: OPTIONS /teacher/overview
+2026-08-13 14:14:15,683 [INFO] [ReqID: eee90c3a] COMPLETED: Status 200 in 0.00s
+2026-08-13 14:14:15,684 [INFO] [ReqID: b9cdadb6] COMPLETED: Status 200 in 0.00s
+2026-08-13 14:14:15,686 [INFO] [ReqID: dc7c8a26] STARTED: GET /teacher/overview
+2026-08-13 14:14:15,692 [INFO] [ReqID: dc7c8a26] COMPLETED: Status 200 in 0.01s
+2026-08-13 14:14:15,694 [INFO] [ReqID: 32e35ae0] STARTED: GET /teacher/overview
+2026-08-13 14:14:15,696 [INFO] [ReqID: 1ae66e79] STARTED: OPTIONS /teacher/classrooms
+2026-08-13 14:14:15,697 [INFO] [ReqID: 1ae66e79] COMPLETED: Status 200 in 0.00s
+2026-08-13 14:14:15,700 [INFO] [ReqID: 7244b82e] STARTED: GET /teacher/classrooms
+2026-08-13 14:14:15,701 [INFO] [ReqID: 32e35ae0] COMPLETED: Status 200 in 0.01s
+2026-08-13 14:14:15,707 [INFO] [ReqID: 7244b82e] COMPLETED: Status 200 in 0.01s
+2026-08-13 14:14:15,709 [INFO] [ReqID: 41b90888] STARTED: GET /teacher/classrooms
+2026-08-13 14:14:15,713 [INFO] [ReqID: d5342769] STARTED: OPTIONS /teacher/analytics/recent-attempts
+2026-08-13 14:14:15,713 [INFO] [ReqID: d5342769] COMPLETED: Status 200 in 0.00s
+2026-08-13 14:14:15,716 [INFO] [ReqID: e715174a] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-13 14:14:15,721 [INFO] [ReqID: 41b90888] COMPLETED: Status 200 in 0.01s
+2026-08-13 14:14:15,728 [INFO] [ReqID: e715174a] COMPLETED: Status 200 in 0.01s
+2026-08-13 14:14:15,729 [INFO] [ReqID: eac42071] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-13 14:14:15,732 [INFO] [ReqID: 81c432b0] STARTED: GET /teacher/branding
+2026-08-13 14:14:15,735 [INFO] [ReqID: eac42071] COMPLETED: Status 200 in 0.01s
+2026-08-13 14:14:15,740 [INFO] [ReqID: 81c432b0] COMPLETED: Status 200 in 0.01s
+2026-08-13 14:14:15,743 [INFO] [ReqID: 562b0d3a] STARTED: GET /teacher/branding
+2026-08-13 14:14:15,749 [INFO] [ReqID: 562b0d3a] COMPLETED: Status 200 in 0.01s
+2026-08-13 14:15:49,732 [INFO] [ReqID: 0326af77] STARTED: GET /teacher/quizzes
+2026-08-13 14:15:49,745 [INFO] [ReqID: 0326af77] COMPLETED: Status 200 in 0.01s
+2026-08-13 14:15:49,748 [INFO] [ReqID: 2565ab3f] STARTED: GET /teacher/quizzes
+2026-08-13 14:15:49,755 [INFO] [ReqID: c1d12e19] STARTED: GET /teacher/overview
+2026-08-13 14:15:49,761 [INFO] [ReqID: 2565ab3f] COMPLETED: Status 200 in 0.01s
+2026-08-13 14:15:49,764 [INFO] [ReqID: c1d12e19] COMPLETED: Status 200 in 0.01s
+2026-08-13 14:15:49,766 [INFO] [ReqID: d83ef24e] STARTED: GET /teacher/overview
+2026-08-13 14:15:49,771 [INFO] [ReqID: d138abc3] STARTED: GET /teacher/classrooms
+2026-08-13 14:15:49,776 [INFO] [ReqID: d138abc3] COMPLETED: Status 200 in 0.00s
+2026-08-13 14:15:49,777 [INFO] [ReqID: d83ef24e] COMPLETED: Status 200 in 0.01s
+2026-08-13 14:15:49,780 [INFO] [ReqID: 0522e808] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-13 14:15:49,782 [INFO] [ReqID: 9fec7e12] STARTED: GET /teacher/classrooms
+2026-08-13 14:15:49,791 [INFO] [ReqID: 0522e808] COMPLETED: Status 200 in 0.01s
+2026-08-13 14:15:49,798 [INFO] [ReqID: 9fec7e12] COMPLETED: Status 200 in 0.02s
+2026-08-13 14:15:49,807 [INFO] [ReqID: dbeed980] STARTED: GET /teacher/branding
+2026-08-13 14:15:49,808 [INFO] [ReqID: 263284ae] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-13 14:15:49,813 [INFO] [ReqID: 263284ae] COMPLETED: Status 200 in 0.00s
+2026-08-13 14:15:49,815 [INFO] [ReqID: dbeed980] COMPLETED: Status 200 in 0.01s
+2026-08-13 14:15:49,819 [INFO] [ReqID: 986e9487] STARTED: GET /teacher/branding
+2026-08-13 14:15:49,825 [INFO] [ReqID: 986e9487] COMPLETED: Status 200 in 0.01s
+2026-08-13 14:16:53,030 [INFO] [ReqID: 764a4f43] STARTED: POST /quiz/analyze-document
+2026-08-13 14:16:53,032 [INFO] [ReqID: 764a4f43] COMPLETED: Status 405 in 0.00s
+2026-08-13 14:22:35,071 [INFO] [ReqID: 937cfd3a] STARTED: GET /teacher/quizzes
+2026-08-13 14:22:35,078 [INFO] [ReqID: 937cfd3a] COMPLETED: Status 200 in 0.01s
+2026-08-13 14:22:35,082 [INFO] [ReqID: f11696c6] STARTED: GET /teacher/quizzes
+2026-08-13 14:22:35,089 [INFO] [ReqID: 66670192] STARTED: GET /teacher/overview
+2026-08-13 14:22:35,093 [INFO] [ReqID: f11696c6] COMPLETED: Status 200 in 0.01s
+2026-08-13 14:22:35,100 [INFO] [ReqID: 66670192] COMPLETED: Status 200 in 0.01s
+2026-08-13 14:22:35,103 [INFO] [ReqID: da4656a3] STARTED: GET /teacher/overview
+2026-08-13 14:22:35,108 [INFO] [ReqID: 02b47da5] STARTED: GET /teacher/classrooms
+2026-08-13 14:22:35,112 [INFO] [ReqID: da4656a3] COMPLETED: Status 200 in 0.01s
+2026-08-13 14:22:35,115 [INFO] [ReqID: 02b47da5] COMPLETED: Status 200 in 0.01s
+2026-08-13 14:22:35,120 [INFO] [ReqID: 0a135a2b] STARTED: GET /teacher/classrooms
+2026-08-13 14:22:35,121 [INFO] [ReqID: f5944cd5] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-13 14:22:35,126 [INFO] [ReqID: 0a135a2b] COMPLETED: Status 200 in 0.01s
+2026-08-13 14:22:35,127 [INFO] [ReqID: f5944cd5] COMPLETED: Status 200 in 0.01s
+2026-08-13 14:22:35,130 [INFO] [ReqID: f15a6cd5] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-13 14:22:35,134 [INFO] [ReqID: a5fbd2c3] STARTED: OPTIONS /teacher/branding
+2026-08-13 14:22:35,135 [INFO] [ReqID: a5fbd2c3] COMPLETED: Status 200 in 0.00s
+2026-08-13 14:22:35,137 [INFO] [ReqID: 491aee73] STARTED: GET /teacher/branding
+2026-08-13 14:22:35,138 [INFO] [ReqID: f15a6cd5] COMPLETED: Status 200 in 0.01s
+2026-08-13 14:22:35,143 [INFO] [ReqID: 491aee73] COMPLETED: Status 200 in 0.01s
+2026-08-13 14:22:35,144 [INFO] [ReqID: 11ad698f] STARTED: GET /teacher/branding
+2026-08-13 14:22:35,152 [INFO] [ReqID: 11ad698f] COMPLETED: Status 200 in 0.01s
+2026-08-13 14:22:48,385 [INFO] [ReqID: b351c532] STARTED: POST /quiz/analyze-document
+2026-08-13 14:22:48,414 [INFO] [ReqID: b351c532] COMPLETED: Status 200 in 0.03s
+2026-08-13 14:23:24,470 [INFO] [ReqID: f9ff422a] STARTED: OPTIONS /quiz/generate
+2026-08-13 14:23:24,470 [INFO] [ReqID: f9ff422a] COMPLETED: Status 200 in 0.00s
+2026-08-13 14:23:24,473 [INFO] [ReqID: 5bd5414c] STARTED: POST /quiz/generate
+2026-08-13 14:23:25,160 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 14:23:32,944 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 14:23:34,949 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 14:23:40,986 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 14:23:42,992 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 14:23:44,478 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 14:23:46,486 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 14:23:48,560 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 14:23:50,564 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 14:23:53,022 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 14:23:55,030 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 14:23:57,381 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 14:23:59,389 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 14:24:01,168 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 14:24:03,175 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 14:24:06,454 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 14:24:08,460 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 14:24:11,069 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 14:24:13,078 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 14:24:15,872 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 14:24:17,908 [INFO] [ReqID: 5bd5414c] COMPLETED: Status 200 in 53.44s
+2026-08-13 14:24:17,913 [INFO] [ReqID: 63d631b5] STARTED: OPTIONS /teacher/quizzes
+2026-08-13 14:24:17,913 [INFO] [ReqID: 63d631b5] COMPLETED: Status 200 in 0.00s
+2026-08-13 14:24:17,916 [INFO] [ReqID: eab6ca58] STARTED: GET /teacher/quizzes
+2026-08-13 14:24:17,919 [INFO] [ReqID: eab6ca58] COMPLETED: Status 200 in 0.00s
+2026-08-13 14:24:17,930 [INFO] [ReqID: 5185b3b4] STARTED: OPTIONS /teacher/overview
+2026-08-13 14:24:17,930 [INFO] [ReqID: 5185b3b4] COMPLETED: Status 200 in 0.00s
+2026-08-13 14:24:17,933 [INFO] [ReqID: ca957590] STARTED: GET /teacher/overview
+2026-08-13 14:24:17,937 [INFO] [ReqID: ca957590] COMPLETED: Status 200 in 0.00s
+2026-08-13 14:24:17,941 [INFO] [ReqID: 9efe088f] STARTED: OPTIONS /teacher/classrooms
+2026-08-13 14:24:17,941 [INFO] [ReqID: 9efe088f] COMPLETED: Status 200 in 0.00s
+2026-08-13 14:24:17,943 [INFO] [ReqID: 2f015f15] STARTED: GET /teacher/classrooms
+2026-08-13 14:24:17,949 [INFO] [ReqID: 2f015f15] COMPLETED: Status 200 in 0.01s
+2026-08-13 14:24:17,959 [INFO] [ReqID: bd19c893] STARTED: OPTIONS /teacher/analytics/recent-attempts
+2026-08-13 14:24:17,962 [INFO] [ReqID: bd19c893] COMPLETED: Status 200 in 0.00s
+2026-08-13 14:24:17,968 [INFO] [ReqID: 8cb61dc3] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-13 14:24:17,976 [INFO] [ReqID: 8cb61dc3] COMPLETED: Status 200 in 0.01s
+2026-08-13 14:24:17,980 [INFO] [ReqID: a61242cd] STARTED: GET /teacher/branding
+2026-08-13 14:24:17,988 [INFO] [ReqID: a61242cd] COMPLETED: Status 200 in 0.01s
+2026-08-13 14:24:39,347 [INFO] [ReqID: 228eab77] STARTED: OPTIONS /quiz/32/export/docx
+2026-08-13 14:24:39,348 [INFO] [ReqID: 228eab77] COMPLETED: Status 200 in 0.00s
+2026-08-13 14:24:39,350 [INFO] [ReqID: 1ab625cf] STARTED: POST /quiz/32/export/docx
+2026-08-13 14:24:39,424 [INFO] [ReqID: 1ab625cf] COMPLETED: Status 200 in 0.07s
+2026-08-13 14:25:36,535 [INFO] [ReqID: 9b011e7f] STARTED: OPTIONS /quiz/32/export/pdf
+2026-08-13 14:25:36,536 [INFO] [ReqID: 9b011e7f] COMPLETED: Status 200 in 0.00s
+2026-08-13 14:25:36,538 [INFO] [ReqID: 7bb093d8] STARTED: POST /quiz/32/export/pdf
+2026-08-13 14:25:36,558 [ERROR] Failed to add logo to PDF: expected str, bytes or os.PathLike object, not ImageReader
+2026-08-13 14:25:36,595 [INFO] [ReqID: 7bb093d8] COMPLETED: Status 200 in 0.06s
+2026-08-13 14:34:05,719 [INFO] [ReqID: b5967996] STARTED: GET /teacher/quizzes
+2026-08-13 14:34:05,726 [INFO] [ReqID: b5967996] COMPLETED: Status 200 in 0.01s
+2026-08-13 14:34:05,730 [INFO] [ReqID: fb475f24] STARTED: GET /teacher/quizzes
+2026-08-13 14:34:05,735 [INFO] [ReqID: fb475f24] COMPLETED: Status 200 in 0.00s
+2026-08-13 14:34:05,750 [INFO] [ReqID: 5a0edad6] STARTED: GET /teacher/overview
+2026-08-13 14:34:05,758 [INFO] [ReqID: 5a0edad6] COMPLETED: Status 200 in 0.01s
+2026-08-13 14:34:05,760 [INFO] [ReqID: 9000bec2] STARTED: GET /teacher/overview
+2026-08-13 14:34:05,763 [INFO] [ReqID: 3658ebe8] STARTED: GET /teacher/classrooms
+2026-08-13 14:34:05,772 [INFO] [ReqID: 9000bec2] COMPLETED: Status 200 in 0.01s
+2026-08-13 14:34:05,774 [INFO] [ReqID: 3658ebe8] COMPLETED: Status 200 in 0.01s
+2026-08-13 14:34:05,777 [INFO] [ReqID: b62c9be7] STARTED: GET /teacher/classrooms
+2026-08-13 14:34:05,780 [INFO] [ReqID: e47427f7] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-13 14:34:05,783 [INFO] [ReqID: b62c9be7] COMPLETED: Status 200 in 0.01s
+2026-08-13 14:34:05,789 [INFO] [ReqID: e47427f7] COMPLETED: Status 200 in 0.01s
+2026-08-13 14:34:05,807 [INFO] [ReqID: 27732673] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-13 14:34:05,812 [INFO] [ReqID: 27732673] COMPLETED: Status 200 in 0.01s
+2026-08-13 14:34:05,813 [INFO] [ReqID: 257d0693] STARTED: OPTIONS /teacher/branding
+2026-08-13 14:34:05,814 [INFO] [ReqID: 257d0693] COMPLETED: Status 200 in 0.00s
+2026-08-13 14:34:05,824 [INFO] [ReqID: 4f1e9a34] STARTED: GET /teacher/branding
+2026-08-13 14:34:05,831 [INFO] [ReqID: 4f1e9a34] COMPLETED: Status 200 in 0.01s
+2026-08-13 14:34:05,842 [INFO] [ReqID: 324783ea] STARTED: GET /teacher/branding
+2026-08-13 14:34:05,858 [INFO] [ReqID: 324783ea] COMPLETED: Status 200 in 0.01s
+2026-08-13 14:34:14,780 [INFO] [ReqID: 6e14144b] STARTED: POST /quiz/analyze-document
+2026-08-13 14:34:14,781 [INFO] [ReqID: 6e14144b] COMPLETED: Status 405 in 0.00s
+2026-08-13 14:34:32,383 [INFO] [ReqID: b1e20cd1] STARTED: OPTIONS /quiz/generate
+2026-08-13 14:34:32,384 [INFO] [ReqID: b1e20cd1] COMPLETED: Status 200 in 0.00s
+2026-08-13 14:34:32,387 [INFO] [ReqID: d5245a8c] STARTED: POST /quiz/generate
+2026-08-13 14:34:32,468 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 14:34:35,977 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 14:34:37,986 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 14:34:42,160 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 14:34:44,165 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 14:34:46,187 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 14:34:48,191 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 14:34:52,454 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 14:34:54,481 [INFO] [ReqID: d5245a8c] COMPLETED: Status 200 in 22.09s
+2026-08-13 14:34:54,485 [INFO] [ReqID: 86ed656e] STARTED: OPTIONS /teacher/quizzes
+2026-08-13 14:34:54,486 [INFO] [ReqID: 86ed656e] COMPLETED: Status 200 in 0.00s
+2026-08-13 14:34:54,488 [INFO] [ReqID: 8b3b30ea] STARTED: GET /teacher/quizzes
+2026-08-13 14:34:54,494 [INFO] [ReqID: 8b3b30ea] COMPLETED: Status 200 in 0.01s
+2026-08-13 14:34:54,497 [INFO] [ReqID: f53ffdbd] STARTED: OPTIONS /teacher/overview
+2026-08-13 14:34:54,497 [INFO] [ReqID: f53ffdbd] COMPLETED: Status 200 in 0.00s
+2026-08-13 14:34:54,499 [INFO] [ReqID: b78b5a65] STARTED: GET /teacher/overview
+2026-08-13 14:34:54,503 [INFO] [ReqID: b78b5a65] COMPLETED: Status 200 in 0.00s
+2026-08-13 14:34:54,507 [INFO] [ReqID: 53ebf554] STARTED: OPTIONS /teacher/classrooms
+2026-08-13 14:34:54,507 [INFO] [ReqID: 53ebf554] COMPLETED: Status 200 in 0.00s
+2026-08-13 14:34:54,510 [INFO] [ReqID: 6860efe4] STARTED: GET /teacher/classrooms
+2026-08-13 14:34:54,514 [INFO] [ReqID: 6860efe4] COMPLETED: Status 200 in 0.00s
+2026-08-13 14:34:54,517 [INFO] [ReqID: a54ead4d] STARTED: OPTIONS /teacher/analytics/recent-attempts
+2026-08-13 14:34:54,518 [INFO] [ReqID: a54ead4d] COMPLETED: Status 200 in 0.00s
+2026-08-13 14:34:54,520 [INFO] [ReqID: 7cbb8388] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-13 14:34:54,525 [INFO] [ReqID: 7cbb8388] COMPLETED: Status 200 in 0.01s
+2026-08-13 14:34:54,531 [INFO] [ReqID: fcba3497] STARTED: GET /teacher/branding
+2026-08-13 14:34:54,540 [INFO] [ReqID: fcba3497] COMPLETED: Status 200 in 0.01s
+2026-08-13 14:37:37,857 [INFO] [ReqID: bd20fefd] STARTED: OPTIONS /quiz/32/export/pdf
+2026-08-13 14:37:37,858 [INFO] [ReqID: bd20fefd] COMPLETED: Status 200 in 0.00s
+2026-08-13 14:37:37,860 [INFO] [ReqID: 0f4efcf5] STARTED: POST /quiz/32/export/pdf
+2026-08-13 14:37:37,947 [INFO] [ReqID: 0f4efcf5] COMPLETED: Status 200 in 0.09s
+2026-08-13 14:38:00,415 [INFO] [ReqID: 2e09addf] STARTED: OPTIONS /quiz/32/export/docx
+2026-08-13 14:38:00,416 [INFO] [ReqID: 2e09addf] COMPLETED: Status 200 in 0.00s
+2026-08-13 14:38:00,419 [INFO] [ReqID: 1a86b4b7] STARTED: POST /quiz/32/export/docx
+2026-08-13 14:38:00,503 [INFO] [ReqID: 1a86b4b7] COMPLETED: Status 200 in 0.08s
+2026-08-13 15:36:49,739 [INFO] [ReqID: c582c5ff] STARTED: OPTIONS /teacher/quizzes
+2026-08-13 15:36:49,740 [INFO] [ReqID: e33bc0b4] STARTED: OPTIONS /teacher/quizzes
+2026-08-13 15:36:49,740 [INFO] [ReqID: c582c5ff] COMPLETED: Status 200 in 0.00s
+2026-08-13 15:36:49,741 [INFO] [ReqID: e33bc0b4] COMPLETED: Status 200 in 0.00s
+2026-08-13 15:36:49,745 [INFO] [ReqID: fda56aef] STARTED: GET /teacher/quizzes
+2026-08-13 15:36:49,757 [INFO] [ReqID: fda56aef] COMPLETED: Status 200 in 0.01s
+2026-08-13 15:36:49,759 [INFO] [ReqID: a79c856c] STARTED: GET /teacher/quizzes
+2026-08-13 15:36:49,763 [INFO] [ReqID: a79c856c] COMPLETED: Status 200 in 0.00s
+2026-08-13 15:36:49,774 [INFO] [ReqID: b5458e02] STARTED: OPTIONS /teacher/overview
+2026-08-13 15:36:49,775 [INFO] [ReqID: b5458e02] COMPLETED: Status 200 in 0.00s
+2026-08-13 15:36:49,776 [INFO] [ReqID: a24a9bf4] STARTED: OPTIONS /teacher/overview
+2026-08-13 15:36:49,777 [INFO] [ReqID: a24a9bf4] COMPLETED: Status 200 in 0.00s
+2026-08-13 15:36:49,778 [INFO] [ReqID: c327f0ea] STARTED: GET /teacher/overview
+2026-08-13 15:36:49,784 [INFO] [ReqID: c327f0ea] COMPLETED: Status 200 in 0.01s
+2026-08-13 15:36:49,785 [INFO] [ReqID: 1c624ea6] STARTED: GET /teacher/overview
+2026-08-13 15:36:49,789 [INFO] [ReqID: fc969805] STARTED: OPTIONS /teacher/classrooms
+2026-08-13 15:36:49,789 [INFO] [ReqID: fc969805] COMPLETED: Status 200 in 0.00s
+2026-08-13 15:36:49,792 [INFO] [ReqID: 990db9ef] STARTED: GET /teacher/classrooms
+2026-08-13 15:36:49,793 [INFO] [ReqID: 1c624ea6] COMPLETED: Status 200 in 0.01s
+2026-08-13 15:36:49,797 [INFO] [ReqID: 990db9ef] COMPLETED: Status 200 in 0.00s
+2026-08-13 15:36:49,798 [INFO] [ReqID: 39bf1393] STARTED: GET /teacher/classrooms
+2026-08-13 15:36:49,800 [INFO] [ReqID: 98878518] STARTED: OPTIONS /teacher/analytics/recent-attempts
+2026-08-13 15:36:49,801 [INFO] [ReqID: 98878518] COMPLETED: Status 200 in 0.00s
+2026-08-13 15:36:49,804 [INFO] [ReqID: 957c823b] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-13 15:36:49,804 [INFO] [ReqID: 39bf1393] COMPLETED: Status 200 in 0.01s
+2026-08-13 15:36:49,810 [INFO] [ReqID: 957c823b] COMPLETED: Status 200 in 0.01s
+2026-08-13 15:36:49,811 [INFO] [ReqID: a8c201b7] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-13 15:36:49,813 [INFO] [ReqID: 7ece15a8] STARTED: OPTIONS /teacher/branding
+2026-08-13 15:36:49,814 [INFO] [ReqID: 7ece15a8] COMPLETED: Status 200 in 0.00s
+2026-08-13 15:36:49,816 [INFO] [ReqID: 1f418fed] STARTED: GET /teacher/branding
+2026-08-13 15:36:49,816 [INFO] [ReqID: a8c201b7] COMPLETED: Status 200 in 0.01s
+2026-08-13 15:36:49,824 [INFO] [ReqID: 1f418fed] COMPLETED: Status 200 in 0.01s
+2026-08-13 15:36:49,826 [INFO] [ReqID: 523c59a2] STARTED: GET /teacher/branding
+2026-08-13 15:36:49,830 [INFO] [ReqID: 523c59a2] COMPLETED: Status 200 in 0.00s
+2026-08-13 15:38:00,086 [INFO] [ReqID: c698efeb] STARTED: GET /teacher/quizzes
+2026-08-13 15:38:00,097 [INFO] [ReqID: c698efeb] COMPLETED: Status 200 in 0.01s
+2026-08-13 15:38:00,100 [INFO] [ReqID: b2af82ba] STARTED: GET /teacher/quizzes
+2026-08-13 15:38:00,107 [INFO] [ReqID: 02337a00] STARTED: GET /teacher/overview
+2026-08-13 15:38:00,120 [INFO] [ReqID: b2af82ba] COMPLETED: Status 200 in 0.02s
+2026-08-13 15:38:00,122 [INFO] [ReqID: 02337a00] COMPLETED: Status 200 in 0.01s
+2026-08-13 15:38:00,125 [INFO] [ReqID: 5c5ea67a] STARTED: GET /teacher/overview
+2026-08-13 15:38:00,132 [INFO] [ReqID: 61def582] STARTED: GET /teacher/classrooms
+2026-08-13 15:38:00,137 [INFO] [ReqID: 5c5ea67a] COMPLETED: Status 200 in 0.01s
+2026-08-13 15:38:00,139 [INFO] [ReqID: 61def582] COMPLETED: Status 200 in 0.01s
+2026-08-13 15:38:00,142 [INFO] [ReqID: 39cc372a] STARTED: GET /teacher/classrooms
+2026-08-13 15:38:00,162 [INFO] [ReqID: f4fab4ff] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-13 15:38:00,169 [INFO] [ReqID: 39cc372a] COMPLETED: Status 200 in 0.03s
+2026-08-13 15:38:00,174 [INFO] [ReqID: f4fab4ff] COMPLETED: Status 200 in 0.01s
+2026-08-13 15:38:00,180 [INFO] [ReqID: 1399be97] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-13 15:38:00,183 [INFO] [ReqID: 461e2877] STARTED: GET /teacher/branding
+2026-08-13 15:38:00,188 [INFO] [ReqID: 1399be97] COMPLETED: Status 200 in 0.01s
+2026-08-13 15:38:00,191 [INFO] [ReqID: 461e2877] COMPLETED: Status 200 in 0.01s
+2026-08-13 15:38:00,194 [INFO] [ReqID: 4a3693b4] STARTED: GET /teacher/branding
+2026-08-13 15:38:00,201 [INFO] [ReqID: 4a3693b4] COMPLETED: Status 200 in 0.01s
+2026-08-13 15:38:22,032 [INFO] [ReqID: e9a5f068] STARTED: POST /quiz/analyze-document
+2026-08-13 15:38:22,045 [INFO] [ReqID: e9a5f068] COMPLETED: Status 200 in 0.01s
+2026-08-13 15:38:22,058 [INFO] [ReqID: 72fd47d8] STARTED: POST /quiz/analyze-document
+2026-08-13 15:38:22,083 [INFO] [ReqID: 72fd47d8] COMPLETED: Status 200 in 0.02s
+2026-08-13 15:38:22,088 [INFO] [ReqID: 4a7f90ec] STARTED: POST /quiz/analyze-document
+2026-08-13 15:38:22,092 [INFO] [ReqID: 4a7f90ec] COMPLETED: Status 200 in 0.00s
+2026-08-13 15:39:07,641 [INFO] [ReqID: 14764ca0] STARTED: OPTIONS /quiz/generate
+2026-08-13 15:39:07,642 [INFO] [ReqID: 14764ca0] COMPLETED: Status 200 in 0.00s
+2026-08-13 15:39:07,654 [INFO] [ReqID: 91d6d596] STARTED: POST /quiz/generate
+2026-08-13 15:39:08,762 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 15:39:13,762 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 15:39:15,773 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 15:39:18,339 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 15:39:20,345 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 15:39:24,154 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 15:39:26,162 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 15:39:30,994 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 15:39:33,002 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 15:39:37,300 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 15:39:39,309 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 15:39:41,809 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 15:39:43,814 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 15:39:48,800 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 15:39:50,805 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 15:39:55,083 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 15:39:57,089 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 15:40:00,383 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 15:40:02,387 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 15:40:05,592 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 15:40:07,599 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 15:40:13,055 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 15:40:15,062 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 15:40:19,152 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 15:40:21,157 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 15:40:22,703 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 15:40:24,710 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 15:40:27,208 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 15:40:29,216 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 15:40:33,255 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 15:40:35,261 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 15:40:38,285 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 15:40:40,288 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 15:40:42,162 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 15:40:44,169 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 15:40:46,188 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 15:40:48,196 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 15:40:50,294 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 15:40:52,301 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 15:40:53,745 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 15:40:55,784 [INFO] [ReqID: 91d6d596] COMPLETED: Status 200 in 108.13s
+2026-08-13 15:40:55,789 [INFO] [ReqID: 392e5248] STARTED: GET /teacher/quizzes
+2026-08-13 15:40:55,794 [INFO] [ReqID: 392e5248] COMPLETED: Status 200 in 0.00s
+2026-08-13 15:40:55,800 [INFO] [ReqID: 9f5369ca] STARTED: GET /teacher/overview
+2026-08-13 15:40:55,804 [INFO] [ReqID: 9f5369ca] COMPLETED: Status 200 in 0.00s
+2026-08-13 15:40:55,809 [INFO] [ReqID: 7c9922ba] STARTED: GET /teacher/classrooms
+2026-08-13 15:40:55,813 [INFO] [ReqID: 7c9922ba] COMPLETED: Status 200 in 0.00s
+2026-08-13 15:40:55,817 [INFO] [ReqID: 0b89cebf] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-13 15:40:55,821 [INFO] [ReqID: 0b89cebf] COMPLETED: Status 200 in 0.00s
+2026-08-13 15:40:55,828 [INFO] [ReqID: 0dfc1c92] STARTED: GET /teacher/branding
+2026-08-13 15:40:55,835 [INFO] [ReqID: 0dfc1c92] COMPLETED: Status 200 in 0.01s
+2026-08-13 15:42:06,686 [INFO] [ReqID: f8df3cfc] STARTED: OPTIONS /quiz/34/export/docx
+2026-08-13 15:42:06,687 [INFO] [ReqID: f8df3cfc] COMPLETED: Status 200 in 0.00s
+2026-08-13 15:42:06,690 [INFO] [ReqID: 0f096fdf] STARTED: POST /quiz/34/export/docx
+2026-08-13 15:42:06,806 [INFO] [ReqID: 0f096fdf] COMPLETED: Status 200 in 0.12s
+2026-08-13 15:43:10,995 [INFO] [ReqID: bf9e0021] STARTED: OPTIONS /quiz/34/export/pdf
+2026-08-13 15:43:10,996 [INFO] [ReqID: bf9e0021] COMPLETED: Status 200 in 0.00s
+2026-08-13 15:43:10,998 [INFO] [ReqID: 5739fd59] STARTED: POST /quiz/34/export/pdf
+2026-08-13 15:43:11,081 [INFO] [ReqID: 5739fd59] COMPLETED: Status 200 in 0.08s
+2026-08-13 15:44:30,062 [INFO] [ReqID: 95e9afe0] STARTED: OPTIONS /user/dashboard
+2026-08-13 15:44:30,063 [INFO] [ReqID: 95e9afe0] COMPLETED: Status 200 in 0.00s
+2026-08-13 15:44:30,065 [INFO] [ReqID: 95f2b1e0] STARTED: OPTIONS /user/dashboard
+2026-08-13 15:44:30,066 [INFO] [ReqID: 95f2b1e0] COMPLETED: Status 200 in 0.00s
+2026-08-13 15:44:30,078 [INFO] [ReqID: a41e5c44] STARTED: GET /user/dashboard
+2026-08-13 15:44:30,083 [INFO] [ReqID: a41e5c44] COMPLETED: Status 200 in 0.00s
+2026-08-13 15:44:30,086 [INFO] [ReqID: 18a1efba] STARTED: GET /user/dashboard
+2026-08-13 15:44:30,093 [INFO] [ReqID: 18a1efba] COMPLETED: Status 200 in 0.01s
+2026-08-13 15:44:30,096 [INFO] [ReqID: b2529573] STARTED: OPTIONS /flashcards/due
+2026-08-13 15:44:30,097 [INFO] [ReqID: b2529573] COMPLETED: Status 200 in 0.00s
+2026-08-13 15:44:30,102 [INFO] [ReqID: d0339a90] STARTED: GET /flashcards/due
+2026-08-13 15:44:30,117 [INFO] [ReqID: d0339a90] COMPLETED: Status 200 in 0.01s
+2026-08-13 15:44:30,118 [INFO] [ReqID: cd9c0232] STARTED: GET /flashcards/due
+2026-08-13 15:44:30,128 [INFO] [ReqID: cd9c0232] COMPLETED: Status 200 in 0.01s
+2026-08-13 15:46:59,155 [INFO] [ReqID: 1673bb5a] STARTED: OPTIONS /user/dashboard
+2026-08-13 15:46:59,156 [INFO] [ReqID: e723afb4] STARTED: OPTIONS /user/dashboard
+2026-08-13 15:46:59,158 [INFO] [ReqID: 1673bb5a] COMPLETED: Status 200 in 0.00s
+2026-08-13 15:46:59,159 [INFO] [ReqID: e723afb4] COMPLETED: Status 200 in 0.00s
+2026-08-13 15:46:59,161 [INFO] [ReqID: 08110468] STARTED: GET /user/dashboard
+2026-08-13 15:46:59,165 [INFO] [ReqID: 08110468] COMPLETED: Status 200 in 0.00s
+2026-08-13 15:46:59,167 [INFO] [ReqID: 3b49b4d8] STARTED: GET /user/dashboard
+2026-08-13 15:46:59,181 [INFO] [ReqID: 3b49b4d8] COMPLETED: Status 200 in 0.01s
+2026-08-13 15:46:59,242 [INFO] [ReqID: b607c868] STARTED: OPTIONS /flashcards/due
+2026-08-13 15:46:59,242 [INFO] [ReqID: 3485d549] STARTED: OPTIONS /flashcards/due
+2026-08-13 15:46:59,243 [INFO] [ReqID: b607c868] COMPLETED: Status 200 in 0.00s
+2026-08-13 15:46:59,245 [INFO] [ReqID: 3485d549] COMPLETED: Status 200 in 0.00s
+2026-08-13 15:46:59,248 [INFO] [ReqID: 8ba70d2b] STARTED: GET /flashcards/due
+2026-08-13 15:46:59,254 [INFO] [ReqID: 8ba70d2b] COMPLETED: Status 200 in 0.01s
+2026-08-13 15:46:59,256 [INFO] [ReqID: cbc0e2a8] STARTED: GET /flashcards/due
+2026-08-13 15:46:59,262 [INFO] [ReqID: cbc0e2a8] COMPLETED: Status 200 in 0.01s
+2026-08-13 15:46:59,287 [INFO] [ReqID: 278dd2ac] STARTED: OPTIONS /teacher/quizzes
+2026-08-13 15:46:59,288 [INFO] [ReqID: 3536a47c] STARTED: OPTIONS /teacher/quizzes
+2026-08-13 15:46:59,288 [INFO] [ReqID: 278dd2ac] COMPLETED: Status 200 in 0.00s
+2026-08-13 15:46:59,290 [INFO] [ReqID: 3536a47c] COMPLETED: Status 200 in 0.00s
+2026-08-13 15:46:59,294 [INFO] [ReqID: 6f95c7b4] STARTED: GET /teacher/quizzes
+2026-08-13 15:46:59,298 [INFO] [ReqID: 6f95c7b4] COMPLETED: Status 200 in 0.00s
+2026-08-13 15:46:59,299 [INFO] [ReqID: 8aaac402] STARTED: GET /teacher/quizzes
+2026-08-13 15:46:59,304 [INFO] [ReqID: 8aaac402] COMPLETED: Status 200 in 0.00s
+2026-08-13 15:46:59,324 [INFO] [ReqID: 85fc854c] STARTED: OPTIONS /teacher/overview
+2026-08-13 15:46:59,325 [INFO] [ReqID: 9ef9f09e] STARTED: OPTIONS /teacher/overview
+2026-08-13 15:46:59,325 [INFO] [ReqID: 85fc854c] COMPLETED: Status 200 in 0.00s
+2026-08-13 15:46:59,326 [INFO] [ReqID: 9ef9f09e] COMPLETED: Status 200 in 0.00s
+2026-08-13 15:46:59,328 [INFO] [ReqID: 49d24f25] STARTED: GET /teacher/overview
+2026-08-13 15:46:59,332 [INFO] [ReqID: 49d24f25] COMPLETED: Status 200 in 0.00s
+2026-08-13 15:46:59,333 [INFO] [ReqID: e30ae1c1] STARTED: GET /teacher/overview
+2026-08-13 15:46:59,338 [INFO] [ReqID: e30ae1c1] COMPLETED: Status 200 in 0.00s
+2026-08-13 15:46:59,352 [INFO] [ReqID: 7128cd21] STARTED: OPTIONS /teacher/classrooms
+2026-08-13 15:46:59,353 [INFO] [ReqID: afd01103] STARTED: OPTIONS /teacher/classrooms
+2026-08-13 15:46:59,354 [INFO] [ReqID: 7128cd21] COMPLETED: Status 200 in 0.00s
+2026-08-13 15:46:59,355 [INFO] [ReqID: afd01103] COMPLETED: Status 200 in 0.00s
+2026-08-13 15:46:59,358 [INFO] [ReqID: 9535299b] STARTED: GET /teacher/classrooms
+2026-08-13 15:46:59,362 [INFO] [ReqID: 9535299b] COMPLETED: Status 200 in 0.00s
+2026-08-13 15:46:59,363 [INFO] [ReqID: b6095935] STARTED: GET /teacher/classrooms
+2026-08-13 15:46:59,366 [INFO] [ReqID: 86ba143d] STARTED: OPTIONS /teacher/analytics/recent-attempts
+2026-08-13 15:46:59,367 [INFO] [ReqID: 86ba143d] COMPLETED: Status 200 in 0.00s
+2026-08-13 15:46:59,369 [INFO] [ReqID: 943716e8] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-13 15:46:59,370 [INFO] [ReqID: b6095935] COMPLETED: Status 200 in 0.01s
+2026-08-13 15:46:59,375 [INFO] [ReqID: 943716e8] COMPLETED: Status 200 in 0.01s
+2026-08-13 15:46:59,376 [INFO] [ReqID: 3ea4c98e] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-13 15:46:59,378 [INFO] [ReqID: d43301d4] STARTED: OPTIONS /teacher/branding
+2026-08-13 15:46:59,379 [INFO] [ReqID: d43301d4] COMPLETED: Status 200 in 0.00s
+2026-08-13 15:46:59,381 [INFO] [ReqID: 6e8ba5ff] STARTED: GET /teacher/branding
+2026-08-13 15:46:59,383 [INFO] [ReqID: 3ea4c98e] COMPLETED: Status 200 in 0.01s
+2026-08-13 15:46:59,387 [INFO] [ReqID: 6e8ba5ff] COMPLETED: Status 200 in 0.01s
+2026-08-13 15:46:59,389 [INFO] [ReqID: f04acea9] STARTED: GET /teacher/branding
+2026-08-13 15:46:59,395 [INFO] [ReqID: f04acea9] COMPLETED: Status 200 in 0.01s
+2026-08-13 15:48:37,121 [INFO] [ReqID: 4e77f94b] STARTED: GET /user/dashboard
+2026-08-13 15:48:37,125 [INFO] [ReqID: 4e77f94b] COMPLETED: Status 200 in 0.00s
+2026-08-13 15:48:37,128 [INFO] [ReqID: e20f2bd9] STARTED: GET /user/dashboard
+2026-08-13 15:48:37,133 [INFO] [ReqID: e20f2bd9] COMPLETED: Status 200 in 0.01s
+2026-08-13 15:48:37,140 [INFO] [ReqID: 7efd51f9] STARTED: GET /flashcards/due
+2026-08-13 15:48:37,143 [INFO] [ReqID: 7efd51f9] COMPLETED: Status 200 in 0.00s
+2026-08-13 15:48:37,144 [INFO] [ReqID: 74f6c6b3] STARTED: GET /flashcards/due
+2026-08-13 15:48:37,150 [INFO] [ReqID: 74f6c6b3] COMPLETED: Status 200 in 0.01s
+2026-08-13 15:48:56,703 [INFO] [ReqID: 6a19a5f9] STARTED: GET /teacher/quizzes
+2026-08-13 15:48:56,714 [INFO] [ReqID: 6a19a5f9] COMPLETED: Status 200 in 0.01s
+2026-08-13 15:48:56,717 [INFO] [ReqID: 27442fdc] STARTED: GET /teacher/quizzes
+2026-08-13 15:48:56,728 [INFO] [ReqID: 27442fdc] COMPLETED: Status 200 in 0.01s
+2026-08-13 15:48:56,730 [INFO] [ReqID: b244cb8a] STARTED: GET /teacher/overview
+2026-08-13 15:48:56,743 [INFO] [ReqID: b244cb8a] COMPLETED: Status 200 in 0.01s
+2026-08-13 15:48:56,745 [INFO] [ReqID: 92864a27] STARTED: GET /teacher/overview
+2026-08-13 15:48:56,748 [INFO] [ReqID: 5b7b2daa] STARTED: GET /teacher/classrooms
+2026-08-13 15:48:56,757 [INFO] [ReqID: 92864a27] COMPLETED: Status 200 in 0.01s
+2026-08-13 15:48:56,769 [INFO] [ReqID: 5b7b2daa] COMPLETED: Status 200 in 0.02s
+2026-08-13 15:48:56,779 [INFO] [ReqID: 40adacbe] STARTED: GET /teacher/classrooms
+2026-08-13 15:48:56,780 [INFO] [ReqID: 7802a802] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-13 15:48:56,786 [INFO] [ReqID: 40adacbe] COMPLETED: Status 200 in 0.01s
+2026-08-13 15:48:56,787 [INFO] [ReqID: 7802a802] COMPLETED: Status 200 in 0.01s
+2026-08-13 15:48:56,793 [INFO] [ReqID: 7a6e225d] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-13 15:48:56,795 [INFO] [ReqID: f4bc4154] STARTED: GET /teacher/branding
+2026-08-13 15:48:56,800 [INFO] [ReqID: 7a6e225d] COMPLETED: Status 200 in 0.01s
+2026-08-13 15:48:56,810 [INFO] [ReqID: f4bc4154] COMPLETED: Status 200 in 0.01s
+2026-08-13 15:48:56,813 [INFO] [ReqID: 4fc00360] STARTED: GET /teacher/branding
+2026-08-13 15:48:56,828 [INFO] [ReqID: 4fc00360] COMPLETED: Status 200 in 0.01s
+2026-08-13 15:48:57,342 [INFO] [ReqID: f242f06b] STARTED: GET /user/dashboard
+2026-08-13 15:48:57,347 [INFO] [ReqID: f242f06b] COMPLETED: Status 200 in 0.01s
+2026-08-13 15:48:57,350 [INFO] [ReqID: 6baefb33] STARTED: GET /user/dashboard
+2026-08-13 15:48:57,357 [INFO] [ReqID: d1cfb4f4] STARTED: GET /flashcards/due
+2026-08-13 15:48:57,360 [INFO] [ReqID: 6baefb33] COMPLETED: Status 200 in 0.01s
+2026-08-13 15:48:57,365 [INFO] [ReqID: d1cfb4f4] COMPLETED: Status 200 in 0.01s
+2026-08-13 15:48:57,369 [INFO] [ReqID: 678cfee0] STARTED: GET /flashcards/due
+2026-08-13 15:48:57,376 [INFO] [ReqID: 678cfee0] COMPLETED: Status 200 in 0.01s
+2026-08-13 15:49:01,672 [INFO] [ReqID: 3a5dee9d] STARTED: GET /user/dashboard
+2026-08-13 15:49:01,677 [INFO] [ReqID: 3a5dee9d] COMPLETED: Status 200 in 0.01s
+2026-08-13 15:49:01,679 [INFO] [ReqID: 675d1f46] STARTED: GET /user/dashboard
+2026-08-13 15:49:01,684 [INFO] [ReqID: 675d1f46] COMPLETED: Status 200 in 0.01s
+2026-08-13 15:49:01,701 [INFO] [ReqID: 12c0a393] STARTED: GET /flashcards/due
+2026-08-13 15:49:01,707 [INFO] [ReqID: 12c0a393] COMPLETED: Status 200 in 0.01s
+2026-08-13 15:49:01,709 [INFO] [ReqID: a6e7836c] STARTED: GET /flashcards/due
+2026-08-13 15:49:01,713 [INFO] [ReqID: a6e7836c] COMPLETED: Status 200 in 0.00s
+2026-08-13 15:49:13,710 [INFO] [ReqID: 2e0c5f5d] STARTED: POST /quiz/analyze-document
+2026-08-13 15:49:13,752 [INFO] [ReqID: 2e0c5f5d] COMPLETED: Status 200 in 0.04s
+2026-08-13 15:49:13,758 [INFO] [ReqID: a00ed681] STARTED: POST /quiz/analyze-document
+2026-08-13 15:49:13,766 [INFO] [ReqID: a00ed681] COMPLETED: Status 200 in 0.01s
+2026-08-13 15:49:13,772 [INFO] [ReqID: 09b4634f] STARTED: POST /quiz/analyze-document
+2026-08-13 15:49:13,785 [INFO] [ReqID: 09b4634f] COMPLETED: Status 200 in 0.01s
+2026-08-13 16:11:12,405 [INFO] [ReqID: c7f61d17] STARTED: OPTIONS /teacher/quizzes
+2026-08-13 16:11:12,406 [INFO] [ReqID: 5fae0dcd] STARTED: OPTIONS /teacher/quizzes
+2026-08-13 16:11:12,407 [INFO] [ReqID: c7f61d17] COMPLETED: Status 200 in 0.00s
+2026-08-13 16:11:12,408 [INFO] [ReqID: 5fae0dcd] COMPLETED: Status 200 in 0.00s
+2026-08-13 16:11:12,410 [INFO] [ReqID: 1f13ed7f] STARTED: GET /teacher/quizzes
+2026-08-13 16:11:12,417 [INFO] [ReqID: 1f13ed7f] COMPLETED: Status 200 in 0.01s
+2026-08-13 16:11:12,419 [INFO] [ReqID: a1ef7c38] STARTED: GET /teacher/quizzes
+2026-08-13 16:11:12,423 [INFO] [ReqID: a1ef7c38] COMPLETED: Status 200 in 0.00s
+2026-08-13 16:11:12,454 [INFO] [ReqID: e9b181ca] STARTED: OPTIONS /teacher/branding
+2026-08-13 16:11:12,455 [INFO] [ReqID: 522ed92d] STARTED: OPTIONS /teacher/branding
+2026-08-13 16:11:12,455 [INFO] [ReqID: e9b181ca] COMPLETED: Status 200 in 0.00s
+2026-08-13 16:11:12,456 [INFO] [ReqID: 522ed92d] COMPLETED: Status 200 in 0.00s
+2026-08-13 16:11:12,459 [INFO] [ReqID: 21cd4d23] STARTED: GET /teacher/branding
+2026-08-13 16:11:12,465 [INFO] [ReqID: 21cd4d23] COMPLETED: Status 200 in 0.01s
+2026-08-13 16:11:12,468 [INFO] [ReqID: 521435ac] STARTED: GET /teacher/branding
+2026-08-13 16:11:12,474 [INFO] [ReqID: 521435ac] COMPLETED: Status 200 in 0.01s
+2026-08-13 16:11:20,995 [INFO] [ReqID: 59dfa394] STARTED: OPTIONS /quiz/34
+2026-08-13 16:11:20,997 [INFO] [ReqID: 59dfa394] COMPLETED: Status 200 in 0.00s
+2026-08-13 16:11:21,000 [INFO] [ReqID: 3ac9dd90] STARTED: GET /quiz/34
+2026-08-13 16:11:21,003 [INFO] [ReqID: 3ac9dd90] COMPLETED: Status 200 in 0.00s
+2026-08-13 16:11:30,629 [INFO] [ReqID: 1710ebbf] STARTED: OPTIONS /quiz/34/regenerate-question
+2026-08-13 16:11:30,631 [INFO] [ReqID: 1710ebbf] COMPLETED: Status 200 in 0.00s
+2026-08-13 16:11:30,634 [INFO] [ReqID: bfd56efc] STARTED: POST /quiz/34/regenerate-question
+2026-08-13 16:11:30,639 [INFO] [ReqID: bfd56efc] COMPLETED: Status 400 in 0.00s
+2026-08-13 16:11:48,446 [INFO] [ReqID: fb584e7c] STARTED: OPTIONS /quiz/34
+2026-08-13 16:11:48,447 [INFO] [ReqID: fb584e7c] COMPLETED: Status 200 in 0.00s
+2026-08-13 16:11:48,449 [INFO] [ReqID: 8708f7c6] STARTED: PUT /quiz/34
+2026-08-13 16:11:48,469 [INFO] [ReqID: 8708f7c6] COMPLETED: Status 200 in 0.02s
+2026-08-13 16:16:23,065 [INFO] [ReqID: f2141dcd] STARTED: GET /teacher/quizzes
+2026-08-13 16:16:23,070 [INFO] [ReqID: f2141dcd] COMPLETED: Status 200 in 0.00s
+2026-08-13 16:16:23,073 [INFO] [ReqID: b39f200b] STARTED: GET /teacher/quizzes
+2026-08-13 16:16:23,077 [INFO] [ReqID: d9e8c29d] STARTED: OPTIONS /teacher/overview
+2026-08-13 16:16:23,077 [INFO] [ReqID: d9e8c29d] COMPLETED: Status 200 in 0.00s
+2026-08-13 16:16:23,082 [INFO] [ReqID: b39f200b] COMPLETED: Status 200 in 0.01s
+2026-08-13 16:16:23,083 [INFO] [ReqID: c68df25f] STARTED: GET /teacher/overview
+2026-08-13 16:16:23,120 [INFO] [ReqID: c68df25f] COMPLETED: Status 200 in 0.04s
+2026-08-13 16:16:23,134 [INFO] [ReqID: 3ce52423] STARTED: GET /teacher/overview
+2026-08-13 16:16:23,140 [INFO] [ReqID: 3ce52423] COMPLETED: Status 200 in 0.01s
+2026-08-13 16:16:23,160 [INFO] [ReqID: 802053d2] STARTED: OPTIONS /teacher/classrooms
+2026-08-13 16:16:23,160 [INFO] [ReqID: 802053d2] COMPLETED: Status 200 in 0.00s
+2026-08-13 16:16:23,163 [INFO] [ReqID: 938c36de] STARTED: GET /teacher/classrooms
+2026-08-13 16:16:23,168 [INFO] [ReqID: 938c36de] COMPLETED: Status 200 in 0.01s
+2026-08-13 16:16:23,169 [INFO] [ReqID: 886325da] STARTED: GET /teacher/classrooms
+2026-08-13 16:16:23,172 [INFO] [ReqID: 886325da] COMPLETED: Status 200 in 0.00s
+2026-08-13 16:16:23,190 [INFO] [ReqID: 0fa92024] STARTED: OPTIONS /teacher/analytics/recent-attempts
+2026-08-13 16:16:23,191 [INFO] [ReqID: 333960a0] STARTED: OPTIONS /teacher/analytics/recent-attempts
+2026-08-13 16:16:23,191 [INFO] [ReqID: 0fa92024] COMPLETED: Status 200 in 0.00s
+2026-08-13 16:16:23,192 [INFO] [ReqID: 333960a0] COMPLETED: Status 200 in 0.00s
+2026-08-13 16:16:23,196 [INFO] [ReqID: 8f8a761c] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-13 16:16:23,199 [INFO] [ReqID: 8f8a761c] COMPLETED: Status 200 in 0.00s
+2026-08-13 16:16:23,200 [INFO] [ReqID: 619010e4] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-13 16:16:23,203 [INFO] [ReqID: c3436c6a] STARTED: GET /teacher/branding
+2026-08-13 16:16:23,204 [INFO] [ReqID: 619010e4] COMPLETED: Status 200 in 0.00s
+2026-08-13 16:16:23,209 [INFO] [ReqID: c3436c6a] COMPLETED: Status 200 in 0.01s
+2026-08-13 16:16:23,210 [INFO] [ReqID: c2bf344e] STARTED: GET /teacher/branding
+2026-08-13 16:16:23,216 [INFO] [ReqID: c2bf344e] COMPLETED: Status 200 in 0.01s
+2026-08-13 16:17:09,878 [INFO] [ReqID: cab8b551] STARTED: GET /teacher/quizzes
+2026-08-13 16:17:09,886 [INFO] [ReqID: cab8b551] COMPLETED: Status 200 in 0.01s
+2026-08-13 16:17:09,888 [INFO] [ReqID: 17d289a2] STARTED: GET /teacher/quizzes
+2026-08-13 16:17:09,893 [INFO] [ReqID: 17d289a2] COMPLETED: Status 200 in 0.00s
+2026-08-13 16:17:09,901 [INFO] [ReqID: 641a1d6b] STARTED: GET /teacher/overview
+2026-08-13 16:17:09,906 [INFO] [ReqID: 641a1d6b] COMPLETED: Status 200 in 0.01s
+2026-08-13 16:17:09,907 [INFO] [ReqID: f7befec2] STARTED: GET /teacher/overview
+2026-08-13 16:17:09,910 [INFO] [ReqID: 8d4d078b] STARTED: GET /teacher/classrooms
+2026-08-13 16:17:09,918 [INFO] [ReqID: f7befec2] COMPLETED: Status 200 in 0.01s
+2026-08-13 16:17:09,919 [INFO] [ReqID: 8d4d078b] COMPLETED: Status 200 in 0.01s
+2026-08-13 16:17:09,922 [INFO] [ReqID: 77c0d282] STARTED: GET /teacher/classrooms
+2026-08-13 16:17:09,924 [INFO] [ReqID: a8b45f9b] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-13 16:17:09,930 [INFO] [ReqID: 77c0d282] COMPLETED: Status 200 in 0.01s
+2026-08-13 16:17:09,947 [INFO] [ReqID: a8b45f9b] COMPLETED: Status 200 in 0.02s
+2026-08-13 16:17:09,949 [INFO] [ReqID: ff8621c8] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-13 16:17:09,955 [INFO] [ReqID: ff8621c8] COMPLETED: Status 200 in 0.01s
+2026-08-13 16:17:09,956 [INFO] [ReqID: 4c4161ff] STARTED: GET /teacher/branding
+2026-08-13 16:17:09,962 [INFO] [ReqID: 4c4161ff] COMPLETED: Status 200 in 0.01s
+2026-08-13 16:17:09,965 [INFO] [ReqID: e63fc50f] STARTED: GET /teacher/branding
+2026-08-13 16:17:09,969 [INFO] [ReqID: e63fc50f] COMPLETED: Status 200 in 0.00s
+2026-08-13 16:17:47,726 [INFO] [ReqID: 73474da9] STARTED: OPTIONS /teacher/classrooms
+2026-08-13 16:17:47,727 [INFO] [ReqID: 73474da9] COMPLETED: Status 200 in 0.00s
+2026-08-13 16:17:47,729 [INFO] [ReqID: 68c7f1b6] STARTED: POST /teacher/classrooms
+2026-08-13 16:17:47,747 [INFO] [ReqID: 68c7f1b6] COMPLETED: Status 200 in 0.02s
+2026-08-13 16:18:14,440 [INFO] [ReqID: 4627f659] STARTED: OPTIONS /user/dashboard
+2026-08-13 16:18:14,441 [INFO] [ReqID: 4627f659] COMPLETED: Status 200 in 0.00s
+2026-08-13 16:18:14,442 [INFO] [ReqID: 9c74a38e] STARTED: OPTIONS /user/dashboard
+2026-08-13 16:18:14,443 [INFO] [ReqID: 9c74a38e] COMPLETED: Status 200 in 0.00s
+2026-08-13 16:18:14,453 [INFO] [ReqID: cc1e310f] STARTED: GET /user/dashboard
+2026-08-13 16:18:14,458 [INFO] [ReqID: cc1e310f] COMPLETED: Status 200 in 0.00s
+2026-08-13 16:18:14,460 [INFO] [ReqID: ef1e2821] STARTED: GET /user/dashboard
+2026-08-13 16:18:14,465 [INFO] [ReqID: ef1e2821] COMPLETED: Status 200 in 0.01s
+2026-08-13 16:18:14,517 [INFO] [ReqID: 8577935c] STARTED: OPTIONS /flashcards/due
+2026-08-13 16:18:14,521 [INFO] [ReqID: f6ed6a19] STARTED: OPTIONS /flashcards/due
+2026-08-13 16:18:14,521 [INFO] [ReqID: 8577935c] COMPLETED: Status 200 in 0.00s
+2026-08-13 16:18:14,523 [INFO] [ReqID: f6ed6a19] COMPLETED: Status 200 in 0.00s
+2026-08-13 16:18:14,528 [INFO] [ReqID: e0f3f5dc] STARTED: GET /flashcards/due
+2026-08-13 16:18:14,536 [INFO] [ReqID: e0f3f5dc] COMPLETED: Status 200 in 0.01s
+2026-08-13 16:18:14,538 [INFO] [ReqID: 66046af5] STARTED: GET /flashcards/due
+2026-08-13 16:18:14,543 [INFO] [ReqID: 66046af5] COMPLETED: Status 200 in 0.00s
+2026-08-13 16:18:20,542 [INFO] [ReqID: d09b7f39] STARTED: OPTIONS /student/classrooms/join
+2026-08-13 16:18:20,542 [INFO] [ReqID: d09b7f39] COMPLETED: Status 200 in 0.00s
+2026-08-13 16:18:20,545 [INFO] [ReqID: 6b59f7f1] STARTED: POST /student/classrooms/join
+2026-08-13 16:18:20,555 [INFO] [ReqID: 6b59f7f1] COMPLETED: Status 200 in 0.01s
+2026-08-13 16:19:05,596 [INFO] [ReqID: a582a7b5] STARTED: POST /quiz/analyze-document
+2026-08-13 16:19:05,617 [INFO] [ReqID: a582a7b5] COMPLETED: Status 200 in 0.02s
+2026-08-13 16:19:05,624 [INFO] [ReqID: afd30db9] STARTED: POST /quiz/analyze-document
+2026-08-13 16:19:05,633 [INFO] [ReqID: afd30db9] COMPLETED: Status 200 in 0.01s
+2026-08-13 16:22:17,118 [INFO] [ReqID: b7b5c13b] STARTED: OPTIONS /quiz/generate
+2026-08-13 16:22:17,119 [INFO] [ReqID: b7b5c13b] COMPLETED: Status 200 in 0.00s
+2026-08-13 16:22:17,123 [INFO] [ReqID: a498c028] STARTED: POST /quiz/generate
+2026-08-13 16:22:24,235 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 16:22:27,006 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 16:22:29,016 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 16:22:30,250 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 16:22:32,256 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 16:22:33,542 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 16:22:35,550 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-13 16:22:37,250 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-13 16:22:39,279 [INFO] [ReqID: a498c028] COMPLETED: Status 200 in 22.16s
+2026-08-13 16:23:04,393 [INFO] [ReqID: 4b793bad] STARTED: POST /quiz/generate
+2026-08-13 16:23:10,458 [INFO] [ReqID: 4b793bad] COMPLETED: Status 200 in 6.07s
+2026-08-13 16:23:16,665 [INFO] [ReqID: 46ef85a1] STARTED: GET /quiz/36
+2026-08-13 16:23:16,669 [INFO] [ReqID: 46ef85a1] COMPLETED: Status 200 in 0.00s
+2026-08-13 16:23:16,672 [INFO] [ReqID: 43ec8a06] STARTED: GET /quiz/36
+2026-08-13 16:23:16,676 [INFO] [ReqID: 43ec8a06] COMPLETED: Status 200 in 0.00s
+2026-08-13 16:23:57,388 [INFO] [ReqID: a1215be9] STARTED: GET /user/dashboard
+2026-08-13 16:23:57,393 [INFO] [ReqID: a1215be9] COMPLETED: Status 200 in 0.00s
+2026-08-13 16:23:57,396 [INFO] [ReqID: 4ef25a88] STARTED: GET /user/dashboard
+2026-08-13 16:23:57,400 [INFO] [ReqID: a4787c72] STARTED: GET /flashcards/due
+2026-08-13 16:23:57,402 [INFO] [ReqID: 4ef25a88] COMPLETED: Status 200 in 0.01s
+2026-08-13 16:23:57,405 [INFO] [ReqID: a4787c72] COMPLETED: Status 200 in 0.00s
+2026-08-13 16:23:57,409 [INFO] [ReqID: 63558741] STARTED: GET /flashcards/due
+2026-08-13 16:23:57,414 [INFO] [ReqID: 63558741] COMPLETED: Status 200 in 0.00s
+2026-08-16 23:10:28,535 [INFO] [ReqID: 345a3811] STARTED: OPTIONS /user/dashboard
+2026-08-16 23:10:28,537 [INFO] [ReqID: 345a3811] COMPLETED: Status 200 in 0.00s
+2026-08-16 23:10:28,540 [INFO] [ReqID: 279e291d] STARTED: OPTIONS /user/dashboard
+2026-08-16 23:10:28,542 [INFO] [ReqID: 279e291d] COMPLETED: Status 200 in 0.00s
+2026-08-16 23:10:28,545 [INFO] [ReqID: 7d0d4452] STARTED: GET /user/dashboard
+2026-08-16 23:10:28,557 [INFO] [ReqID: 7d0d4452] COMPLETED: Status 200 in 0.01s
+2026-08-16 23:10:28,559 [INFO] [ReqID: 229fb3a0] STARTED: GET /user/dashboard
+2026-08-16 23:10:28,565 [INFO] [ReqID: 229fb3a0] COMPLETED: Status 200 in 0.01s
+2026-08-16 23:10:28,633 [INFO] [ReqID: bf50a4b4] STARTED: OPTIONS /flashcards/due
+2026-08-16 23:10:28,634 [INFO] [ReqID: 32fb83e7] STARTED: OPTIONS /flashcards/due
+2026-08-16 23:10:28,635 [INFO] [ReqID: bf50a4b4] COMPLETED: Status 200 in 0.00s
+2026-08-16 23:10:28,636 [INFO] [ReqID: 32fb83e7] COMPLETED: Status 200 in 0.00s
+2026-08-16 23:10:28,640 [INFO] [ReqID: f30a32df] STARTED: GET /flashcards/due
+2026-08-16 23:10:28,650 [INFO] [ReqID: f30a32df] COMPLETED: Status 200 in 0.01s
+2026-08-16 23:10:28,652 [INFO] [ReqID: 1bdafa5f] STARTED: GET /flashcards/due
+2026-08-16 23:10:28,659 [INFO] [ReqID: 1bdafa5f] COMPLETED: Status 200 in 0.01s
+2026-08-16 23:10:28,684 [INFO] [ReqID: b7131576] STARTED: OPTIONS /teacher/quizzes
+2026-08-16 23:10:28,685 [INFO] [ReqID: e7135afa] STARTED: OPTIONS /teacher/quizzes
+2026-08-16 23:10:28,686 [INFO] [ReqID: b7131576] COMPLETED: Status 200 in 0.00s
+2026-08-16 23:10:28,687 [INFO] [ReqID: e7135afa] COMPLETED: Status 200 in 0.00s
+2026-08-16 23:10:28,697 [INFO] [ReqID: bc0a3225] STARTED: GET /teacher/quizzes
+2026-08-16 23:10:28,706 [INFO] [ReqID: bc0a3225] COMPLETED: Status 200 in 0.01s
+2026-08-16 23:10:28,708 [INFO] [ReqID: ff4fa9a0] STARTED: GET /teacher/quizzes
+2026-08-16 23:10:28,712 [INFO] [ReqID: ff4fa9a0] COMPLETED: Status 200 in 0.00s
+2026-08-16 23:10:28,732 [INFO] [ReqID: de2027d9] STARTED: OPTIONS /teacher/overview
+2026-08-16 23:10:28,732 [INFO] [ReqID: 1e692c60] STARTED: OPTIONS /teacher/overview
+2026-08-16 23:10:28,733 [INFO] [ReqID: de2027d9] COMPLETED: Status 200 in 0.00s
+2026-08-16 23:10:28,734 [INFO] [ReqID: 1e692c60] COMPLETED: Status 200 in 0.00s
+2026-08-16 23:10:28,736 [INFO] [ReqID: 705a17fd] STARTED: GET /teacher/overview
+2026-08-16 23:10:28,743 [INFO] [ReqID: 705a17fd] COMPLETED: Status 200 in 0.01s
+2026-08-16 23:10:28,745 [INFO] [ReqID: 751b8a0e] STARTED: GET /teacher/overview
+2026-08-16 23:10:28,749 [INFO] [ReqID: 751b8a0e] COMPLETED: Status 200 in 0.00s
+2026-08-16 23:10:28,764 [INFO] [ReqID: 37fca69b] STARTED: OPTIONS /teacher/classrooms
+2026-08-16 23:10:28,765 [INFO] [ReqID: b511484b] STARTED: OPTIONS /teacher/classrooms
+2026-08-16 23:10:28,765 [INFO] [ReqID: 37fca69b] COMPLETED: Status 200 in 0.00s
+2026-08-16 23:10:28,766 [INFO] [ReqID: b511484b] COMPLETED: Status 200 in 0.00s
+2026-08-16 23:10:28,769 [INFO] [ReqID: 8b6ae106] STARTED: GET /teacher/classrooms
+2026-08-16 23:10:28,776 [INFO] [ReqID: 8b6ae106] COMPLETED: Status 200 in 0.01s
+2026-08-16 23:10:28,777 [INFO] [ReqID: 614382de] STARTED: GET /teacher/classrooms
+2026-08-16 23:10:28,780 [INFO] [ReqID: ba57d760] STARTED: OPTIONS /teacher/analytics/recent-attempts
+2026-08-16 23:10:28,780 [INFO] [ReqID: ba57d760] COMPLETED: Status 200 in 0.00s
+2026-08-16 23:10:28,783 [INFO] [ReqID: 051755a3] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-16 23:10:28,785 [INFO] [ReqID: 614382de] COMPLETED: Status 200 in 0.01s
+2026-08-16 23:10:28,790 [INFO] [ReqID: 051755a3] COMPLETED: Status 200 in 0.01s
+2026-08-16 23:10:28,791 [INFO] [ReqID: 83a6187d] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-16 23:10:28,794 [INFO] [ReqID: f40e4f77] STARTED: OPTIONS /teacher/branding
+2026-08-16 23:10:28,795 [INFO] [ReqID: f40e4f77] COMPLETED: Status 200 in 0.00s
+2026-08-16 23:10:28,797 [INFO] [ReqID: 977a03ae] STARTED: GET /teacher/branding
+2026-08-16 23:10:28,799 [INFO] [ReqID: 83a6187d] COMPLETED: Status 200 in 0.01s
+2026-08-16 23:10:28,806 [INFO] [ReqID: 977a03ae] COMPLETED: Status 200 in 0.01s
+2026-08-16 23:10:28,808 [INFO] [ReqID: d32e30f4] STARTED: GET /teacher/branding
+2026-08-16 23:10:28,814 [INFO] [ReqID: d32e30f4] COMPLETED: Status 200 in 0.01s
+2026-08-16 23:10:41,586 [INFO] [ReqID: c9474e5a] STARTED: OPTIONS /user/dashboard
+2026-08-16 23:10:41,587 [INFO] [ReqID: c9474e5a] COMPLETED: Status 200 in 0.00s
+2026-08-16 23:10:41,589 [INFO] [ReqID: b4564238] STARTED: OPTIONS /user/dashboard
+2026-08-16 23:10:41,590 [INFO] [ReqID: b4564238] COMPLETED: Status 200 in 0.00s
+2026-08-16 23:10:41,600 [INFO] [ReqID: 8fa51141] STARTED: GET /user/dashboard
+2026-08-16 23:10:41,605 [INFO] [ReqID: 8fa51141] COMPLETED: Status 200 in 0.00s
+2026-08-16 23:10:41,606 [INFO] [ReqID: 5adc17c3] STARTED: GET /user/dashboard
+2026-08-16 23:10:41,616 [INFO] [ReqID: 5adc17c3] COMPLETED: Status 200 in 0.01s
+2026-08-16 23:10:41,621 [INFO] [ReqID: c41ad03c] STARTED: OPTIONS /flashcards/due
+2026-08-16 23:10:41,622 [INFO] [ReqID: c41ad03c] COMPLETED: Status 200 in 0.00s
+2026-08-16 23:10:41,628 [INFO] [ReqID: 3340e5dc] STARTED: OPTIONS /flashcards/due
+2026-08-16 23:10:41,639 [INFO] [ReqID: f9863282] STARTED: GET /flashcards/due
+2026-08-16 23:10:41,640 [INFO] [ReqID: 3340e5dc] COMPLETED: Status 200 in 0.01s
+2026-08-16 23:10:41,646 [INFO] [ReqID: f9863282] COMPLETED: Status 200 in 0.01s
+2026-08-16 23:10:41,647 [INFO] [ReqID: 9b6a9f9e] STARTED: GET /flashcards/due
+2026-08-16 23:10:41,652 [INFO] [ReqID: 9b6a9f9e] COMPLETED: Status 200 in 0.00s
+2026-08-16 23:18:20,741 [INFO] [ReqID: f59566f3] STARTED: GET /teacher/quizzes
+2026-08-16 23:18:20,747 [INFO] [ReqID: f59566f3] COMPLETED: Status 200 in 0.01s
+2026-08-16 23:18:20,751 [INFO] [ReqID: 5cb9fdba] STARTED: GET /teacher/quizzes
+2026-08-16 23:18:20,758 [INFO] [ReqID: 6c780233] STARTED: GET /teacher/overview
+2026-08-16 23:18:20,759 [INFO] [ReqID: 5cb9fdba] COMPLETED: Status 200 in 0.01s
+2026-08-16 23:18:20,768 [INFO] [ReqID: 6c780233] COMPLETED: Status 200 in 0.01s
+2026-08-16 23:18:20,770 [INFO] [ReqID: 8cc11e84] STARTED: GET /teacher/overview
+2026-08-16 23:18:20,774 [INFO] [ReqID: 78f566af] STARTED: GET /teacher/classrooms
+2026-08-16 23:18:20,784 [INFO] [ReqID: 78f566af] COMPLETED: Status 200 in 0.01s
+2026-08-16 23:18:20,785 [INFO] [ReqID: 8cc11e84] COMPLETED: Status 200 in 0.01s
+2026-08-16 23:18:20,789 [INFO] [ReqID: 20087db6] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-16 23:18:20,795 [INFO] [ReqID: 20087db6] COMPLETED: Status 200 in 0.01s
+2026-08-16 23:18:20,796 [INFO] [ReqID: 0274bf9b] STARTED: GET /teacher/classrooms
+2026-08-16 23:18:20,803 [INFO] [ReqID: 0274bf9b] COMPLETED: Status 200 in 0.01s
+2026-08-16 23:18:20,805 [INFO] [ReqID: cd727c04] STARTED: GET /teacher/branding
+2026-08-16 23:18:20,812 [INFO] [ReqID: cd727c04] COMPLETED: Status 200 in 0.01s
+2026-08-16 23:18:20,814 [INFO] [ReqID: ab0b6429] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-16 23:18:20,824 [INFO] [ReqID: ab0b6429] COMPLETED: Status 200 in 0.01s
+2026-08-16 23:18:20,830 [INFO] [ReqID: 19b5f7a6] STARTED: GET /teacher/branding
+2026-08-16 23:18:20,838 [INFO] [ReqID: 19b5f7a6] COMPLETED: Status 200 in 0.01s
+2026-08-16 23:18:20,956 [INFO] [ReqID: 750ed55d] STARTED: GET /user/dashboard
+2026-08-16 23:18:20,963 [INFO] [ReqID: 750ed55d] COMPLETED: Status 200 in 0.01s
+2026-08-16 23:18:20,969 [INFO] [ReqID: 4576ad9a] STARTED: GET /user/dashboard
+2026-08-16 23:18:20,976 [INFO] [ReqID: 4576ad9a] COMPLETED: Status 200 in 0.01s
+2026-08-16 23:18:20,982 [INFO] [ReqID: f23f5745] STARTED: GET /flashcards/due
+2026-08-16 23:18:20,987 [INFO] [ReqID: f23f5745] COMPLETED: Status 200 in 0.00s
+2026-08-16 23:18:20,989 [INFO] [ReqID: 3ad752b5] STARTED: GET /flashcards/due
+2026-08-16 23:18:20,993 [INFO] [ReqID: 3ad752b5] COMPLETED: Status 200 in 0.00s
+2026-08-16 23:19:21,142 [INFO] [ReqID: 582cf600] STARTED: GET /teacher/quizzes
+2026-08-16 23:19:21,147 [INFO] [ReqID: 582cf600] COMPLETED: Status 200 in 0.01s
+2026-08-16 23:19:21,151 [INFO] [ReqID: 15318053] STARTED: GET /teacher/quizzes
+2026-08-16 23:19:21,156 [INFO] [ReqID: 31ba94ee] STARTED: GET /teacher/overview
+2026-08-16 23:19:21,162 [INFO] [ReqID: 15318053] COMPLETED: Status 200 in 0.01s
+2026-08-16 23:19:21,166 [INFO] [ReqID: 31ba94ee] COMPLETED: Status 200 in 0.01s
+2026-08-16 23:19:21,168 [INFO] [ReqID: 10726e69] STARTED: GET /teacher/overview
+2026-08-16 23:19:21,173 [INFO] [ReqID: 42ba94c4] STARTED: GET /teacher/classrooms
+2026-08-16 23:19:21,178 [INFO] [ReqID: 10726e69] COMPLETED: Status 200 in 0.01s
+2026-08-16 23:19:21,179 [INFO] [ReqID: 42ba94c4] COMPLETED: Status 200 in 0.00s
+2026-08-16 23:19:21,183 [INFO] [ReqID: 6891ea04] STARTED: GET /teacher/classrooms
+2026-08-16 23:19:21,184 [INFO] [ReqID: bfbf7346] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-16 23:19:21,192 [INFO] [ReqID: 6891ea04] COMPLETED: Status 200 in 0.01s
+2026-08-16 23:19:21,198 [INFO] [ReqID: bfbf7346] COMPLETED: Status 200 in 0.01s
+2026-08-16 23:19:21,205 [INFO] [ReqID: 6efba711] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-16 23:19:21,210 [INFO] [ReqID: 17fe156b] STARTED: GET /teacher/branding
+2026-08-16 23:19:21,213 [INFO] [ReqID: 6efba711] COMPLETED: Status 200 in 0.01s
+2026-08-16 23:19:21,217 [INFO] [ReqID: 17fe156b] COMPLETED: Status 200 in 0.01s
+2026-08-16 23:19:21,219 [INFO] [ReqID: 3b4b7bb4] STARTED: GET /teacher/branding
+2026-08-16 23:19:21,226 [INFO] [ReqID: 3b4b7bb4] COMPLETED: Status 200 in 0.01s
+2026-08-16 23:19:34,425 [INFO] [ReqID: 90ea8c12] STARTED: POST /quiz/analyze-document
+2026-08-16 23:19:34,450 [INFO] [ReqID: 90ea8c12] COMPLETED: Status 200 in 0.03s
+2026-08-16 23:21:04,521 [INFO] [ReqID: 4638b5a4] STARTED: OPTIONS /quiz/generate
+2026-08-16 23:21:04,521 [INFO] [ReqID: 4638b5a4] COMPLETED: Status 200 in 0.00s
+2026-08-16 23:21:04,524 [INFO] [ReqID: a75db59f] STARTED: POST /quiz/generate
+2026-08-16 23:21:05,245 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-16 23:21:10,809 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-16 23:21:12,825 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-16 23:21:22,679 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-16 23:21:24,687 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-16 23:21:27,630 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-16 23:21:29,635 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-16 23:21:35,923 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-16 23:21:37,929 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-16 23:21:46,126 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-16 23:21:48,136 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-16 23:21:52,809 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-16 23:21:54,816 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-16 23:22:00,471 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-16 23:22:02,498 [INFO] [ReqID: a75db59f] COMPLETED: Status 200 in 57.97s
+2026-08-16 23:22:02,503 [INFO] [ReqID: 445b96e3] STARTED: OPTIONS /teacher/quizzes
+2026-08-16 23:22:02,504 [INFO] [ReqID: 445b96e3] COMPLETED: Status 200 in 0.00s
+2026-08-16 23:22:02,509 [INFO] [ReqID: e7d57c17] STARTED: GET /teacher/quizzes
+2026-08-16 23:22:02,515 [INFO] [ReqID: e7d57c17] COMPLETED: Status 200 in 0.01s
+2026-08-16 23:22:02,526 [INFO] [ReqID: 0d4922bf] STARTED: OPTIONS /teacher/overview
+2026-08-16 23:22:02,526 [INFO] [ReqID: 0d4922bf] COMPLETED: Status 200 in 0.00s
+2026-08-16 23:22:02,529 [INFO] [ReqID: b7992dad] STARTED: GET /teacher/overview
+2026-08-16 23:22:02,533 [INFO] [ReqID: b7992dad] COMPLETED: Status 200 in 0.00s
+2026-08-16 23:22:02,538 [INFO] [ReqID: 0a5dbdaa] STARTED: OPTIONS /teacher/classrooms
+2026-08-16 23:22:02,538 [INFO] [ReqID: 0a5dbdaa] COMPLETED: Status 200 in 0.00s
+2026-08-16 23:22:02,542 [INFO] [ReqID: e7614f6c] STARTED: GET /teacher/classrooms
+2026-08-16 23:22:02,547 [INFO] [ReqID: e7614f6c] COMPLETED: Status 200 in 0.01s
+2026-08-16 23:22:02,553 [INFO] [ReqID: f04dbb07] STARTED: OPTIONS /teacher/analytics/recent-attempts
+2026-08-16 23:22:02,553 [INFO] [ReqID: f04dbb07] COMPLETED: Status 200 in 0.00s
+2026-08-16 23:22:02,558 [INFO] [ReqID: efbe3586] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-16 23:22:02,563 [INFO] [ReqID: efbe3586] COMPLETED: Status 200 in 0.00s
+2026-08-16 23:22:02,568 [INFO] [ReqID: 4f0023d2] STARTED: OPTIONS /teacher/branding
+2026-08-16 23:22:02,569 [INFO] [ReqID: 4f0023d2] COMPLETED: Status 200 in 0.00s
+2026-08-16 23:22:02,571 [INFO] [ReqID: c87f6e7a] STARTED: GET /teacher/branding
+2026-08-16 23:22:02,578 [INFO] [ReqID: c87f6e7a] COMPLETED: Status 200 in 0.01s
+2026-08-16 23:22:33,376 [INFO] [ReqID: 8566ab28] STARTED: OPTIONS /quiz/37
+2026-08-16 23:22:33,377 [INFO] [ReqID: 8566ab28] COMPLETED: Status 200 in 0.00s
+2026-08-16 23:22:33,379 [INFO] [ReqID: a2e1d7c4] STARTED: GET /quiz/37
+2026-08-16 23:22:33,382 [INFO] [ReqID: a2e1d7c4] COMPLETED: Status 200 in 0.00s
+2026-08-16 23:23:21,389 [INFO] [ReqID: 8429d0e4] STARTED: OPTIONS /quiz/37/regenerate-question
+2026-08-16 23:23:21,390 [INFO] [ReqID: 8429d0e4] COMPLETED: Status 200 in 0.00s
+2026-08-16 23:23:21,392 [INFO] [ReqID: 37cecb62] STARTED: POST /quiz/37/regenerate-question
+2026-08-16 23:23:21,399 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-16 23:23:23,533 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-16 23:23:25,535 [INFO] [ReqID: 37cecb62] COMPLETED: Status 200 in 4.14s
+2026-08-16 23:23:54,569 [INFO] [ReqID: 1782a6e9] STARTED: POST /quiz/37/regenerate-question
+2026-08-16 23:23:54,576 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-16 23:23:58,267 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-16 23:24:00,271 [INFO] [ReqID: 1782a6e9] COMPLETED: Status 200 in 5.70s
+2026-08-16 23:24:14,236 [INFO] [ReqID: e001656f] STARTED: OPTIONS /quiz/37
+2026-08-16 23:24:14,237 [INFO] [ReqID: e001656f] COMPLETED: Status 200 in 0.00s
+2026-08-16 23:24:14,239 [INFO] [ReqID: d980d92a] STARTED: PUT /quiz/37
+2026-08-16 23:24:14,251 [INFO] [ReqID: d980d92a] COMPLETED: Status 200 in 0.01s
+2026-08-16 23:24:31,965 [INFO] [ReqID: 39eee7c6] STARTED: OPTIONS /quiz/37/export/pdf
+2026-08-16 23:24:31,966 [INFO] [ReqID: 39eee7c6] COMPLETED: Status 200 in 0.00s
+2026-08-16 23:24:31,968 [INFO] [ReqID: 1c9b9e80] STARTED: POST /quiz/37/export/pdf
+2026-08-16 23:24:32,070 [INFO] [ReqID: 1c9b9e80] COMPLETED: Status 200 in 0.10s
+2026-08-17 00:42:49,171 [INFO] [ReqID: 353491e6] STARTED: OPTIONS /teacher/quizzes
+2026-08-17 00:42:49,172 [INFO] [ReqID: 353491e6] COMPLETED: Status 200 in 0.00s
+2026-08-17 00:42:49,173 [INFO] [ReqID: a5ad492f] STARTED: OPTIONS /teacher/quizzes
+2026-08-17 00:42:49,174 [INFO] [ReqID: a5ad492f] COMPLETED: Status 200 in 0.00s
+2026-08-17 00:42:49,177 [INFO] [ReqID: d1966446] STARTED: GET /teacher/quizzes
+2026-08-17 00:42:49,183 [INFO] [ReqID: d1966446] COMPLETED: Status 200 in 0.00s
+2026-08-17 00:42:49,184 [INFO] [ReqID: b19542f1] STARTED: GET /teacher/quizzes
+2026-08-17 00:42:49,189 [INFO] [ReqID: b19542f1] COMPLETED: Status 200 in 0.00s
+2026-08-17 00:42:49,198 [INFO] [ReqID: b4c354e9] STARTED: OPTIONS /teacher/overview
+2026-08-17 00:42:49,199 [INFO] [ReqID: b4c354e9] COMPLETED: Status 200 in 0.00s
+2026-08-17 00:42:49,201 [INFO] [ReqID: 2abf96a7] STARTED: OPTIONS /teacher/overview
+2026-08-17 00:42:49,201 [INFO] [ReqID: 2abf96a7] COMPLETED: Status 200 in 0.00s
+2026-08-17 00:42:49,202 [INFO] [ReqID: 22500dc5] STARTED: GET /teacher/overview
+2026-08-17 00:42:49,208 [INFO] [ReqID: 22500dc5] COMPLETED: Status 200 in 0.01s
+2026-08-17 00:42:49,210 [INFO] [ReqID: 7078c736] STARTED: GET /teacher/overview
+2026-08-17 00:42:49,215 [INFO] [ReqID: bbb7c730] STARTED: OPTIONS /teacher/classrooms
+2026-08-17 00:42:49,216 [INFO] [ReqID: bbb7c730] COMPLETED: Status 200 in 0.00s
+2026-08-17 00:42:49,220 [INFO] [ReqID: a77c0d08] STARTED: GET /teacher/classrooms
+2026-08-17 00:42:49,221 [INFO] [ReqID: 7078c736] COMPLETED: Status 200 in 0.01s
+2026-08-17 00:42:49,227 [INFO] [ReqID: a77c0d08] COMPLETED: Status 200 in 0.01s
+2026-08-17 00:42:49,229 [INFO] [ReqID: a508f635] STARTED: GET /teacher/classrooms
+2026-08-17 00:42:49,232 [INFO] [ReqID: f7b219a8] STARTED: OPTIONS /teacher/analytics/recent-attempts
+2026-08-17 00:42:49,235 [INFO] [ReqID: f7b219a8] COMPLETED: Status 200 in 0.00s
+2026-08-17 00:42:49,249 [INFO] [ReqID: f08b1a8a] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-17 00:42:49,250 [INFO] [ReqID: a508f635] COMPLETED: Status 200 in 0.02s
+2026-08-17 00:42:49,257 [INFO] [ReqID: f08b1a8a] COMPLETED: Status 200 in 0.01s
+2026-08-17 00:42:49,258 [INFO] [ReqID: a7455c61] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-17 00:42:49,261 [INFO] [ReqID: 5ea1d50a] STARTED: OPTIONS /teacher/branding
+2026-08-17 00:42:49,262 [INFO] [ReqID: 5ea1d50a] COMPLETED: Status 200 in 0.00s
+2026-08-17 00:42:49,265 [INFO] [ReqID: 6d215523] STARTED: GET /teacher/branding
+2026-08-17 00:42:49,268 [INFO] [ReqID: a7455c61] COMPLETED: Status 200 in 0.01s
+2026-08-17 00:42:49,273 [INFO] [ReqID: 6d215523] COMPLETED: Status 200 in 0.01s
+2026-08-17 00:42:49,275 [INFO] [ReqID: 00a20dc2] STARTED: GET /teacher/branding
+2026-08-17 00:42:49,279 [INFO] [ReqID: 00a20dc2] COMPLETED: Status 200 in 0.00s
+2026-08-17 00:44:58,716 [INFO] [ReqID: a3ce9d14] STARTED: GET /teacher/quizzes
+2026-08-17 00:44:58,721 [INFO] [ReqID: a3ce9d14] COMPLETED: Status 200 in 0.00s
+2026-08-17 00:44:58,726 [INFO] [ReqID: 20c5ca49] STARTED: GET /teacher/overview
+2026-08-17 00:44:58,732 [INFO] [ReqID: 20c5ca49] COMPLETED: Status 200 in 0.01s
+2026-08-17 00:44:58,748 [INFO] [ReqID: 566f5f30] STARTED: GET /teacher/classrooms
+2026-08-17 00:44:58,751 [INFO] [ReqID: 566f5f30] COMPLETED: Status 200 in 0.00s
+2026-08-17 00:44:58,759 [INFO] [ReqID: f40b9e25] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-17 00:44:58,765 [INFO] [ReqID: f40b9e25] COMPLETED: Status 200 in 0.01s
+2026-08-17 00:44:58,770 [INFO] [ReqID: f69f0578] STARTED: GET /teacher/branding
+2026-08-17 00:44:58,776 [INFO] [ReqID: f69f0578] COMPLETED: Status 200 in 0.01s
+2026-08-17 02:34:09,500 [INFO] [ReqID: d67608f7] STARTED: GET /docs
+2026-08-17 02:34:09,504 [INFO] [ReqID: d67608f7] COMPLETED: Status 200 in 0.00s
+2026-08-17 02:34:11,149 [INFO] [ReqID: 807cbb8c] STARTED: GET /openapi.json
+2026-08-17 02:34:11,230 [INFO] [ReqID: 807cbb8c] COMPLETED: Status 200 in 0.08s
+2026-08-17 03:18:25,864 [INFO] [ReqID: 77f7e433] STARTED: OPTIONS /auth/login
+2026-08-17 03:18:25,867 [INFO] [ReqID: 77f7e433] COMPLETED: Status 200 in 0.00s
+2026-08-17 03:18:25,878 [INFO] [ReqID: 10947a5d] STARTED: POST /auth/login
+2026-08-17 03:18:25,960 [INFO] [ReqID: 10947a5d] COMPLETED: Status 200 in 0.08s
+2026-08-17 03:18:27,069 [INFO] [ReqID: 0d1b6da3] STARTED: OPTIONS /user/dashboard
+2026-08-17 03:18:27,071 [INFO] [ReqID: 0d1b6da3] COMPLETED: Status 200 in 0.00s
+2026-08-17 03:18:27,081 [INFO] [ReqID: a0d37be7] STARTED: GET /user/dashboard
+2026-08-17 03:18:27,093 [INFO] [ReqID: a0d37be7] COMPLETED: Status 200 in 0.01s
+2026-08-17 03:18:27,113 [INFO] [ReqID: 46983cef] STARTED: OPTIONS /flashcards/due
+2026-08-17 03:18:27,113 [INFO] [ReqID: 46983cef] COMPLETED: Status 200 in 0.00s
+2026-08-17 03:18:27,120 [INFO] [ReqID: e5a9cc1d] STARTED: GET /flashcards/due
+2026-08-17 03:18:27,124 [INFO] [ReqID: e5a9cc1d] COMPLETED: Status 200 in 0.00s
+2026-08-17 03:20:59,406 [INFO] [ReqID: adce1459] STARTED: OPTIONS /user/dashboard
+2026-08-17 03:20:59,407 [INFO] [ReqID: adce1459] COMPLETED: Status 200 in 0.00s
+2026-08-17 03:20:59,408 [INFO] [ReqID: b908bc30] STARTED: OPTIONS /user/dashboard
+2026-08-17 03:20:59,409 [INFO] [ReqID: b908bc30] COMPLETED: Status 200 in 0.00s
+2026-08-17 03:20:59,420 [INFO] [ReqID: 3c983f97] STARTED: GET /user/dashboard
+2026-08-17 03:20:59,430 [INFO] [ReqID: 3c983f97] COMPLETED: Status 200 in 0.01s
+2026-08-17 03:20:59,432 [INFO] [ReqID: 5736a984] STARTED: GET /user/dashboard
+2026-08-17 03:20:59,440 [INFO] [ReqID: 5736a984] COMPLETED: Status 200 in 0.01s
+2026-08-17 03:20:59,489 [INFO] [ReqID: 68c18316] STARTED: OPTIONS /flashcards/due
+2026-08-17 03:20:59,490 [INFO] [ReqID: 68c18316] COMPLETED: Status 200 in 0.00s
+2026-08-17 03:20:59,491 [INFO] [ReqID: 0ee87572] STARTED: OPTIONS /flashcards/due
+2026-08-17 03:20:59,492 [INFO] [ReqID: 0ee87572] COMPLETED: Status 200 in 0.00s
+2026-08-17 03:20:59,496 [INFO] [ReqID: 12ec0d00] STARTED: GET /flashcards/due
+2026-08-17 03:20:59,506 [INFO] [ReqID: 12ec0d00] COMPLETED: Status 200 in 0.01s
+2026-08-17 03:20:59,509 [INFO] [ReqID: 0eedd406] STARTED: GET /flashcards/due
+2026-08-17 03:20:59,514 [INFO] [ReqID: 0eedd406] COMPLETED: Status 200 in 0.00s
+2026-08-17 03:25:25,479 [INFO] [ReqID: 647043e2] STARTED: POST /quiz/analyze-document
+2026-08-17 03:25:25,491 [INFO] [ReqID: 647043e2] COMPLETED: Status 200 in 0.01s
+2026-08-17 03:26:22,362 [INFO] [ReqID: 6650638f] STARTED: OPTIONS /quiz/generate
+2026-08-17 03:26:22,363 [INFO] [ReqID: 6650638f] COMPLETED: Status 200 in 0.00s
+2026-08-17 03:26:22,397 [INFO] [ReqID: 6c3c9636] STARTED: POST /quiz/generate
+2026-08-17 03:26:22,461 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-17 03:26:28,483 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-17 03:26:30,490 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-17 03:26:34,233 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-17 03:26:36,265 [INFO] [ReqID: 6c3c9636] COMPLETED: Status 200 in 13.87s
+2026-08-17 03:26:54,943 [INFO] [ReqID: 239450e5] STARTED: GET /user/dashboard
+2026-08-17 03:26:54,956 [INFO] [ReqID: 239450e5] COMPLETED: Status 200 in 0.01s
+2026-08-17 03:26:54,992 [INFO] [ReqID: 46f85544] STARTED: GET /flashcards/due
+2026-08-17 03:26:54,996 [INFO] [ReqID: 46f85544] COMPLETED: Status 200 in 0.00s
+2026-08-17 03:27:32,591 [INFO] [ReqID: d360dc4f] STARTED: OPTIONS /user/dashboard
+2026-08-17 03:27:32,592 [INFO] [ReqID: 15966ae5] STARTED: OPTIONS /user/dashboard
+2026-08-17 03:27:32,592 [INFO] [ReqID: d360dc4f] COMPLETED: Status 200 in 0.00s
+2026-08-17 03:27:32,595 [INFO] [ReqID: 15966ae5] COMPLETED: Status 200 in 0.00s
+2026-08-17 03:27:32,598 [INFO] [ReqID: 783b044e] STARTED: GET /user/dashboard
+2026-08-17 03:27:32,602 [INFO] [ReqID: 783b044e] COMPLETED: Status 200 in 0.00s
+2026-08-17 03:27:32,604 [INFO] [ReqID: bdcfdca8] STARTED: GET /user/dashboard
+2026-08-17 03:27:32,609 [INFO] [ReqID: bdcfdca8] COMPLETED: Status 200 in 0.00s
+2026-08-17 03:27:32,698 [INFO] [ReqID: 87a28bd7] STARTED: OPTIONS /flashcards/due
+2026-08-17 03:27:32,699 [INFO] [ReqID: 23a32429] STARTED: OPTIONS /flashcards/due
+2026-08-17 03:27:32,700 [INFO] [ReqID: 87a28bd7] COMPLETED: Status 200 in 0.00s
+2026-08-17 03:27:32,703 [INFO] [ReqID: 23a32429] COMPLETED: Status 200 in 0.00s
+2026-08-17 03:27:32,704 [INFO] [ReqID: d7a0d6ed] STARTED: GET /flashcards/due
+2026-08-17 03:27:32,716 [INFO] [ReqID: d7a0d6ed] COMPLETED: Status 200 in 0.01s
+2026-08-17 03:27:32,718 [INFO] [ReqID: 6c343b58] STARTED: GET /flashcards/due
+2026-08-17 03:27:32,724 [INFO] [ReqID: 6c343b58] COMPLETED: Status 200 in 0.01s
+2026-08-17 03:27:32,806 [INFO] [ReqID: fff3dc52] STARTED: OPTIONS /teacher/quizzes
+2026-08-17 03:27:32,808 [INFO] [ReqID: 0bf9d341] STARTED: OPTIONS /teacher/quizzes
+2026-08-17 03:27:32,809 [INFO] [ReqID: fff3dc52] COMPLETED: Status 200 in 0.00s
+2026-08-17 03:27:32,811 [INFO] [ReqID: 0bf9d341] COMPLETED: Status 200 in 0.00s
+2026-08-17 03:27:32,815 [INFO] [ReqID: 91d5e633] STARTED: GET /teacher/quizzes
+2026-08-17 03:27:32,826 [INFO] [ReqID: 91d5e633] COMPLETED: Status 200 in 0.01s
+2026-08-17 03:27:32,827 [INFO] [ReqID: 1e741979] STARTED: GET /teacher/quizzes
+2026-08-17 03:27:32,834 [INFO] [ReqID: 1e741979] COMPLETED: Status 200 in 0.01s
+2026-08-17 03:27:32,854 [INFO] [ReqID: bae98705] STARTED: OPTIONS /teacher/overview
+2026-08-17 03:27:32,865 [INFO] [ReqID: bc421f1b] STARTED: OPTIONS /teacher/overview
+2026-08-17 03:27:32,865 [INFO] [ReqID: bae98705] COMPLETED: Status 200 in 0.01s
+2026-08-17 03:27:32,867 [INFO] [ReqID: bc421f1b] COMPLETED: Status 200 in 0.00s
+2026-08-17 03:27:32,869 [INFO] [ReqID: 1c6f3a52] STARTED: GET /teacher/overview
+2026-08-17 03:27:32,877 [INFO] [ReqID: 1c6f3a52] COMPLETED: Status 200 in 0.01s
+2026-08-17 03:27:32,879 [INFO] [ReqID: 1fe68188] STARTED: GET /teacher/overview
+2026-08-17 03:27:32,885 [INFO] [ReqID: 1fe68188] COMPLETED: Status 200 in 0.01s
+2026-08-17 03:27:32,887 [INFO] [ReqID: f9c4ec06] STARTED: OPTIONS /teacher/classrooms
+2026-08-17 03:27:32,889 [INFO] [ReqID: f9c4ec06] COMPLETED: Status 200 in 0.00s
+2026-08-17 03:27:32,891 [INFO] [ReqID: cd94aaec] STARTED: OPTIONS /teacher/classrooms
+2026-08-17 03:27:32,892 [INFO] [ReqID: cd94aaec] COMPLETED: Status 200 in 0.00s
+2026-08-17 03:27:32,894 [INFO] [ReqID: 75ba64b2] STARTED: GET /teacher/classrooms
+2026-08-17 03:27:32,901 [INFO] [ReqID: 75ba64b2] COMPLETED: Status 200 in 0.01s
+2026-08-17 03:27:32,902 [INFO] [ReqID: c6371c6f] STARTED: GET /teacher/classrooms
+2026-08-17 03:27:32,905 [INFO] [ReqID: bd57778a] STARTED: OPTIONS /teacher/analytics/recent-attempts
+2026-08-17 03:27:32,906 [INFO] [ReqID: bd57778a] COMPLETED: Status 200 in 0.00s
+2026-08-17 03:27:32,908 [INFO] [ReqID: 8f32b416] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-17 03:27:32,910 [INFO] [ReqID: c6371c6f] COMPLETED: Status 200 in 0.01s
+2026-08-17 03:27:32,916 [INFO] [ReqID: 8f32b416] COMPLETED: Status 200 in 0.01s
+2026-08-17 03:27:32,918 [INFO] [ReqID: efaebb91] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-17 03:27:32,922 [INFO] [ReqID: 187c8866] STARTED: OPTIONS /teacher/branding
+2026-08-17 03:27:32,922 [INFO] [ReqID: 187c8866] COMPLETED: Status 200 in 0.00s
+2026-08-17 03:27:32,925 [INFO] [ReqID: 51b6de44] STARTED: GET /teacher/branding
+2026-08-17 03:27:32,926 [INFO] [ReqID: efaebb91] COMPLETED: Status 200 in 0.01s
+2026-08-17 03:27:32,934 [INFO] [ReqID: 51b6de44] COMPLETED: Status 200 in 0.01s
+2026-08-17 03:27:32,935 [INFO] [ReqID: 279ca1e9] STARTED: GET /teacher/branding
+2026-08-17 03:27:32,940 [INFO] [ReqID: 279ca1e9] COMPLETED: Status 200 in 0.00s
+2026-08-17 03:27:58,752 [INFO] [ReqID: 92384045] STARTED: POST /auth/login
+2026-08-17 03:27:58,817 [INFO] [ReqID: 92384045] COMPLETED: Status 200 in 0.06s
+2026-08-17 03:27:59,883 [INFO] [ReqID: c1b00f33] STARTED: GET /user/dashboard
+2026-08-17 03:27:59,896 [INFO] [ReqID: c1b00f33] COMPLETED: Status 200 in 0.01s
+2026-08-17 03:27:59,923 [INFO] [ReqID: fe5429c7] STARTED: GET /flashcards/due
+2026-08-17 03:27:59,925 [INFO] [ReqID: fe5429c7] COMPLETED: Status 200 in 0.00s
+2026-08-17 03:28:24,828 [INFO] [ReqID: d98adb1f] STARTED: GET /user/dashboard
+2026-08-17 03:28:24,833 [INFO] [ReqID: d98adb1f] COMPLETED: Status 200 in 0.01s
+2026-08-17 03:28:24,837 [INFO] [ReqID: 52c879fa] STARTED: GET /user/dashboard
+2026-08-17 03:28:24,841 [INFO] [ReqID: 52c879fa] COMPLETED: Status 200 in 0.00s
+2026-08-17 03:28:24,881 [INFO] [ReqID: e0bd5e04] STARTED: GET /flashcards/due
+2026-08-17 03:28:24,884 [INFO] [ReqID: e0bd5e04] COMPLETED: Status 200 in 0.00s
+2026-08-17 03:28:24,885 [INFO] [ReqID: 32d6fb4d] STARTED: GET /flashcards/due
+2026-08-17 03:28:24,892 [INFO] [ReqID: 32d6fb4d] COMPLETED: Status 200 in 0.01s
+2026-08-17 03:28:54,674 [INFO] [ReqID: 0ccf16b1] STARTED: POST /quiz/analyze-document
+2026-08-17 03:28:54,689 [INFO] [ReqID: 0ccf16b1] COMPLETED: Status 200 in 0.01s
+2026-08-17 03:28:54,704 [INFO] [ReqID: e8c709da] STARTED: POST /quiz/analyze-document
+2026-08-17 03:28:54,706 [INFO] [ReqID: e8c709da] COMPLETED: Status 200 in 0.00s
+2026-08-17 03:29:13,745 [INFO] [ReqID: a05f75ba] STARTED: OPTIONS /quiz/generate
+2026-08-17 03:29:13,746 [INFO] [ReqID: a05f75ba] COMPLETED: Status 200 in 0.00s
+2026-08-17 03:29:13,750 [INFO] [ReqID: bb8c94e9] STARTED: POST /quiz/generate
+2026-08-17 03:29:14,118 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-17 03:29:17,098 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-17 03:29:19,103 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-17 03:29:21,992 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-17 03:29:23,996 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-17 03:29:25,920 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-17 03:29:27,927 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-17 03:29:31,019 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-17 03:29:33,022 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-17 03:29:36,476 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-17 03:29:38,480 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-17 03:29:40,266 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-17 03:29:42,296 [INFO] [ReqID: bb8c94e9] COMPLETED: Status 200 in 28.55s
+2026-08-17 03:29:42,301 [INFO] [ReqID: 0b48fa48] STARTED: GET /teacher/quizzes
+2026-08-17 03:29:42,308 [INFO] [ReqID: 0b48fa48] COMPLETED: Status 200 in 0.01s
+2026-08-17 03:29:42,311 [INFO] [ReqID: 3ebd34b2] STARTED: GET /teacher/overview
+2026-08-17 03:29:42,317 [INFO] [ReqID: 3ebd34b2] COMPLETED: Status 200 in 0.01s
+2026-08-17 03:29:42,321 [INFO] [ReqID: db41a18b] STARTED: GET /teacher/classrooms
+2026-08-17 03:29:42,325 [INFO] [ReqID: db41a18b] COMPLETED: Status 200 in 0.00s
+2026-08-17 03:29:42,329 [INFO] [ReqID: 7daff417] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-17 03:29:42,333 [INFO] [ReqID: 7daff417] COMPLETED: Status 200 in 0.00s
+2026-08-17 03:29:42,336 [INFO] [ReqID: 05d6c268] STARTED: GET /teacher/branding
+2026-08-17 03:29:42,341 [INFO] [ReqID: 05d6c268] COMPLETED: Status 200 in 0.00s
+2026-08-17 03:29:55,516 [INFO] [ReqID: 6db8d353] STARTED: OPTIONS /quiz/39
+2026-08-17 03:29:55,516 [INFO] [ReqID: 6db8d353] COMPLETED: Status 200 in 0.00s
+2026-08-17 03:29:55,519 [INFO] [ReqID: 301647ea] STARTED: GET /quiz/39
+2026-08-17 03:29:55,522 [INFO] [ReqID: 301647ea] COMPLETED: Status 200 in 0.00s
+2026-08-17 03:30:08,770 [INFO] [ReqID: 1240bb0e] STARTED: OPTIONS /quiz/39
+2026-08-17 03:30:08,770 [INFO] [ReqID: 1240bb0e] COMPLETED: Status 200 in 0.00s
+2026-08-17 03:30:08,773 [INFO] [ReqID: bb760fd5] STARTED: PUT /quiz/39
+2026-08-17 03:30:08,792 [INFO] [ReqID: bb760fd5] COMPLETED: Status 200 in 0.02s
+2026-08-17 03:30:18,952 [INFO] [ReqID: 9e4d2adc] STARTED: OPTIONS /quiz/39/export/docx
+2026-08-17 03:30:18,952 [INFO] [ReqID: 9e4d2adc] COMPLETED: Status 200 in 0.00s
+2026-08-17 03:30:18,955 [INFO] [ReqID: 2dadbacc] STARTED: POST /quiz/39/export/docx
+2026-08-17 03:30:19,100 [INFO] [ReqID: 2dadbacc] COMPLETED: Status 200 in 0.15s
+2026-08-17 03:31:32,515 [INFO] [ReqID: 97606803] STARTED: POST /quiz/analyze-document
+2026-08-17 03:31:32,517 [INFO] [ReqID: 97606803] COMPLETED: Status 200 in 0.00s
+2026-08-17 03:31:32,532 [INFO] [ReqID: aa76df96] STARTED: POST /quiz/analyze-document
+2026-08-17 03:31:32,657 [INFO] [ReqID: aa76df96] COMPLETED: Status 200 in 0.12s
+2026-08-17 03:32:04,970 [INFO] [ReqID: 9b555cc5] STARTED: OPTIONS /quiz/generate
+2026-08-17 03:32:04,970 [INFO] [ReqID: 9b555cc5] COMPLETED: Status 200 in 0.00s
+2026-08-17 03:32:04,980 [INFO] [ReqID: 10299a96] STARTED: POST /quiz/generate
+2026-08-17 03:32:05,727 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-17 03:32:09,455 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-17 03:32:11,465 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-17 03:32:13,277 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-17 03:32:15,281 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-17 03:32:16,810 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-17 03:32:18,816 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-17 03:32:20,485 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-17 03:32:22,490 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-17 03:32:24,082 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-17 03:32:26,090 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-17 03:32:28,276 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-17 03:32:30,279 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-17 03:32:33,608 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-17 03:32:35,614 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-17 03:32:38,432 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-17 03:32:40,438 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-17 03:32:43,498 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-17 03:32:45,503 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-17 03:32:47,873 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-17 03:32:49,901 [INFO] [ReqID: 10299a96] COMPLETED: Status 200 in 44.92s
+2026-08-17 03:35:05,542 [INFO] [ReqID: 6b0bd09b] STARTED: OPTIONS /user/dashboard
+2026-08-17 03:35:05,543 [INFO] [ReqID: 6b0bd09b] COMPLETED: Status 200 in 0.00s
+2026-08-17 03:35:05,545 [INFO] [ReqID: 868301a4] STARTED: OPTIONS /user/dashboard
+2026-08-17 03:35:05,546 [INFO] [ReqID: 868301a4] COMPLETED: Status 200 in 0.00s
+2026-08-17 03:35:05,572 [INFO] [ReqID: 7ce2fcb1] STARTED: OPTIONS /flashcards/due
+2026-08-17 03:35:05,573 [INFO] [ReqID: 7ce2fcb1] COMPLETED: Status 200 in 0.00s
+2026-08-17 03:35:05,595 [INFO] [ReqID: 17cf6645] STARTED: OPTIONS /flashcards/due
+2026-08-17 03:35:05,596 [INFO] [ReqID: 17cf6645] COMPLETED: Status 200 in 0.00s
+2026-08-17 03:43:33,945 [INFO] [ReqID: 9ad1759d] STARTED: OPTIONS /teacher/quizzes
+2026-08-17 03:43:33,947 [INFO] [ReqID: 9ad1759d] COMPLETED: Status 200 in 0.00s
+2026-08-17 03:43:33,954 [INFO] [ReqID: 4934d8b7] STARTED: GET /teacher/quizzes
+2026-08-17 03:43:33,995 [INFO] [ReqID: 4934d8b7] COMPLETED: Status 200 in 0.04s
+2026-08-17 03:43:34,000 [INFO] [ReqID: 405dff2b] STARTED: GET /teacher/quizzes
+2026-08-17 03:43:34,014 [INFO] [ReqID: 405dff2b] COMPLETED: Status 200 in 0.01s
+2026-08-17 03:43:34,020 [INFO] [ReqID: ae00a5d5] STARTED: OPTIONS /teacher/overview
+2026-08-17 03:43:34,022 [INFO] [ReqID: ae00a5d5] COMPLETED: Status 200 in 0.00s
+2026-08-17 03:43:34,028 [INFO] [ReqID: fb2fc7e2] STARTED: GET /teacher/overview
+2026-08-17 03:43:34,046 [INFO] [ReqID: fb2fc7e2] COMPLETED: Status 200 in 0.02s
+2026-08-17 03:43:34,049 [INFO] [ReqID: f38c0887] STARTED: GET /teacher/overview
+2026-08-17 03:43:34,057 [INFO] [ReqID: b6c27350] STARTED: OPTIONS /teacher/classrooms
+2026-08-17 03:43:34,060 [INFO] [ReqID: b6c27350] COMPLETED: Status 200 in 0.00s
+2026-08-17 03:43:34,067 [INFO] [ReqID: d744b999] STARTED: GET /teacher/classrooms
+2026-08-17 03:43:34,071 [INFO] [ReqID: f38c0887] COMPLETED: Status 200 in 0.02s
+2026-08-17 03:43:34,081 [INFO] [ReqID: d744b999] COMPLETED: Status 200 in 0.01s
+2026-08-17 03:43:34,083 [INFO] [ReqID: ccd96268] STARTED: GET /teacher/classrooms
+2026-08-17 03:43:34,091 [INFO] [ReqID: 0fb9d6b6] STARTED: OPTIONS /teacher/analytics/recent-attempts
+2026-08-17 03:43:34,093 [INFO] [ReqID: 0fb9d6b6] COMPLETED: Status 200 in 0.00s
+2026-08-17 03:43:34,098 [INFO] [ReqID: c32c0f75] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-17 03:43:34,098 [INFO] [ReqID: ccd96268] COMPLETED: Status 200 in 0.01s
+2026-08-17 03:43:34,111 [INFO] [ReqID: c32c0f75] COMPLETED: Status 200 in 0.01s
+2026-08-17 03:43:34,114 [INFO] [ReqID: 48ff4474] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-17 03:43:34,123 [INFO] [ReqID: 48ff4474] COMPLETED: Status 200 in 0.01s
+2026-08-17 03:43:34,127 [INFO] [ReqID: 10450cba] STARTED: OPTIONS /teacher/branding
+2026-08-17 03:43:34,129 [INFO] [ReqID: 10450cba] COMPLETED: Status 200 in 0.00s
+2026-08-17 03:43:34,133 [INFO] [ReqID: 19406990] STARTED: OPTIONS /teacher/branding
+2026-08-17 03:43:34,134 [INFO] [ReqID: 19406990] COMPLETED: Status 200 in 0.00s
+2026-08-17 03:43:34,135 [INFO] [ReqID: fb2a7254] STARTED: GET /teacher/branding
+2026-08-17 03:43:34,149 [INFO] [ReqID: fb2a7254] COMPLETED: Status 200 in 0.01s
+2026-08-17 03:43:34,152 [INFO] [ReqID: 7b4895fa] STARTED: GET /teacher/branding
+2026-08-17 03:43:34,165 [INFO] [ReqID: 7b4895fa] COMPLETED: Status 200 in 0.01s
+2026-08-17 03:53:32,776 [INFO] [ReqID: a83919e8] STARTED: GET /teacher/quizzes
+2026-08-17 03:53:32,789 [INFO] [ReqID: a83919e8] COMPLETED: Status 200 in 0.01s
+2026-08-17 03:53:32,794 [INFO] [ReqID: 7ea1feb9] STARTED: GET /teacher/quizzes
+2026-08-17 03:53:32,798 [INFO] [ReqID: d81cb939] STARTED: GET /teacher/overview
+2026-08-17 03:53:32,812 [INFO] [ReqID: 7ea1feb9] COMPLETED: Status 200 in 0.02s
+2026-08-17 03:53:32,826 [INFO] [ReqID: d81cb939] COMPLETED: Status 200 in 0.03s
+2026-08-17 03:53:32,830 [INFO] [ReqID: 076a6af4] STARTED: GET /teacher/overview
+2026-08-17 03:53:32,835 [INFO] [ReqID: 1eef00ce] STARTED: GET /teacher/classrooms
+2026-08-17 03:53:32,861 [INFO] [ReqID: 076a6af4] COMPLETED: Status 200 in 0.03s
+2026-08-17 03:53:32,866 [INFO] [ReqID: 1eef00ce] COMPLETED: Status 200 in 0.03s
+2026-08-17 03:53:32,875 [INFO] [ReqID: 07127815] STARTED: GET /teacher/classrooms
+2026-08-17 03:53:32,880 [INFO] [ReqID: e9ecab62] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-17 03:53:32,887 [INFO] [ReqID: 07127815] COMPLETED: Status 200 in 0.01s
+2026-08-17 03:53:32,893 [INFO] [ReqID: e9ecab62] COMPLETED: Status 200 in 0.01s
+2026-08-17 03:53:32,896 [INFO] [ReqID: b312f425] STARTED: GET /teacher/analytics/recent-attempts
+2026-08-17 03:53:32,901 [INFO] [ReqID: 318f2674] STARTED: GET /teacher/branding
+2026-08-17 03:53:32,911 [INFO] [ReqID: b312f425] COMPLETED: Status 200 in 0.01s
+2026-08-17 03:53:32,920 [INFO] [ReqID: 318f2674] COMPLETED: Status 200 in 0.02s
+2026-08-17 03:53:32,924 [INFO] [ReqID: a59ef9c0] STARTED: GET /teacher/branding
+2026-08-17 03:53:32,938 [INFO] [ReqID: a59ef9c0] COMPLETED: Status 200 in 0.01s
+2026-08-17 03:53:38,081 [INFO] [ReqID: 5056513c] STARTED: OPTIONS /user/dashboard
+2026-08-17 03:53:38,083 [INFO] [ReqID: 5056513c] COMPLETED: Status 200 in 0.00s
+2026-08-17 03:53:38,086 [INFO] [ReqID: 2773383f] STARTED: OPTIONS /user/dashboard
+2026-08-17 03:53:38,087 [INFO] [ReqID: 2773383f] COMPLETED: Status 200 in 0.00s
+2026-08-17 03:53:38,101 [INFO] [ReqID: bc6e6b82] STARTED: GET /user/dashboard
+2026-08-17 03:53:38,112 [INFO] [ReqID: bc6e6b82] COMPLETED: Status 200 in 0.01s
+2026-08-17 03:53:38,116 [INFO] [ReqID: 3f15d689] STARTED: GET /user/dashboard
+2026-08-17 03:53:38,132 [INFO] [ReqID: 61d29db1] STARTED: OPTIONS /flashcards/due
+2026-08-17 03:53:38,134 [INFO] [ReqID: 61d29db1] COMPLETED: Status 200 in 0.00s
+2026-08-17 03:53:38,141 [INFO] [ReqID: 3f15d689] COMPLETED: Status 200 in 0.02s
+2026-08-17 03:53:38,147 [INFO] [ReqID: 67913cac] STARTED: GET /flashcards/due
+2026-08-17 03:53:38,161 [INFO] [ReqID: 67913cac] COMPLETED: Status 200 in 0.01s
+2026-08-17 03:53:38,165 [INFO] [ReqID: fc8f3f5e] STARTED: GET /flashcards/due
+2026-08-17 03:53:38,176 [INFO] [ReqID: fc8f3f5e] COMPLETED: Status 200 in 0.01s
+2026-08-17 03:54:04,217 [INFO] [ReqID: 05bd01b9] STARTED: POST /quiz/analyze-document
+2026-08-17 03:54:04,227 [INFO] [ReqID: 05bd01b9] COMPLETED: Status 200 in 0.01s
+2026-08-17 03:54:04,264 [INFO] [ReqID: 6e119936] STARTED: POST /quiz/analyze-document
+2026-08-17 03:54:04,288 [INFO] [ReqID: 6e119936] COMPLETED: Status 200 in 0.02s
+2026-08-17 03:54:25,224 [INFO] [ReqID: ec6de385] STARTED: OPTIONS /quiz/generate
+2026-08-17 03:54:25,226 [INFO] [ReqID: ec6de385] COMPLETED: Status 200 in 0.00s
+2026-08-17 03:54:25,244 [INFO] [ReqID: 06aa837f] STARTED: POST /quiz/generate
+2026-08-17 03:54:25,542 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-17 03:54:28,525 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-17 03:54:30,534 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-17 03:54:32,611 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-17 03:54:34,620 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-17 03:54:36,500 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-17 03:54:38,508 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-17 03:54:40,391 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-17 03:54:42,400 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-17 03:54:44,859 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-17 03:54:46,869 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-17 03:54:49,249 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-17 03:54:51,303 [INFO] [ReqID: 06aa837f] COMPLETED: Status 200 in 26.06s
+2026-08-17 03:55:22,486 [INFO] [ReqID: 7403f3b5] STARTED: GET /quiz/41
+2026-08-17 03:55:22,498 [INFO] [ReqID: 7403f3b5] COMPLETED: Status 200 in 0.01s
+2026-08-17 03:55:22,507 [INFO] [ReqID: 3e87a488] STARTED: GET /quiz/41
+2026-08-17 03:55:22,524 [INFO] [ReqID: 3e87a488] COMPLETED: Status 200 in 0.02s
+2026-08-17 04:06:26,797 [INFO] [ReqID: f7071085] STARTED: OPTIONS /auth/login
+2026-08-17 04:06:26,799 [INFO] [ReqID: f7071085] COMPLETED: Status 200 in 0.00s
+2026-08-17 04:06:26,867 [INFO] [ReqID: a202b0d7] STARTED: POST /auth/login
+2026-08-17 04:06:27,107 [INFO] [ReqID: a202b0d7] COMPLETED: Status 200 in 0.24s
+2026-08-17 04:06:28,284 [INFO] [ReqID: 300a8f7d] STARTED: OPTIONS /user/dashboard
+2026-08-17 04:06:28,285 [INFO] [ReqID: 300a8f7d] COMPLETED: Status 200 in 0.00s
+2026-08-17 04:06:28,342 [INFO] [ReqID: 552a229d] STARTED: GET /user/dashboard
+2026-08-17 04:06:28,351 [INFO] [ReqID: 552a229d] COMPLETED: Status 200 in 0.01s
+2026-08-17 04:06:28,371 [INFO] [ReqID: 15be9e9b] STARTED: OPTIONS /flashcards/due
+2026-08-17 04:06:28,372 [INFO] [ReqID: 15be9e9b] COMPLETED: Status 200 in 0.00s
+2026-08-17 04:06:28,408 [INFO] [ReqID: e3bf8079] STARTED: GET /flashcards/due
+2026-08-17 04:06:28,418 [INFO] [ReqID: e3bf8079] COMPLETED: Status 200 in 0.01s
+2026-08-17 04:06:40,374 [INFO] [ReqID: 75a8f31f] STARTED: POST /quiz/analyze-document
+2026-08-17 04:06:40,404 [INFO] [ReqID: 75a8f31f] COMPLETED: Status 200 in 0.03s
+2026-08-17 04:07:06,278 [INFO] [ReqID: c6774e41] STARTED: OPTIONS /quiz/generate
+2026-08-17 04:07:06,279 [INFO] [ReqID: c6774e41] COMPLETED: Status 200 in 0.00s
+2026-08-17 04:07:06,310 [INFO] [ReqID: ee5247f6] STARTED: POST /quiz/generate
+2026-08-17 04:07:06,412 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-17 04:07:09,666 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-17 04:07:11,677 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-17 04:07:14,569 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-17 04:07:16,608 [INFO] [ReqID: ee5247f6] COMPLETED: Status 200 in 10.30s
+2026-08-17 04:07:26,356 [INFO] [ReqID: 616a6c4b] STARTED: GET /quiz/42
+2026-08-17 04:07:26,365 [INFO] [ReqID: 616a6c4b] COMPLETED: Status 200 in 0.01s
+2026-08-17 04:07:47,655 [INFO] [ReqID: 95ba5860] STARTED: OPTIONS /quiz/42/submit
+2026-08-17 04:07:47,658 [INFO] [ReqID: 95ba5860] COMPLETED: Status 200 in 0.00s
+2026-08-17 04:07:47,714 [INFO] [ReqID: d4e02341] STARTED: POST /quiz/42/submit
+2026-08-17 04:07:48,974 [INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-08-17 04:07:49,793 [INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-08-17 04:07:50,409 [INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-08-17 04:07:50,958 [INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-08-17 04:07:51,580 [INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-08-17 04:07:51,656 [INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-08-17 04:07:51,659 [INFO] Retrying request to /openai/v1/chat/completions in 5.000000 seconds
+2026-08-17 04:07:57,372 [INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-08-17 04:07:57,419 [INFO] [ReqID: d4e02341] COMPLETED: Status 200 in 9.70s
+2026-08-17 04:08:12,218 [INFO] [ReqID: 8dcbbc7a] STARTED: OPTIONS /quiz/42/flashcards
+2026-08-17 04:08:12,219 [INFO] [ReqID: 8dcbbc7a] COMPLETED: Status 200 in 0.00s
+2026-08-17 04:08:12,256 [INFO] [ReqID: 65eb338d] STARTED: POST /quiz/42/flashcards
+2026-08-17 04:08:12,325 [INFO] [ReqID: 65eb338d] COMPLETED: Status 200 in 0.07s
+2026-08-17 04:08:21,649 [INFO] [ReqID: 4a812457] STARTED: OPTIONS /challenge/create
+2026-08-17 04:08:21,649 [INFO] [ReqID: 4a812457] COMPLETED: Status 200 in 0.00s
+2026-08-17 04:08:21,666 [INFO] [ReqID: ec9346dc] STARTED: POST /challenge/create
+2026-08-17 04:08:21,685 [INFO] [ReqID: ec9346dc] COMPLETED: Status 200 in 0.02s
+2026-08-17 04:08:37,513 [INFO] [ReqID: d1e71e3f] STARTED: GET /user/dashboard
+2026-08-17 04:08:37,527 [INFO] [ReqID: d1e71e3f] COMPLETED: Status 200 in 0.01s
+2026-08-17 04:08:37,544 [INFO] [ReqID: 74f53a1d] STARTED: GET /flashcards/due
+2026-08-17 04:08:37,563 [INFO] [ReqID: 74f53a1d] COMPLETED: Status 200 in 0.02s
+2026-08-17 04:08:50,830 [INFO] [ReqID: ce4528f9] STARTED: GET /flashcards/due
+2026-08-17 04:08:50,846 [INFO] [ReqID: ce4528f9] COMPLETED: Status 200 in 0.02s
+2026-08-17 04:09:08,579 [INFO] [ReqID: 52824197] STARTED: OPTIONS /flashcards/review
+2026-08-17 04:09:08,580 [INFO] [ReqID: 52824197] COMPLETED: Status 200 in 0.00s
+2026-08-17 04:09:08,593 [INFO] [ReqID: 7f974715] STARTED: POST /flashcards/review
+2026-08-17 04:09:08,622 [INFO] [ReqID: 7f974715] COMPLETED: Status 200 in 0.03s
+2026-08-17 04:09:22,056 [INFO] [ReqID: 5efd63e1] STARTED: POST /flashcards/review
+2026-08-17 04:09:22,092 [INFO] [ReqID: 5efd63e1] COMPLETED: Status 200 in 0.04s
+2026-08-17 04:09:25,128 [INFO] [ReqID: 3f5c91f3] STARTED: POST /flashcards/review
+2026-08-17 04:09:25,154 [INFO] [ReqID: 3f5c91f3] COMPLETED: Status 200 in 0.02s
+2026-08-17 04:09:26,979 [INFO] [ReqID: a26a502c] STARTED: POST /flashcards/review
+2026-08-17 04:09:27,005 [INFO] [ReqID: a26a502c] COMPLETED: Status 200 in 0.03s
+2026-08-17 04:09:28,712 [INFO] [ReqID: 1f36aadc] STARTED: POST /flashcards/review
+2026-08-17 04:09:28,739 [INFO] [ReqID: 1f36aadc] COMPLETED: Status 200 in 0.03s
+2026-08-17 04:09:30,760 [INFO] [ReqID: a3f5640c] STARTED: GET /user/dashboard
+2026-08-17 04:09:30,773 [INFO] [ReqID: a3f5640c] COMPLETED: Status 200 in 0.01s
+2026-08-17 04:09:30,796 [INFO] [ReqID: c85ab271] STARTED: GET /flashcards/due
+2026-08-17 04:09:30,812 [INFO] [ReqID: c85ab271] COMPLETED: Status 200 in 0.02s
+2026-08-17 04:10:15,612 [INFO] [ReqID: 6ac6a134] STARTED: POST /quiz/analyze-document
+2026-08-17 04:10:15,749 [INFO] [ReqID: 6ac6a134] COMPLETED: Status 200 in 0.14s
+2026-08-17 04:10:19,509 [INFO] [ReqID: 7e631619] STARTED: POST /quiz/generate
+2026-08-17 04:10:20,318 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-17 04:10:24,728 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-17 04:10:26,761 [INFO] AFC is enabled with max remote calls: 10.
+2026-08-17 04:10:30,053 [INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-08-17 04:10:32,088 [INFO] [ReqID: 7e631619] COMPLETED: Status 200 in 12.58s
+2026-08-17 04:10:32,235 [INFO] [ReqID: 221b85af] STARTED: GET /quiz/43
+2026-08-17 04:10:32,242 [INFO] [ReqID: 221b85af] COMPLETED: Status 200 in 0.01s
+2026-08-17 04:11:29,990 [INFO] [ReqID: 11fd86a9] STARTED: OPTIONS /quiz/43/submit
+2026-08-17 04:11:29,992 [INFO] [ReqID: 11fd86a9] COMPLETED: Status 200 in 0.00s
+2026-08-17 04:11:30,011 [INFO] [ReqID: 37265622] STARTED: POST /quiz/43/submit
+2026-08-17 04:11:31,172 [INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-08-17 04:11:31,850 [INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-08-17 04:11:32,413 [INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-08-17 04:11:32,927 [INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-08-17 04:11:33,538 [INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-08-17 04:11:33,636 [INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-08-17 04:11:33,638 [INFO] Retrying request to /openai/v1/chat/completions in 2.000000 seconds
+2026-08-17 04:11:36,099 [INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-08-17 04:11:36,178 [INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-08-17 04:11:36,180 [INFO] Retrying request to /openai/v1/chat/completions in 10.000000 seconds
+2026-08-17 04:11:46,851 [INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-08-17 04:11:47,463 [INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-08-17 04:11:47,977 [INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-08-17 04:11:48,053 [INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-08-17 04:11:48,055 [INFO] Retrying request to /openai/v1/chat/completions in 1.000000 seconds
+2026-08-17 04:11:49,619 [INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-08-17 04:11:49,696 [INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-08-17 04:11:49,698 [INFO] Retrying request to /openai/v1/chat/completions in 5.000000 seconds
+2026-08-17 04:11:55,351 [INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-08-17 04:11:55,430 [INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-08-17 04:11:55,432 [INFO] Retrying request to /openai/v1/chat/completions in 4.000000 seconds
+2026-08-17 04:11:59,903 [INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-08-17 04:11:59,927 [INFO] [ReqID: 37265622] COMPLETED: Status 200 in 29.91s
+2026-08-17 04:12:08,404 [INFO] [ReqID: 737a61b7] STARTED: OPTIONS /quiz/43/flashcards
+2026-08-17 04:12:08,406 [INFO] [ReqID: 737a61b7] COMPLETED: Status 200 in 0.00s
+2026-08-17 04:12:08,417 [INFO] [ReqID: bd4ee101] STARTED: POST /quiz/43/flashcards
+2026-08-17 04:12:08,571 [INFO] [ReqID: bd4ee101] COMPLETED: Status 200 in 0.15s
+2026-08-17 04:12:13,332 [INFO] [ReqID: 3dba29cf] STARTED: GET /user/dashboard
+2026-08-17 04:12:13,346 [INFO] [ReqID: 3dba29cf] COMPLETED: Status 200 in 0.01s
+2026-08-17 04:12:13,371 [INFO] [ReqID: c18df5d9] STARTED: GET /flashcards/due
+2026-08-17 04:12:13,389 [INFO] [ReqID: c18df5d9] COMPLETED: Status 200 in 0.02s
