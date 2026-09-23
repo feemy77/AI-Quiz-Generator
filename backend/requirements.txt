@@ -25,3 +25,4 @@ passlib[bcrypt]
 bcrypt
 sqlalchemy
 requests
+python-pptx

@@ -3,8 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-// 📱 DYNAMIC API URL CONFIGURATION (FOR ANDROID COMPATIBILITY)
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://192.168.0.103:8000";
+import { apiFetch } from "@/lib/api";
 
 export default function SetupProfile() {
   const router = useRouter();
@@ -22,7 +21,7 @@ export default function SetupProfile() {
     if (!token) {
       router.push("/");
     } else if (currentRole === "teacher") {
-      router.push("/dashboard");
+      router.push("/teacher-dashboard");
     } else if (currentRole === "student") {
       router.push("/student-dashboard");
     }
@@ -35,29 +34,22 @@ export default function SetupProfile() {
     setLoading(true);
     setMessage("");
 
-    const token = localStorage.getItem("token");
-
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/update-profile`, {
+      const { ok, data, error } = await apiFetch("/auth/update-profile", {
         method: "POST",
-        headers: { 
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
-        },
         body: JSON.stringify({ role, institution_name: institution }),
       });
 
-      if (response.ok) {
+      if (ok) {
         localStorage.setItem("role", role);
         setMessage("Profile configured successfully. Redirecting...");
         
         setTimeout(() => {
-          if (role === "teacher") router.push("/dashboard");
+          if (role === "teacher") router.push("/teacher-dashboard");
           else router.push("/student-dashboard");
-        }, 1000);
+        }, 800);
       } else {
-        const data = await response.json();
-        setMessage(`Error: ${data.detail || "Configuration failed"}`);
+        setMessage(`Error: ${error || "Configuration failed"}`);
       }
     } catch (error) {
       setMessage("Network error. Please verify backend connection.");
@@ -81,8 +73,11 @@ export default function SetupProfile() {
             Personalize Your Workspace
           </h1>
           <p className="text-base text-gray-500 font-medium max-w-lg mx-auto leading-relaxed">
-            Select your primary objective to help us tailor the AI Quiz Generator experience for your needs.
+            Select your primary objective to help us tailor your initial workspace.
           </p>
+          <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-xs font-semibold text-blue-700">
+            <span>💡 You can switch between Student and Educator mode at any time with 1 click!</span>
+          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-8">

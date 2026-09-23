@@ -21,12 +21,12 @@ def init_db():
     conn.commit()
     conn.close()
 
-def generate_hash(source_identifier: str, mcq: int, fill_blank: int, short_ans: int, long_ans: int, difficulty: str) -> str:
+def generate_hash(source_identifier: str, mcq: int, fill_blank: int, short_ans: int, long_ans: int, difficulty: str, question_style: str = "Auto") -> str:
     """
     Ek unique fingerprint banata hay input parameters ko mila kar.
     source_identifier: YouTube URL ho sakta hay ya Document text ka hissa.
     """
-    raw_string = f"{source_identifier}_{mcq}_{fill_blank}_{short_ans}_{long_ans}_{difficulty}".lower()
+    raw_string = f"{source_identifier}_{mcq}_{fill_blank}_{short_ans}_{long_ans}_{difficulty}_{question_style}".lower()
     return hashlib.sha256(raw_string.encode('utf-8')).hexdigest()
 
 def get_cached_quiz(request_hash: str) -> dict:

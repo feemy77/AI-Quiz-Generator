@@ -24,7 +24,7 @@ def transcribe_audio_with_groq(url: str, video_id: str) -> str:
     for f in glob.glob(f"{base_out_path}.*"):
         os.remove(f)
 
-    print(f"🎧 Subtitles missing! Downloading audio for AI Transcription... ({video_id})")
+    print(f"[YouTube] Subtitles missing! Downloading audio for AI Transcription... ({video_id})")
     
     try:
         ydl_opts = {
@@ -41,7 +41,7 @@ def transcribe_audio_with_groq(url: str, video_id: str) -> str:
             return "Error: Could not download audio for AI transcription."
         
         audio_file = downloaded_files[0]
-        print(f"🎙️ Audio downloaded. Sending to Groq Whisper AI for transcription...")
+        print(f"[Groq Whisper] Audio downloaded. Sending to Groq Whisper AI for transcription...")
 
         headers = {
             "Authorization": f"Bearer {GROQ_API_KEY}"
@@ -58,7 +58,7 @@ def transcribe_audio_with_groq(url: str, video_id: str) -> str:
         if response.status_code == 200:
             result_text = response.json().get("text", "")
             if result_text.strip():
-                print("✅ AI Transcription Complete!")
+                print("[Groq Whisper] AI Transcription Complete!")
                 return result_text
             else:
                 return "Error: AI Transcription returned an empty result."
@@ -107,8 +107,9 @@ def get_youtube_transcript(url: str, start_min: int = 0, end_min: int = 0) -> st
         if not text.strip():
             return "Error: No speech found in the selected time range. Please adjust the minutes."
             
-        print(f"✅ Found built-in YouTube subtitles (Time Range: {start_min}m to {end_min if end_min > 0 else 'End'}m).")
+        print(f"[YouTube] Found built-in YouTube subtitles (Time Range: {start_min}m to {end_min if end_min > 0 else 'End'}m).")
         return text
         
     except Exception as e:
+        print(f"[YouTube] Subtitle fetch notice: {e}. Attempting fallback...")
         return transcribe_audio_with_groq(url, video_id)

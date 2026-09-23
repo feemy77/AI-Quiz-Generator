@@ -1,7 +1,7 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.your.app',     // Yeh apka apna hi rahega
+  appId: 'com.aiquiz.generator',
   appName: 'Quiz Generator', // Yeh apka apna hi rahega
   webDir: 'out',
   server: {

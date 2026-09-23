@@ -1,12 +1,15 @@
 import sqlite3
 import json
+import os
 from datetime import datetime
 
-DB_FILE = "quiz_app.db"
+DB_FILE = os.path.join(os.path.dirname(__file__), "quiz_app.db")
 
 def get_db_connection():
-    conn = sqlite3.connect(DB_FILE)
+    conn = sqlite3.connect(DB_FILE, timeout=30.0)
     conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA foreign_keys = ON;")
+    conn.execute("PRAGMA journal_mode = WAL;")
     return conn
 
 def init_db():
@@ -56,9 +59,18 @@ def init_db():
             answers TEXT NOT NULL,
             results TEXT NOT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            user_id INTEGER,
             FOREIGN KEY(quiz_id) REFERENCES quizzes(id)
         )
     ''')
+    try:
+        cursor.execute("ALTER TABLE attempts ADD COLUMN user_id INTEGER")
+    except Exception:
+        pass
+    try:
+        cursor.execute("ALTER TABLE attempts ADD COLUMN assignment_id INTEGER")
+    except Exception:
+        pass
 
     # ==========================================
     # 🌟 ADVANCED FEATURES TABLES (UNTOUCHED)
@@ -182,6 +194,36 @@ def init_db():
 
     conn.commit()
     conn.close()
+    seed_demo_accounts()
+
+def seed_demo_accounts():
+    """Seeds default demo teacher and student accounts if they do not exist."""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute("SELECT id FROM users WHERE email = 'teacher@demo.com'")
+        if not cursor.fetchone():
+            import auth
+            p_hash, salt = auth.hash_password("teacher123")
+            cursor.execute(
+                "INSERT INTO users (name, email, password_hash, salt, role, institution_name) VALUES (?, ?, ?, ?, ?, ?)",
+                ("Demo Educator", "teacher@demo.com", p_hash, salt, "teacher", "Demo Academy")
+            )
+            
+        cursor.execute("SELECT id FROM users WHERE email = 'student@demo.com'")
+        if not cursor.fetchone():
+            import auth
+            p_hash, salt = auth.hash_password("student123")
+            cursor.execute(
+                "INSERT INTO users (name, email, password_hash, salt, role, institution_name) VALUES (?, ?, ?, ?, ?, ?)",
+                ("Demo Student", "student@demo.com", p_hash, salt, "student", "Demo High School")
+            )
+            
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print(f"[WARNING] Demo seeding error: {e}")
 
 # ==========================================
 # 🛑 EXISTING FUNCTIONS (UNTOUCHED)
@@ -261,10 +303,20 @@ def get_quiz(quiz_id):
         return quiz
     return None
 
-def get_quizzes_for_teacher(teacher_id):
+def get_quizzes_for_teacher(teacher_id, include_self_study=False):
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT id, exam_metadata, created_at FROM quizzes WHERE teacher_id = ? ORDER BY id DESC", (teacher_id,))
+    if include_self_study:
+        cursor.execute("SELECT id, exam_metadata, created_at FROM quizzes WHERE teacher_id = ? ORDER BY id DESC", (teacher_id,))
+    else:
+        cursor.execute("""
+            SELECT id, exam_metadata, created_at FROM quizzes 
+            WHERE teacher_id = ? 
+              AND (json_extract(exam_metadata, '$.is_self_study') IS NULL 
+                   OR json_extract(exam_metadata, '$.is_self_study') = 0 
+                   OR json_extract(exam_metadata, '$.is_self_study') = 'false')
+            ORDER BY id DESC
+        """, (teacher_id,))
     rows = cursor.fetchall()
     conn.close()
     quizzes = []
@@ -274,12 +326,12 @@ def get_quizzes_for_teacher(teacher_id):
         quizzes.append(quiz)
     return quizzes
 
-def save_attempt(quiz_id, student_name, answers, results):
+def save_attempt(quiz_id, student_name, answers, results, user_id=None, assignment_id=None):
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute(
-        "INSERT INTO attempts (quiz_id, student_name, answers, results) VALUES (?, ?, ?, ?)",
-        (quiz_id, student_name, json.dumps(answers), json.dumps(results))
+        "INSERT INTO attempts (quiz_id, student_name, answers, results, user_id, assignment_id) VALUES (?, ?, ?, ?, ?, ?)",
+        (quiz_id, student_name, json.dumps(answers), json.dumps(results), user_id, assignment_id)
     )
     attempt_id = cursor.lastrowid
     conn.commit()
@@ -319,6 +371,13 @@ def update_user_profile(user_id, role, institution_name):
         "UPDATE users SET role = ?, institution_name = ? WHERE id = ?",
         (role, institution_name, user_id)
     )
+    conn.commit()
+    conn.close()
+
+def update_user_role(user_id: int, role: str):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE users SET role = ? WHERE id = ?", (role, user_id))
     conn.commit()
     conn.close()
 
@@ -579,3 +638,239 @@ def get_teacher_branding(teacher_id):
     row = cursor.fetchone()
     conn.close()
     return dict(row) if row else None
+
+def get_quiz_for_teacher(quiz_id, teacher_id):
+    """Returns complete quiz data including correct answers and explanations for teacher."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM quizzes WHERE id = ? AND teacher_id = ?", (quiz_id, teacher_id))
+    row = cursor.fetchone()
+    conn.close()
+    if row:
+        quiz = dict(row)
+        quiz["exam_metadata"] = json.loads(quiz["exam_metadata"])
+        quiz["quiz_data"] = json.loads(quiz["quiz_data"])
+        return quiz
+    return None
+
+def create_assignment(classroom_id, quiz_id, due_date=""):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO assignments (classroom_id, quiz_id, due_date) VALUES (?, ?, ?)",
+                   (classroom_id, quiz_id, due_date))
+    assignment_id = cursor.lastrowid
+    conn.commit()
+    conn.close()
+    return assignment_id
+
+def get_classroom_assignments(classroom_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT COUNT(id) as count FROM classroom_students WHERE classroom_id = ?", (classroom_id,))
+    enrolled_row = cursor.fetchone()
+    total_enrolled = enrolled_row["count"] if enrolled_row else 0
+
+    cursor.execute('''
+        SELECT a.id, a.classroom_id, a.quiz_id, a.due_date, a.created_at, q.exam_metadata
+        FROM assignments a
+        JOIN quizzes q ON a.quiz_id = q.id
+        WHERE a.classroom_id = ?
+        ORDER BY a.id DESC
+    ''', (classroom_id,))
+    rows = cursor.fetchall()
+    assignments = []
+    for r in rows:
+        meta = json.loads(r["exam_metadata"])
+        cursor.execute('''
+            SELECT COUNT(DISTINCT user_id) as sub_count FROM attempts
+            WHERE assignment_id = ? OR (quiz_id = ? AND user_id IN (
+                SELECT student_id FROM classroom_students WHERE classroom_id = ?
+            ))
+        ''', (r["id"], r["quiz_id"], classroom_id))
+        sub_row = cursor.fetchone()
+        sub_count = sub_row["sub_count"] if sub_row else 0
+
+        assignments.append({
+            "id": r["id"],
+            "classroom_id": r["classroom_id"],
+            "quiz_id": r["quiz_id"],
+            "due_date": r["due_date"] or "",
+            "created_at": r["created_at"],
+            "quiz_title": meta.get("exam_title", "Untitled Quiz"),
+            "subject": meta.get("subject", ""),
+            "duration_minutes": meta.get("duration_minutes", 30),
+            "total_enrolled": total_enrolled,
+            "submission_count": sub_count
+        })
+    conn.close()
+    return assignments
+
+def get_assignment_submissions_for_teacher(assignment_id, teacher_id):
+    """Fetches full student submission gradebook for a specific assignment belonging to teacher."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('''
+        SELECT a.id, a.classroom_id, a.quiz_id, a.due_date, c.name as classroom_name, q.exam_metadata
+        FROM assignments a
+        JOIN classrooms c ON a.classroom_id = c.id
+        JOIN quizzes q ON a.quiz_id = q.id
+        WHERE a.id = ? AND c.teacher_id = ?
+    ''', (assignment_id, teacher_id))
+    asgn = cursor.fetchone()
+    if not asgn:
+        conn.close()
+        return None
+
+    meta = json.loads(asgn["exam_metadata"])
+    classroom_id = asgn["classroom_id"]
+    quiz_id = asgn["quiz_id"]
+
+    cursor.execute('''
+        SELECT a.id, a.user_id, a.student_name, a.results, a.answers, a.created_at, u.email as student_email
+        FROM attempts a
+        LEFT JOIN users u ON a.user_id = u.id
+        WHERE a.assignment_id = ? OR (a.quiz_id = ? AND a.user_id IN (
+            SELECT student_id FROM classroom_students WHERE classroom_id = ?
+        ))
+        ORDER BY a.id DESC
+    ''', (assignment_id, quiz_id, classroom_id))
+    rows = cursor.fetchall()
+    conn.close()
+
+    submissions = []
+    seen_users = set()
+    for r in rows:
+        uid = r["user_id"] or r["student_name"]
+        if uid in seen_users:
+            continue
+        seen_users.add(uid)
+
+        res = json.loads(r["results"])
+        answers = json.loads(r["answers"]) if r["answers"] else {}
+        max_score = res.get("max_score", 0)
+        score = res.get("total_score", 0)
+        score_pct = round((score / max_score) * 100, 1) if max_score > 0 else 0
+
+        submissions.append({
+            "attempt_id": r["id"],
+            "user_id": r["user_id"],
+            "student_name": r["student_name"],
+            "student_email": r["student_email"] or "N/A",
+            "score": score,
+            "max_score": max_score,
+            "score_percent": score_pct,
+            "submitted_at": r["created_at"],
+            "results": res,
+            "answers": answers
+        })
+
+    return {
+        "assignment_id": assignment_id,
+        "classroom_id": classroom_id,
+        "classroom_name": asgn["classroom_name"],
+        "quiz_title": meta.get("exam_title", "Assignment Quiz"),
+        "subject": meta.get("subject", ""),
+        "due_date": asgn["due_date"] or "",
+        "submissions": submissions
+    }
+
+def get_student_classrooms_and_assignments(student_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('''
+        SELECT c.id, c.name, c.join_code, u.name as teacher_name
+        FROM classroom_students cs
+        JOIN classrooms c ON cs.classroom_id = c.id
+        JOIN users u ON c.teacher_id = u.id
+        WHERE cs.student_id = ?
+        ORDER BY cs.id DESC
+    ''', (student_id,))
+    classes = [dict(row) for row in cursor.fetchall()]
+    
+    for cl in classes:
+        cursor.execute('''
+            SELECT a.id, a.quiz_id, a.due_date, a.created_at, q.exam_metadata
+            FROM assignments a
+            JOIN quizzes q ON a.quiz_id = q.id
+            WHERE a.classroom_id = ?
+            ORDER BY a.id DESC
+        ''', (cl["id"],))
+        assign_rows = cursor.fetchall()
+        assignments = []
+        for ar in assign_rows:
+            meta = json.loads(ar["exam_metadata"])
+            # Check if student has already submitted this assignment
+            cursor.execute('''
+                SELECT id, created_at FROM attempts
+                WHERE user_id = ? AND (assignment_id = ? OR quiz_id = ?)
+                ORDER BY id DESC LIMIT 1
+            ''', (student_id, ar["id"], ar["quiz_id"]))
+            att = cursor.fetchone()
+            assignments.append({
+                "id": ar["id"],
+                "quiz_id": ar["quiz_id"],
+                "due_date": ar["due_date"] or "",
+                "quiz_title": meta.get("exam_title", "Assignment Quiz"),
+                "subject": meta.get("subject", ""),
+                "duration_minutes": meta.get("duration_minutes", 30),
+                "has_submitted": True if att else False,
+                "attempt_id": att["id"] if att else None,
+                "submitted_at": att["created_at"].split(" ")[0] if att and att["created_at"] else None
+            })
+        cl["assignments"] = assignments
+    conn.close()
+    return classes
+
+def get_student_attempts(user_id=None, student_name=None):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    if user_id:
+        cursor.execute('''
+            SELECT a.id, a.quiz_id, a.student_name, a.results, a.created_at, a.assignment_id, q.exam_metadata
+            FROM attempts a
+            JOIN quizzes q ON a.quiz_id = q.id
+            WHERE a.user_id = ?
+            ORDER BY a.id DESC
+            LIMIT 50
+        ''', (user_id,))
+    else:
+        cursor.execute('''
+            SELECT a.id, a.quiz_id, a.student_name, a.results, a.created_at, a.assignment_id, q.exam_metadata
+            FROM attempts a
+            JOIN quizzes q ON a.quiz_id = q.id
+            WHERE a.student_name = ?
+            ORDER BY a.id DESC
+            LIMIT 50
+        ''', (student_name or "",))
+    rows = cursor.fetchall()
+    conn.close()
+    attempts = []
+    for r in rows:
+        meta = json.loads(r["exam_metadata"])
+        res = json.loads(r["results"])
+        max_score = res.get("max_score", 0)
+        score = res.get("total_score", 0)
+        score_pct = round((score / max_score) * 100, 1) if max_score > 0 else 0
+        is_asgn = bool(r["assignment_id"])
+        attempts.append({
+            "id": r["id"],
+            "quiz_id": r["quiz_id"],
+            "quiz_title": meta.get("exam_title", "Assessment Quiz"),
+            "subject": meta.get("subject", ""),
+            "score": "Submitted" if is_asgn else score,
+            "max_score": max_score if not is_asgn else 0,
+            "score_percent": None if is_asgn else score_pct,
+            "status": "Held by Instructor" if is_asgn else "Graded",
+            "is_assignment": is_asgn,
+            "date": r["created_at"].split(" ")[0] if r["created_at"] else ""
+        })
+    return attempts
+
+def delete_bookmark(bookmark_id, user_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM bookmarked_questions WHERE id = ? AND user_id = ?", (bookmark_id, user_id))
+    conn.commit()
+    deleted = cursor.rowcount > 0
+    conn.close()
+    return deleted

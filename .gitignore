@@ -1,6 +1,10 @@
 # Secrets
 .env
+*.env
 backend/.env
+backend/.env.local
+frontend/.env*
+!frontend/.env.example
 
 # Python
 __pycache__/
@@ -10,13 +14,40 @@ __pycache__/
 venv/
 env/
 
-# Streamlit
-.streamlit/secrets.toml
+# Databases & Cache
+*.db
+*.sqlite
+*.sqlite3
+backend/*.db
+backend/*.sqlite*
 
-# OS / Editor
+# Logs
+*.log
+backend/*.log
+
+# Android & Gradle
+.gradle/
+build/
+*.apk
+*.aar
+local.properties
+captures/
+
+# Next.js & Frontend
+frontend/.next/
+frontend/out/
+frontend/build/
+frontend/node_modules/
+*.tsbuildinfo
+next-env.d.ts
+
+# OS & IDE
 .DS_Store
+Thumbs.db
 .vscode/
 .idea/
 
-# Misc
-*.log
+# Scratch & Test Artifacts
+scratch/
+data for checking system/
+legacy_streamlit/

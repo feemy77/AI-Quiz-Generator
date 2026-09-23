@@ -2,9 +2,25 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-
-// 📱 DYNAMIC API URL CONFIGURATION (FOR ANDROID COMPATIBILITY)
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://192.168.0.103:8000";
+import { apiFetch } from "@/lib/api";
+import { toast } from "sonner";
+import {
+  Sparkles,
+  CheckCircle2,
+  ArrowRight,
+  Lock,
+  Mail,
+  User,
+  Eye,
+  EyeOff,
+  FileText,
+  Video,
+  School,
+  Clock,
+  Award,
+  Zap,
+  BookOpen,
+} from "lucide-react";
 
 export default function AuthPage() {
   const router = useRouter();
@@ -12,18 +28,17 @@ export default function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
-    // Agar already logged in hay, to redirect kr do
     const token = localStorage.getItem("token");
     const role = localStorage.getItem("role");
     if (token) {
       if (role === "unassigned") router.push("/setup");
-      else if (role === "teacher") router.push("/dashboard");
+      else if (role === "teacher") router.push("/teacher-dashboard");
       else if (role === "student") router.push("/student-dashboard");
     }
   }, [router]);
@@ -33,123 +48,330 @@ export default function AuthPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setMessage("");
 
     const endpoint = isLogin ? "/auth/login" : "/auth/register";
-    const url = `${API_BASE_URL}${endpoint}`; // 📱 USING DYNAMIC API URL
     const payload = isLogin ? { email, password } : { name, email, password };
 
     try {
-      const response = await fetch(url, {
+      const { ok, data, error } = await apiFetch(endpoint, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
+        auth: false,
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
+      if (ok) {
         localStorage.setItem("token", data.token);
         localStorage.setItem("role", data.role);
         localStorage.setItem("name", data.name || "");
-        
-        setMessage("✅ Success! Redirecting...");
-        
+
+        toast.success(`Welcome back, ${data.name || "User"}! Redirecting...`);
+
         setTimeout(() => {
           if (data.role === "unassigned") {
             router.push("/setup");
           } else if (data.role === "teacher") {
-            router.push("/dashboard");
+            router.push("/teacher-dashboard");
           } else if (data.role === "student") {
             router.push("/student-dashboard");
           }
-        }, 1000);
-
+        }, 600);
       } else {
-        setMessage(`❌ Error: ${data.detail || "Something went wrong"}`);
+        toast.error(error || "Authentication failed. Please check credentials.");
       }
-    } catch (error) {
-      setMessage("❌ Network error. Make sure your FastAPI backend is running.");
+    } catch {
+      toast.error("Network error. Make sure your FastAPI backend is running.");
     } finally {
       setLoading(false);
     }
   };
 
+  const handleQuickDemo = (role: "teacher" | "student") => {
+    setIsLogin(true);
+    if (role === "teacher") {
+      setEmail("teacher@demo.com");
+      setPassword("teacher123");
+      toast.info("Demo Teacher credentials filled. Click 'Sign In'!");
+    } else {
+      setEmail("student@demo.com");
+      setPassword("student123");
+      toast.info("Demo Student credentials filled. Click 'Sign In'!");
+    }
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 text-gray-900">
-      <div className="max-w-md w-full p-8 bg-white rounded-2xl shadow-lg border border-gray-100">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-            AI Quiz Generator
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-slate-100 flex flex-col justify-between relative overflow-hidden">
+      {/* Background Ambient Glow Orbs */}
+      <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-blue-600/20 blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] rounded-full bg-indigo-600/20 blur-[140px] pointer-events-none" />
+
+      {/* Top Navbar */}
+      <header className="relative z-10 w-full max-w-7xl mx-auto px-6 py-6 flex items-center justify-between border-b border-white/10">
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-blue-500 to-indigo-500 flex items-center justify-center shadow-lg shadow-blue-500/30">
+            <Sparkles className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <span className="font-extrabold text-xl tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
+              AI Quiz Generator
+            </span>
+            <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 font-semibold border border-blue-500/30">
+              v2.0 PRO
+            </span>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3 text-sm text-slate-400 font-medium">
+          <span>Switchable Teacher & Student Modes</span>
+        </div>
+      </header>
+
+      {/* Main Content Area */}
+      <main className="relative z-10 max-w-7xl mx-auto px-6 py-12 flex-1 flex flex-col lg:flex-row items-center justify-center gap-16 w-full">
+        {/* Left Column: Hero & Feature Matrix */}
+        <div className="flex-1 space-y-8 max-w-2xl text-center lg:text-left">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-semibold text-blue-300 shadow-sm backdrop-blur-md">
+            <Zap className="w-3.5 h-3.5 text-blue-400 animate-pulse" />
+            <span>Next-Gen Intelligent Assessment Platform</span>
+          </div>
+
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.1] text-white">
+            Transform Any Content into{" "}
+            <span className="bg-gradient-to-r from-blue-400 via-indigo-300 to-sky-400 bg-clip-text text-transparent">
+              Intelligent Exams
+            </span>
           </h1>
-          <p className="text-gray-500 mt-2">
-            {isLogin ? "Welcome back! Please login." : "Create your account to get started."}
+
+          <p className="text-base sm:text-lg text-slate-300 leading-relaxed font-normal">
+            Upload PowerPoint Slides (.pptx, .ppt), PDFs with OCR, Word documents, or YouTube lectures.
+            Our AI constructs official university & board exams, manages classroom assignments, and delivers instant pedagogical grading.
           </p>
-        </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          {!isLogin && (
-            <div>
-              <label className="block text-sm font-medium mb-1">Full Name</label>
-              <input
-                type="text"
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
+          {/* Feature Matrix Badges */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+            <div className="p-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm flex items-start gap-3.5 hover:bg-white/[0.08] transition-all">
+              <div className="p-2.5 rounded-xl bg-orange-500/20 text-orange-400 shrink-0">
+                <FileText className="w-5 h-5" />
+              </div>
+              <div>
+                <h4 className="font-bold text-sm text-white">PowerPoint Slides & Documents</h4>
+                <p className="text-xs text-slate-400 mt-0.5 leading-snug">
+                  PowerPoint (.pptx/.ppt) lecture slides, scanned PDF OCR, Word (.docx/.doc), RTF, Markdown & YouTube lectures.
+                </p>
+              </div>
             </div>
-          )}
 
-          <div>
-            <label className="block text-sm font-medium mb-1">Email Address</label>
-            <input
-              type="email"
-              required
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
+            <div className="p-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm flex items-start gap-3.5 hover:bg-white/[0.08] transition-all">
+              <div className="p-2.5 rounded-xl bg-indigo-500/20 text-indigo-400 shrink-0">
+                <Clock className="w-5 h-5" />
+              </div>
+              <div>
+                <h4 className="font-bold text-sm text-white">Live Countdown Exams</h4>
+                <p className="text-xs text-slate-400 mt-0.5 leading-snug">
+                  Automated timed exams with auto-submit, official Arid/OBE paper export, and reviews.
+                </p>
+              </div>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm flex items-start gap-3.5 hover:bg-white/[0.08] transition-all">
+              <div className="p-2.5 rounded-xl bg-purple-500/20 text-purple-400 shrink-0">
+                <Award className="w-5 h-5" />
+              </div>
+              <div>
+                <h4 className="font-bold text-sm text-white">Smart AI Auto-Grading</h4>
+                <p className="text-xs text-slate-400 mt-0.5 leading-snug">
+                  Intelligent evaluation for MCQs, blanks, and deep conceptual short/long answers.
+                </p>
+              </div>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm flex items-start gap-3.5 hover:bg-white/[0.08] transition-all">
+              <div className="p-2.5 rounded-xl bg-emerald-500/20 text-emerald-400 shrink-0">
+                <School className="w-5 h-5" />
+              </div>
+              <div>
+                <h4 className="font-bold text-sm text-white">Classrooms & Flashcards</h4>
+                <p className="text-xs text-slate-400 mt-0.5 leading-snug">
+                  Teacher assignment distribution and student spaced-repetition memory stacks.
+                </p>
+              </div>
+            </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-1">Password</label>
-            <input
-              type="password"
-              required
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
-
-          {message && (
-            <div className={`p-3 rounded-lg text-sm font-medium ${message.includes("✅") ? "bg-green-50 text-green-700" : "bg-red-50 text-red-700"}`}>
-              {message}
+          {/* Social Proof / Stats Strip */}
+          <div className="flex flex-wrap items-center justify-center lg:justify-start gap-6 pt-4 border-t border-white/10 text-xs font-semibold text-slate-400">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+              <span>PPTX Slides & PDF OCR</span>
             </div>
-          )}
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors shadow-md disabled:opacity-50"
-          >
-            {loading ? "Processing..." : isLogin ? "Sign In" : "Create Account"}
-          </button>
-        </form>
-
-        <div className="mt-6 text-center">
-          <button
-            onClick={() => {
-              setIsLogin(!isLogin);
-              setMessage("");
-            }}
-            className="text-sm text-blue-600 hover:underline focus:outline-none font-medium"
-          >
-            {isLogin ? "Don't have an account? Sign up" : "Already have an account? Log in"}
-          </button>
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-blue-400" />
+              <span>Official Arid/OBE Papers</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-purple-400" />
+              <span>Teacher & Student Hubs</span>
+            </div>
+          </div>
         </div>
-      </div>
+
+        {/* Right Column: Ultra-Sleek Glassmorphism Auth Box */}
+        <div className="w-full max-w-md">
+          <div className="p-8 sm:p-10 rounded-3xl bg-white/[0.07] border border-white/15 backdrop-blur-xl shadow-2xl shadow-black/40">
+            {/* Tab Buttons */}
+            <div className="flex items-center p-1 rounded-2xl bg-black/30 border border-white/10 mb-8">
+              <button
+                type="button"
+                onClick={() => setIsLogin(true)}
+                className={`flex-1 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                  isLogin
+                    ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/30"
+                    : "text-slate-400 hover:text-white"
+                }`}
+              >
+                Sign In
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsLogin(false)}
+                className={`flex-1 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                  !isLogin
+                    ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/30"
+                    : "text-slate-400 hover:text-white"
+                }`}
+              >
+                Create Account
+              </button>
+            </div>
+
+            <div className="mb-6">
+              <h3 className="text-2xl font-black text-white">
+                {isLogin ? "Welcome Back" : "Get Started Free"}
+              </h3>
+              <p className="text-xs text-slate-400 mt-1 font-medium">
+                {isLogin
+                  ? "Access your quizzes, classrooms, and assessments."
+                  : "Create your account. You can switch between Student & Educator mode anytime."}
+              </p>
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {!isLogin && (
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+                    Full Name
+                  </label>
+                  <div className="relative">
+                    <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Dr. Alex Morgan"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className="w-full pl-10 pr-4 py-3 bg-black/25 border border-white/10 rounded-xl text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
+                    />
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+                  Email Address
+                </label>
+                <div className="relative">
+                  <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="email"
+                    required
+                    placeholder="name@institution.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full pl-10 pr-4 py-3 bg-black/25 border border-white/10 rounded-xl text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+                  Password
+                </label>
+                <div className="relative">
+                  <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    required
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full pl-10 pr-11 py-3 bg-black/25 border border-white/10 rounded-xl text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full mt-2 py-3.5 px-4 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-500 hover:from-blue-500 hover:to-indigo-500 text-white font-bold rounded-xl shadow-lg shadow-blue-600/30 flex items-center justify-center gap-2 transition-all active:scale-[0.99] disabled:opacity-50"
+              >
+                {loading ? (
+                  <span className="flex items-center gap-2">
+                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Authenticating...
+                  </span>
+                ) : (
+                  <>
+                    <span>{isLogin ? "Sign In to Workspace" : "Create My Account"}</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
+              </button>
+            </form>
+
+            {/* Quick Demo Logins Bar */}
+            <div className="mt-6 pt-5 border-t border-white/10 text-center">
+              <span className="text-xs font-semibold text-slate-400 block mb-3 uppercase tracking-wider">
+                ⚡ Quick Demo One-Click Fill
+              </span>
+              <div className="grid grid-cols-2 gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => handleQuickDemo("teacher")}
+                  className="py-2 px-3 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-slate-300 flex items-center justify-center gap-1.5 transition-all"
+                >
+                  <School className="w-3.5 h-3.5 text-indigo-400" />
+                  <span>Educator Demo</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleQuickDemo("student")}
+                  className="py-2 px-3 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-slate-300 flex items-center justify-center gap-1.5 transition-all"
+                >
+                  <BookOpen className="w-3.5 h-3.5 text-blue-400" />
+                  <span>Student Demo</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="relative z-10 w-full max-w-7xl mx-auto px-6 py-6 border-t border-white/10 text-center text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <span>© 2026 AI Quiz Generator. Built with Advanced Multimodal Intelligence.</span>
+        <div className="flex items-center gap-6 text-slate-400">
+          <span>Student & Educator Dual Ecosystem</span>
+          <span>•</span>
+          <span>Safe & Isolated Data</span>
+        </div>
+      </footer>
     </div>
   );
 }

@@ -11,15 +11,18 @@ import string
 import json
 import base64
 import os
+import re
 import tempfile
 from datetime import datetime
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Header, Depends, Request
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.concurrency import run_in_threadpool
 from pydantic import BaseModel, EmailStr
 from typing import Optional, Dict, List, Any
 
 # Image & OCR Libraries
+import copy
 from PIL import Image
 import pytesseract
 
@@ -27,12 +30,14 @@ import pytesseract
 from docx import Document
 from docx.shared import Pt, Inches, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.oxml import parse_xml
+from docx.oxml.ns import nsdecls
 
 # NEW: PDF Export Libraries
 from reportlab.lib.pagesizes import letter
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak, Image as RLImage, Table, TableStyle
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.enums import TA_CENTER, TA_LEFT
+from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
 from reportlab.lib.utils import ImageReader
 from reportlab.lib import colors
 
@@ -44,6 +49,7 @@ import database
 import auth
 from document_extractor import get_document_page_count, extract_text_from_document
 from youtube_extractor import get_youtube_transcript
+import quiz_generator
 from quiz_generator import generate_quiz_from_large_text
 from grading_engine import check_mcq, check_fill_blank, grade_long_answer
 from cache_manager import generate_hash, get_cached_quiz, save_quiz_to_cache
@@ -119,10 +125,14 @@ class UpdateProfileRequest(BaseModel):
     role: str
     institution_name: str
 
+class SwitchRoleRequest(BaseModel):
+    new_role: str
+
 class SubmitAttemptRequest(BaseModel):
     student_name: str
     answers: Dict[str, str] 
     challenge_code: Optional[str] = None
+    assignment_id: Optional[int] = None
 
 class ChallengeCreateRequest(BaseModel):
     quiz_id: int
@@ -133,12 +143,29 @@ class FlashcardReviewRequest(BaseModel):
 
 class ExportQuizRequest(BaseModel):
     include_answer_key: bool = False
+    institution_name: Optional[str] = ""
+    department_name: Optional[str] = ""
+    exam_title: Optional[str] = ""
+    exam_category: Optional[str] = "THEORY"  # "THEORY", "PRACTICAL", "MID-TERM", "FINAL-TERM"
+    course_code: Optional[str] = ""
+    subject: Optional[str] = ""
+    class_name: Optional[str] = ""
+    teacher_name: Optional[str] = ""
+    duration_minutes: Optional[int] = None
+    total_marks: Optional[int] = None
+    exam_set: str = "Standard" # "Standard", "Set A", "Set B"
+    include_instructions: bool = True
+    include_clo: bool = True
 
 class CreateClassroomRequest(BaseModel):
     name: str
 
 class JoinClassroomRequest(BaseModel):
     join_code: str
+
+class AssignQuizRequest(BaseModel):
+    quiz_id: int
+    due_date: Optional[str] = ""
 
 class BrandingRequest(BaseModel):
     academy_name: str
@@ -153,6 +180,14 @@ class RegenerateQuestionRequest(BaseModel):
     question_type: str # 'mcq', 'fill_blank', 'short_answer', 'long_answer'
     difficulty: str
     question_style: str = "Auto"
+
+class SwapQuestionRequest(BaseModel):
+    section: str # 'mcq', 'blank', 'short', 'long'
+    index: int
+    action: str = "select_alternative" # 'select_alternative' or 'generate_new'
+    alternative_index: Optional[int] = None
+    target_style: Optional[str] = "conceptual" # 'conceptual', 'coding', 'scenario', 'difference', 'definition'
+    difficulty: Optional[str] = "Medium"
 
 class BookmarkRequest(BaseModel):
     quiz_id: int
@@ -211,6 +246,13 @@ def update_profile(req: UpdateProfileRequest, user=Depends(get_current_user)):
     database.update_user_profile(user["id"], req.role, req.institution_name)
     return {"message": "Profile updated successfully", "role": req.role}
 
+@app.post("/auth/switch-role")
+def switch_role(req: SwitchRoleRequest, user=Depends(get_current_user)):
+    if req.new_role not in ["student", "teacher"]:
+        raise HTTPException(status_code=400, detail="Role must be either 'student' or 'teacher'")
+    database.update_user_role(user["id"], req.new_role)
+    return {"ok": True, "role": req.new_role, "message": f"Switched to {req.new_role} mode"}
+
 @app.post("/auth/logout")
 def logout(authorization: Optional[str] = Header(None)):
     if authorization and authorization.startswith("Bearer "):
@@ -226,6 +268,24 @@ async def analyze_document(file: UploadFile = File(...)):
         return {"total_pages": total_pages}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+def _has_programming_content(text: str) -> bool:
+    """
+    Checks whether text contains programming syntax, code keywords, or algorithmic concepts.
+    """
+    code_indicators = [
+        r"\b(def|class|function|var|let|const|import|include|return|public|private|void|int|float|string|boolean|cout|cin|printf|scanf|malloc|nullptr|lambda)\b",
+        r"[{}();=<>\[\]]{3,}",
+        r"\b(python|javascript|typescript|java|c\+\+|c#|html|css|sql|react|node|algorithm|recursion|pointer|array|linked list|binary tree|stack|queue|loop|if-else)\b",
+        r"```",
+        r"\b(oop|polymorphism|inheritance|encapsulation|database|query|api|backend|frontend|compiler|interpreter)\b",
+    ]
+    text_lower = text.lower()
+    matches = 0
+    for pattern in code_indicators:
+        if re.search(pattern, text_lower):
+            matches += 1
+    return matches >= 2
 
 # ==========================================
 # 📸 MULTI-SOURCE QUIZ INTEGRATED ENDPOINT (UPDATED)
@@ -244,7 +304,10 @@ async def generate_quiz(
     num_short: int = Form(0),
     num_long: int = Form(0),
     difficulty: str = Form("Medium"),
-    question_style: str = Form("Auto"),  # 🧠 NEW: Smart Question Style parameter
+    question_style: str = Form("Auto"),  # 🧠 Smart Question Style parameter
+    academic_tier: str = Form("University"),  # 🎓 Academic Tier: University, College, School
+    exam_track: str = Form("Theory"),        # 📝 Exam Track: Theory, Practical, Standard, Comprehension
+    include_comprehension: bool = Form(False), # 📖 College comprehension passage toggle
     start_page: int = Form(1),      
     end_page: int = Form(1000),     
     institution_name: str = Form(""),
@@ -316,6 +379,35 @@ async def generate_quiz(
     if not raw_text.strip() or raw_text.startswith("Error"):
         raise HTTPException(status_code=422, detail="Combined text extraction failed. Content might be too short.")
 
+    # 🎓 Intelligent Academic Tier and Exam Track Resolution
+    effective_style = question_style
+    tier_lower = academic_tier.lower().strip()
+    track_lower = exam_track.lower().strip()
+
+    if question_style.lower() in ("auto", "exam"):
+        if tier_lower == "university":
+            if track_lower in ("practical", "lab"):
+                effective_style = "university_practical"
+            else:
+                effective_style = "university_theory"
+        elif tier_lower in ("college", "intermediate", "board"):
+            effective_style = "college_board"
+        elif tier_lower in ("school", "secondary"):
+            effective_style = "school_standard"
+    elif question_style.lower() in ("practical", "lab_exam"):
+        effective_style = "university_practical"
+
+    # 🧠 Early validation: Prevent generating coding questions on non-programming documents
+    if effective_style.lower() in ("programming", "coding", "university_practical") and not _has_programming_content(raw_text):
+        if effective_style.lower() == "university_practical":
+            # For practical exams on non-code documents, fall back to high-rigor scenario/theory
+            effective_style = "university_theory"
+        else:
+            raise HTTPException(
+                status_code=400,
+                detail="The uploaded material does not appear to contain programming code or technical algorithms. Please choose 'Conceptual', 'Comprehension', or 'Auto', or upload material containing code."
+            )
+
     question_counts = {
         "mcq": num_mcq, "fill_blank": num_fill_blank, "short_answer": num_short, "long_answer": num_long
     }
@@ -323,13 +415,16 @@ async def generate_quiz(
     combined_identifier = "_".join(source_identifiers)
     req_hash = generate_hash(
         source_identifier=combined_identifier, mcq=num_mcq, fill_blank=num_fill_blank,
-        short_ans=num_short, long_ans=num_long, difficulty=difficulty
+        short_ans=num_short, long_ans=num_long, difficulty=difficulty, question_style=f"{effective_style}_{include_comprehension}"
     )
 
     quiz_data = get_cached_quiz(req_hash)
     if not quiz_data:
-        # 🧠 Pass the question_style down to the generator
-        quiz_data = generate_quiz_from_large_text(raw_text, question_counts, difficulty, question_style=question_style)
+        # 🧠 Pass effective_style down to the generator, running in threadpool to prevent blocking the event loop
+        quiz_data = await run_in_threadpool(
+            generate_quiz_from_large_text,
+            raw_text, question_counts, difficulty, question_style=effective_style, include_comprehension=include_comprehension
+        )
         save_quiz_to_cache(req_hash, quiz_data)
 
     calculated_marks = (num_mcq * 1) + (num_fill_blank * 1) + (num_short * 2) + (num_long * 5)
@@ -337,17 +432,25 @@ async def generate_quiz(
     if calculated_duration < 15: calculated_duration = 15
 
     clean_title = exam_title.strip() if exam_title.strip() else "Assessment Examination"
+    is_practical_exam = (track_lower in ("practical", "lab") or "practical" in effective_style.lower())
+    is_self_study = (user.get("role") == "student")
 
     exam_metadata = {
-        "institution_name": institution_name or "Academy Worksheet",
-        "department": department, 
-        "subject": subject, 
-        "class_name": class_name,
-        "teacher_name": teacher_name or user["name"], 
+        "institution_name": institution_name.strip() or "Academic Examination Department",
+        "department": department.strip() or "Examination Branch", 
+        "subject": subject.strip() or "General Course", 
+        "class_name": class_name.strip(),
+        "teacher_name": teacher_name.strip() or user["name"], 
         "exam_title": clean_title,
         "duration_minutes": calculated_duration, 
         "total_marks": calculated_marks,
-        "source_text_context": raw_text[:20000] # 🧠 Save context for Phase 1 Regeneration securely
+        "academic_tier": academic_tier,
+        "exam_track": exam_track,
+        "exam_category": "PRACTICAL" if is_practical_exam else "THEORY",
+        "question_style": effective_style,
+        "include_comprehension": include_comprehension,
+        "is_self_study": is_self_study,
+        "source_text_context": raw_text[:25000] # 🧠 Save context for Phase 1 Regeneration & Alternative Generation securely
     }
 
     quiz_id = database.create_quiz(user["id"], exam_metadata, quiz_data)
@@ -357,6 +460,14 @@ async def generate_quiz(
 # ==========================================
 # 🪄 PHASE 1 NEW APIS: EDITOR & REGENERATION
 # ==========================================
+@app.get("/teacher/quiz/{quiz_id}")
+def get_quiz_for_teacher_api(quiz_id: int, user=Depends(require_teacher)):
+    """Returns complete quiz data with correct answers, model answers, and explanations for teacher editing."""
+    quiz = database.get_quiz_for_teacher(quiz_id, user["id"])
+    if not quiz:
+        raise HTTPException(status_code=404, detail="Quiz not found or unauthorized.")
+    return quiz
+
 @app.put("/quiz/{quiz_id}")
 def update_quiz_data(quiz_id: int, req: UpdateQuizRequest, user=Depends(get_current_user)):
     """Updates edited quiz data manually (Reorder, Edit, Add, Delete) directly in DB."""
@@ -375,8 +486,8 @@ def update_quiz_data(quiz_id: int, req: UpdateQuizRequest, user=Depends(get_curr
     return {"message": "Quiz updated successfully."}
 
 @app.post("/quiz/{quiz_id}/regenerate-question")
-def regenerate_single_question(quiz_id: int, req: RegenerateQuestionRequest, user=Depends(get_current_user)):
-    """Re-uses existing AI pipeline to fetch exactly ONE new question of requested type."""
+async def regenerate_single_question(quiz_id: int, req: RegenerateQuestionRequest, user=Depends(get_current_user)):
+    """Re-uses existing AI pipeline to fetch exactly ONE new question of requested type without blocking event loop."""
     quiz = database.get_quiz(quiz_id)
     if not quiz or quiz["teacher_id"] != user["id"]: 
         raise HTTPException(status_code=403, detail="Unauthorized.")
@@ -389,8 +500,11 @@ def regenerate_single_question(quiz_id: int, req: RegenerateQuestionRequest, use
     if req.question_type in q_counts:
         q_counts[req.question_type] = 1
     
-    # EXISTING PIPELINE CALL (No new prompts required!)
-    new_data = generate_quiz_from_large_text(context, q_counts, req.difficulty, question_style=req.question_style)
+    # Run in threadpool so single-threaded event loop is never frozen
+    new_data = await run_in_threadpool(
+        generate_quiz_from_large_text,
+        context, q_counts, req.difficulty, question_style=req.question_style
+    )
     
     key_map = {"mcq": "mcq_questions", "fill_blank": "fill_blank_questions", "short_answer": "short_questions", "long_answer": "long_questions"}
     target_key = key_map.get(req.question_type)
@@ -399,6 +513,122 @@ def regenerate_single_question(quiz_id: int, req: RegenerateQuestionRequest, use
         return {"new_question": new_data[target_key][0]}
     else:
         raise HTTPException(status_code=500, detail="AI Engine failed to regenerate question.")
+
+@app.post("/quiz/{quiz_id}/swap-question")
+async def swap_question_endpoint(quiz_id: int, req: SwapQuestionRequest, user=Depends(get_current_user)):
+    """
+    Allows instructors and self-study students to either:
+    1. 'select_alternative': Swap an active question with one of its pre-generated alternatives.
+    2. 'generate_new': Dynamically generate a fresh alternative question with a specific requested style
+       (e.g., conceptual, coding, scenario, difference, definition).
+    The previous active question is preserved in the alternatives list so no work is ever lost.
+    """
+    quiz = database.get_quiz(quiz_id)
+    if not quiz:
+        raise HTTPException(status_code=404, detail="Quiz not found.")
+
+    is_owner = (quiz["teacher_id"] == user["id"])
+    is_student = (user.get("role") == "student")
+    is_self_study = quiz.get("exam_metadata", {}).get("is_self_study", False)
+    if not is_owner and not (is_student and is_self_study):
+        raise HTTPException(status_code=403, detail="Unauthorized to modify questions for this quiz.")
+
+    sec_map = {
+        "mcq": "mcq_questions",
+        "mcq_questions": "mcq_questions",
+        "blank": "fill_blank_questions",
+        "fill_blank": "fill_blank_questions",
+        "fill_blank_questions": "fill_blank_questions",
+        "short": "short_questions",
+        "short_answer": "short_questions",
+        "short_questions": "short_questions",
+        "long": "long_questions",
+        "long_answer": "long_questions",
+        "long_questions": "long_questions"
+    }
+    arr_key = sec_map.get(req.section.lower().strip())
+    if not arr_key or arr_key not in quiz["quiz_data"]:
+        raise HTTPException(status_code=400, detail=f"Invalid question section: {req.section}")
+
+    questions_list = quiz["quiz_data"][arr_key]
+    if req.index < 0 or req.index >= len(questions_list):
+        raise HTTPException(status_code=400, detail="Question index out of bounds.")
+
+    current_q = questions_list[req.index]
+    if not isinstance(current_q, dict):
+        raise HTTPException(status_code=400, detail="Invalid question format.")
+
+    if "alternatives" not in current_q or not isinstance(current_q.get("alternatives"), list):
+        current_q["alternatives"] = []
+
+    if req.action == "select_alternative":
+        if req.alternative_index is None or req.alternative_index < 0 or req.alternative_index >= len(current_q["alternatives"]):
+            raise HTTPException(status_code=400, detail="Invalid alternative index.")
+
+        # Extract selected alternative
+        chosen = current_q["alternatives"].pop(req.alternative_index)
+
+        # Move previous active question to alternatives list
+        old_active = {k: v for k, v in current_q.items() if k != "alternatives"}
+        chosen_alts = current_q["alternatives"]
+        chosen_alts.append(old_active)
+        chosen["alternatives"] = chosen_alts
+
+        # Preserve clo and marks if missing
+        if "clo" in current_q and "clo" not in chosen:
+            chosen["clo"] = current_q["clo"]
+        if "marks" in current_q and "marks" not in chosen:
+            chosen["marks"] = current_q["marks"]
+
+        questions_list[req.index] = chosen
+
+    elif req.action == "generate_new":
+        context = quiz["exam_metadata"].get("source_text_context", "")
+        if not context:
+            raise HTTPException(status_code=400, detail="Original document context is missing. Cannot generate new alternative.")
+
+        target_style = req.target_style or "conceptual"
+        difficulty = req.difficulty or "Medium"
+
+        new_q = await run_in_threadpool(
+            quiz_generator.generate_alternative_question,
+            context,
+            req.section,
+            target_style,
+            difficulty
+        )
+
+        if not new_q or not new_q.get("question_text"):
+            raise HTTPException(status_code=500, detail="AI generation failed to produce an alternative question.")
+
+        # Preserve clo and marks
+        if "clo" in current_q and "clo" not in new_q:
+            new_q["clo"] = current_q["clo"]
+        if "marks" in current_q and "marks" not in new_q:
+            new_q["marks"] = current_q["marks"]
+
+        # Move current active question into alternatives
+        old_active = {k: v for k, v in current_q.items() if k != "alternatives"}
+        existing_alts = current_q.get("alternatives", [])
+        new_q["alternatives"] = existing_alts + [old_active]
+        questions_list[req.index] = new_q
+    else:
+        raise HTTPException(status_code=400, detail=f"Unknown action: {req.action}")
+
+    # Persist updated quiz_data to database
+    conn = database.get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE quizzes SET quiz_data = ? WHERE id = ?",
+                   (json.dumps(quiz["quiz_data"]), quiz_id))
+    conn.commit()
+    conn.close()
+
+    return {
+        "success": True,
+        "active_question": questions_list[req.index],
+        "quiz_data": quiz["quiz_data"],
+        "message": "Question swapped successfully!"
+    }
 
 @app.post("/bookmarks")
 def save_bookmark(req: BookmarkRequest, user=Depends(get_current_user)):
@@ -426,6 +656,14 @@ def get_bookmarks(user=Depends(get_current_user)):
         })
     conn.close()
     return {"bookmarks": bookmarks}
+
+@app.delete("/bookmarks/{bookmark_id}")
+def delete_bookmark_api(bookmark_id: int, user=Depends(get_current_user)):
+    """Deletes a saved question from the user's bookmarks."""
+    deleted = database.delete_bookmark(bookmark_id, user["id"])
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Bookmark not found.")
+    return {"message": "Bookmark removed successfully."}
 
 
 # ==========================================
@@ -458,133 +696,502 @@ def process_base64_logo_safe(branding):
         logger.error(f"Logo processing error: {e}")
         return None
 
+def set_docx_cell_shading(cell, color_hex="F8FAFC"):
+    shd = parse_xml(f'<w:shd {nsdecls("w")} w:fill="{color_hex}"/>')
+    cell._tc.get_or_add_tcPr().append(shd)
+
+def prepare_exam_data(quiz_data: dict, exam_set: str = "Standard") -> dict:
+    """Prepares exam data, deterministically shuffling questions and options for Set B while preserving answer keys."""
+    if exam_set != "Set B":
+        return quiz_data
+
+    rng = random.Random(42)
+    set_b = copy.deepcopy(quiz_data)
+
+    if set_b.get("mcq_questions"):
+        mcqs = set_b["mcq_questions"][::-1]
+        for q in mcqs:
+            opts = list(q.get("options", []))
+            rng.shuffle(opts)
+            q["options"] = opts
+        set_b["mcq_questions"] = mcqs
+
+    if set_b.get("fill_blank_questions"):
+        set_b["fill_blank_questions"] = set_b["fill_blank_questions"][::-1]
+
+    if set_b.get("short_questions"):
+        set_b["short_questions"] = set_b["short_questions"][::-1]
+
+    if set_b.get("long_questions"):
+        set_b["long_questions"] = set_b["long_questions"][::-1]
+
+    return set_b
+
 @app.post("/quiz/{quiz_id}/export/docx")
-def export_quiz_docx(quiz_id: int, req: ExportQuizRequest, user=Depends(require_teacher)):
+def export_quiz_docx(quiz_id: int, req: ExportQuizRequest, user=Depends(get_current_user)):
     quiz = database.get_quiz(quiz_id)
     if not quiz: raise HTTPException(status_code=404, detail="Quiz not found.")
-    
+
+    # If the user is a student and this quiz is an assigned classroom examination, deny confidential answer key
+    if user.get("role") != "teacher":
+        conn = database.get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT a.id FROM assignments a
+            JOIN classroom_students cs ON cs.classroom_id = a.classroom_id
+            WHERE a.quiz_id = ? AND cs.student_id = ?
+        ''', (quiz_id, user["id"]))
+        if cursor.fetchone():
+            req.include_answer_key = False
+        conn.close()
+
     doc = Document()
-    
-    sections = doc.sections
-    for section in sections:
+    for section in doc.sections:
         section.top_margin = Inches(0.5)
         section.bottom_margin = Inches(0.5)
-        section.left_margin = Inches(0.75)
-        section.right_margin = Inches(0.75)
+        section.left_margin = Inches(0.6)
+        section.right_margin = Inches(0.6)
+
+    # Set Times New Roman as document font
+    style_normal = doc.styles['Normal']
+    font = style_normal.font
+    font.name = 'Times New Roman'
+    font.size = Pt(10)
+    font.color.rgb = RGBColor(0, 0, 0)
 
     meta = quiz["exam_metadata"]
-    quiz_data = quiz["quiz_data"]
-    
+    raw_quiz_data = quiz["quiz_data"]
+    quiz_data = prepare_exam_data(raw_quiz_data, req.exam_set)
+
     branding = database.get_teacher_branding(user["id"])
-    academy_name = branding["academy_name"] if branding and branding.get("academy_name") else meta.get("institution_name", "Academy Worksheet")
-    
+    inst_name = req.institution_name.strip() or (branding["academy_name"] if branding and branding.get("academy_name") else meta.get("institution_name", "Academic Examination Department"))
+    dept_name = req.department_name.strip() or meta.get("department_name", "Examination Branch")
+    exam_title = req.exam_title.strip() or meta.get("exam_title", "Assessment Examination")
+    exam_category = (req.exam_category.strip() if req.exam_category else "THEORY").upper()
+    course_code = req.course_code.strip() or meta.get("course_code", "CSC-262")
+    subject_val = req.subject.strip() or meta.get("subject", "Machine Learning")
+    course_str = f"{subject_val} ({course_code})" if course_code else subject_val
+    class_val = req.class_name.strip() or meta.get("class_name", "BSCS - 4")
+    t_name = req.teacher_name.strip() or meta.get('teacher_name', user['name'])
+    dur = req.duration_minutes if req.duration_minutes is not None else meta.get("duration_minutes", 90)
+    marks = req.total_marks if req.total_marks is not None else meta.get("total_marks", 20)
+    set_label = req.exam_set.upper()
+    include_clo = req.include_clo
+
     logo_path = process_base64_logo_safe(branding)
 
-    header_table = doc.add_table(rows=1, cols=2)
-    header_table.columns[0].width = Inches(1.2)
-    header_table.columns[1].width = Inches(5.5)
-
+    # 1. UNIVERSITY / INSTITUTION HEADER (Centered, Exact University Style)
     if logo_path and os.path.exists(logo_path):
+        header_table = doc.add_table(rows=1, cols=2)
+        header_table.columns[0].width = Inches(1.0)
+        header_table.columns[1].width = Inches(6.3)
         try:
             p_logo = header_table.cell(0, 0).paragraphs[0]
             p_logo.alignment = WD_ALIGN_PARAGRAPH.CENTER
-            p_logo.add_run().add_picture(logo_path, width=Inches(1.0))
+            p_logo.add_run().add_picture(logo_path, width=Inches(0.9))
         except Exception as e:
             logger.error(f"Failed to add logo to DOCX: {e}")
+        p_title = header_table.cell(0, 1).paragraphs[0]
+    else:
+        p_title = doc.add_paragraph()
 
-    p_title = header_table.cell(0, 1).paragraphs[0]
     p_title.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    r_uni = p_title.add_run(f"{academy_name}\n")
-    r_uni.bold = True
-    r_uni.font.size = Pt(16)
+    p_title.paragraph_format.space_after = Pt(2)
     
-    exam_title = meta.get("exam_title", "Assessment Examination")
-    r_exam = p_title.add_run(f"{exam_title}\n\n")
+    r_inst = p_title.add_run(f"{inst_name}\n")
+    r_inst.bold = True
+    r_inst.font.name = "Times New Roman"
+    r_inst.font.size = Pt(14.5)
+
+    r_dept = p_title.add_run(f"{dept_name}\n")
+    r_dept.font.name = "Times New Roman"
+    r_dept.font.size = Pt(11)
+
+    r_exam = p_title.add_run(f"{exam_title}\n")
     r_exam.bold = True
-    r_exam.font.size = Pt(13)
-    
-    t_name = str(meta.get('teacher_name', user['name'])).upper()
-    subject_val = meta.get('subject', 'Not Specified')
-    class_val = meta.get('class_name', 'Not Specified')
-    dur = meta.get('duration_minutes', 60)
-    marks = meta.get('total_marks', 100)
-    
-    r_meta1 = p_title.add_run(f"Subject: {subject_val}   |   Class/Semester: {class_val}\n")
-    r_meta1.font.size = Pt(10)
-    
-    r_meta2 = p_title.add_run(f"Teacher: ")
-    r_meta2.font.size = Pt(10)
-    r_meta_tname = p_title.add_run(f"{t_name}")
-    r_meta_tname.bold = True
-    try:
-        r_meta_tname.font.color.rgb = RGBColor(0, 0, 139) 
-    except:
-        pass
-    
-    r_meta3 = p_title.add_run(f"   |   Duration: {dur} mins   |   Total Marks: {marks}")
-    r_meta3.font.size = Pt(10)
+    r_exam.font.name = "Times New Roman"
+    r_exam.font.size = Pt(11)
 
-    doc.add_paragraph("-" * 80)
-    doc.add_paragraph("Student Name: __________________________________   Roll No: ____________   Date: ___________")
-    doc.add_paragraph()
-    
+    r_cat = p_title.add_run(f"{exam_category}")
+    r_cat.bold = True
+    r_cat.underline = True
+    r_cat.font.name = "Times New Roman"
+    r_cat.font.size = Pt(11)
+
+    # 2. METADATA LEFT & RIGHT (Clean borderless layout matching Arid Paper)
+    t_meta = doc.add_table(rows=1, cols=2)
+    t_meta.autofit = False
+    t_meta.columns[0].width = Inches(3.7)
+    t_meta.columns[1].width = Inches(3.6)
+
+    c_left = t_meta.cell(0, 0).paragraphs[0]
+    c_left.paragraph_format.space_after = Pt(1)
+    r_cl1 = c_left.add_run(f"Class: {class_val}\n")
+    r_cl1.font.name = "Times New Roman"
+    r_cl1.font.size = Pt(9.5)
+    r_cl1.bold = True
+
+    r_cl2 = c_left.add_run(f"{course_str}")
+    r_cl2.font.name = "Times New Roman"
+    r_cl2.font.size = Pt(9.5)
+    r_cl2.bold = True
+
+    c_right = t_meta.cell(0, 1).paragraphs[0]
+    c_right.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+    c_right.paragraph_format.space_after = Pt(1)
+
+    dur_text = f"{dur} Min" if dur < 60 else f"{dur // 60} Hour{'s' if dur >= 120 else ''} {dur % 60} Min" if dur % 60 else f"{dur // 60} Hours" if dur > 60 else "1.5 Hours" if dur == 90 else "1 Hour"
+    r_cr1 = c_right.add_run(f"Time Allowed: {dur_text}\n")
+    r_cr1.font.name = "Times New Roman"
+    r_cr1.font.size = Pt(9.5)
+    r_cr1.bold = True
+
+    set_suffix = f"  [{set_label}]" if set_label != "STANDARD" else ""
+    r_cr2 = c_right.add_run(f"Maximum Points: {marks}{set_suffix}")
+    r_cr2.font.name = "Times New Roman"
+    r_cr2.font.size = Pt(9.5)
+    r_cr2.bold = True
+
+    # 3. STUDENT REGISTRATION & NAME LINE (Matching Photo 2)
+    p_reg = doc.add_paragraph()
+    p_reg.paragraph_format.space_before = Pt(3)
+    p_reg.paragraph_format.space_after = Pt(2)
+    r_reg = p_reg.add_run("Registration No. __________________                Student Name: __________________")
+    r_reg.font.name = "Times New Roman"
+    r_reg.font.size = Pt(9)
+    r_reg.bold = True
+
+    # 4. HORIZONTAL DASHED DIVIDER (Matching Photo 1 & 3)
+    p_sep = doc.add_paragraph()
+    p_sep.paragraph_format.space_after = Pt(3)
+    r_sep = p_sep.add_run("----------------------------------------------------------------------------------------------------------------------------------")
+    r_sep.font.name = "Times New Roman"
+    r_sep.font.size = Pt(8)
+    r_sep.font.color.rgb = RGBColor(100, 116, 139)
+
+    # 5. NOTE / INSTRUCTIONS SECTION (Matching Photos 1 & 3)
+    if req.include_instructions:
+        p_note = doc.add_paragraph()
+        p_note.paragraph_format.space_after = Pt(6)
+        r_nh = p_note.add_run("Note:   Solve all the questions.\n")
+        r_nh.bold = True
+        r_nh.font.name = "Times New Roman"
+        r_nh.font.size = Pt(9)
+        
+        r_nb = p_note.add_run(
+            "        Support your answer with mathematical equations and graphs where applicable.\n"
+            "        Provide code examples where necessary.\n"
+            "        All electronic devices, smartwatches, and programmable calculators are strictly prohibited."
+        )
+        r_nb.font.name = "Times New Roman"
+        r_nb.font.size = Pt(8.5)
+
+    # 6. QUESTIONS GENERATION WITH CLO CODES
+    q_counter = 1
+
+    # (A) Reading Comprehension / Case Study (Matching Photo 2)
+    if quiz_data.get("reading_passage"):
+        passage_text = str(quiz_data["reading_passage"])
+        clo_tag = "(CLO - 02)  (04)" if include_clo else "(04 Marks)"
+        
+        t_qh = doc.add_table(rows=1, cols=2)
+        t_qh.autofit = False
+        t_qh.columns[0].width = Inches(5.5)
+        t_qh.columns[1].width = Inches(1.8)
+        
+        c_l = t_qh.cell(0, 0).paragraphs[0]
+        c_l.paragraph_format.space_after = Pt(2)
+        r_ql = c_l.add_run(f"Question {q_counter:02d}: Write short and to the point answers to the questions given below from the following Reading Comprehension passage:")
+        r_ql.bold = True
+        r_ql.font.name = "Times New Roman"
+        r_ql.font.size = Pt(10)
+
+        c_r = t_qh.cell(0, 1).paragraphs[0]
+        c_r.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+        c_r.paragraph_format.space_after = Pt(2)
+        r_qr = c_r.add_run(clo_tag)
+        r_qr.bold = True
+        r_qr.font.name = "Times New Roman"
+        r_qr.font.size = Pt(10)
+
+        p_cp = doc.add_paragraph()
+        p_cp.paragraph_format.space_before = Pt(3)
+        p_cp.paragraph_format.space_after = Pt(2)
+        r_cp = p_cp.add_run("Comprehension passage:")
+        r_cp.bold = True
+        r_cp.font.name = "Times New Roman"
+        r_cp.font.size = Pt(9.5)
+
+        for para in passage_text.split("\n"):
+            if para.strip():
+                p_p = doc.add_paragraph(para.strip())
+                p_p.paragraph_format.left_indent = Inches(0.2)
+                p_p.paragraph_format.space_after = Pt(2)
+                p_p.runs[0].font.name = "Times New Roman"
+                p_p.runs[0].font.size = Pt(9)
+                p_p.runs[0].font.italic = True
+
+        p_cq = doc.add_paragraph()
+        p_cq.paragraph_format.space_before = Pt(2)
+        p_cq.paragraph_format.space_after = Pt(2)
+        r_cq = p_cq.add_run("Questions:")
+        r_cq.bold = True
+        r_cq.font.name = "Times New Roman"
+        r_cq.font.size = Pt(9.5)
+
+        comp_questions = quiz_data.get("short_questions", [])[:4]
+        for sub_idx, sq in enumerate(comp_questions):
+            p_subq = doc.add_paragraph(f"{chr(97 + sub_idx)}) {sq.get('question_text')}")
+            p_subq.paragraph_format.left_indent = Inches(0.25)
+            p_subq.paragraph_format.space_after = Pt(1.5)
+            p_subq.runs[0].font.name = "Times New Roman"
+            p_subq.runs[0].font.size = Pt(9)
+
+        doc.add_paragraph().paragraph_format.space_after = Pt(4)
+        q_counter += 1
+
+    # (B) Multiple Choice Questions (If present)
     if quiz_data.get("mcq_questions"):
-        doc.add_heading("Section A: Multiple Choice Questions", level=2)
-        counter = 1
-        for q in quiz_data["mcq_questions"]:
-            p = doc.add_paragraph()
-            p.paragraph_format.space_after = Pt(2)
-            p.add_run(f"Q{counter}. ").bold = True
-            p.add_run(q['question_text'])
-            for j, opt in enumerate(q['options']):
-                p_opt = doc.add_paragraph(f"   {chr(65+j)}. {opt}")
-                p_opt.paragraph_format.space_after = Pt(2)
-            doc.add_paragraph().paragraph_format.space_after = Pt(4)
-            counter += 1
+        mcq_count = len(quiz_data["mcq_questions"])
+        clo_tag = f"(CLO - 01)  ({mcq_count:02d})" if include_clo else f"({mcq_count} Marks)"
 
+        t_qh = doc.add_table(rows=1, cols=2)
+        t_qh.autofit = False
+        t_qh.columns[0].width = Inches(5.5)
+        t_qh.columns[1].width = Inches(1.8)
+
+        c_l = t_qh.cell(0, 0).paragraphs[0]
+        c_l.paragraph_format.space_after = Pt(2)
+        r_ql = c_l.add_run(f"Question {q_counter:02d}: Multiple Choice Questions (Select the most appropriate option):")
+        r_ql.bold = True
+        r_ql.font.name = "Times New Roman"
+        r_ql.font.size = Pt(10)
+
+        c_r = t_qh.cell(0, 1).paragraphs[0]
+        c_r.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+        c_r.paragraph_format.space_after = Pt(2)
+        r_qr = c_r.add_run(clo_tag)
+        r_qr.bold = True
+        r_qr.font.name = "Times New Roman"
+        r_qr.font.size = Pt(10)
+
+        for m_idx, q in enumerate(quiz_data["mcq_questions"], 1):
+            p_m = doc.add_paragraph()
+            p_m.paragraph_format.left_indent = Inches(0.2)
+            p_m.paragraph_format.space_after = Pt(1)
+            r_mn = p_m.add_run(f"{m_idx}. {q['question_text']}")
+            r_mn.font.name = "Times New Roman"
+            r_mn.font.size = Pt(9.5)
+
+            opts = q.get('options', [])
+            if len(opts) >= 4:
+                t_opt = doc.add_table(rows=2, cols=2)
+                t_opt.columns[0].width = Inches(3.5)
+                t_opt.columns[1].width = Inches(3.5)
+                pairs = [(f"a) {opts[0]}", f"b) {opts[1]}"), (f"c) {opts[2]}", f"d) {opts[3]}")]
+                for r_i, (o1, o2) in enumerate(pairs):
+                    c1 = t_opt.cell(r_i, 0).paragraphs[0]
+                    c1.paragraph_format.left_indent = Inches(0.35)
+                    c1.paragraph_format.space_after = Pt(1)
+                    r1 = c1.add_run(o1)
+                    r1.font.name = "Times New Roman"
+                    r1.font.size = Pt(9)
+
+                    c2 = t_opt.cell(r_i, 1).paragraphs[0]
+                    c2.paragraph_format.left_indent = Inches(0.2)
+                    c2.paragraph_format.space_after = Pt(1)
+                    r2 = c2.add_run(o2)
+                    r2.font.name = "Times New Roman"
+                    r2.font.size = Pt(9)
+            else:
+                for j, opt in enumerate(opts):
+                    p_opt = doc.add_paragraph(f"   {chr(97+j)}) {opt}")
+                    p_opt.paragraph_format.left_indent = Inches(0.35)
+                    p_opt.paragraph_format.space_after = Pt(1)
+                    p_opt.runs[0].font.name = "Times New Roman"
+                    p_opt.runs[0].font.size = Pt(9)
+
+            doc.add_paragraph().paragraph_format.space_after = Pt(2)
+
+        q_counter += 1
+
+    # (C) Fill in the Blanks (If present)
     if quiz_data.get("fill_blank_questions"):
-        doc.add_heading("Section B: Fill in the Blanks", level=2)
-        counter = 1
-        for q in quiz_data["fill_blank_questions"]:
-            p = doc.add_paragraph()
-            p.paragraph_format.space_after = Pt(8)
-            p.add_run(f"Q{counter}. ").bold = True
-            p.add_run(q['question_text'])
-            counter += 1
+        fb_count = len(quiz_data["fill_blank_questions"])
+        clo_tag = f"(CLO - 01)  ({fb_count:02d})" if include_clo else f"({fb_count} Marks)"
 
-    if quiz_data.get("short_questions"):
-        doc.add_heading("Section C: Short Answer Questions", level=2)
-        counter = 1
-        for q in quiz_data["short_questions"]:
-            p = doc.add_paragraph()
-            p.paragraph_format.space_after = Pt(24) 
-            p.add_run(f"Q{counter}. ").bold = True
-            p.add_run(q['question_text'])
-            counter += 1
+        t_qh = doc.add_table(rows=1, cols=2)
+        t_qh.autofit = False
+        t_qh.columns[0].width = Inches(5.5)
+        t_qh.columns[1].width = Inches(1.8)
 
-    if quiz_data.get("long_questions"):
-        doc.add_heading("Section D: Detailed Explanation", level=2)
-        counter = 1
-        for q in quiz_data["long_questions"]:
-            p = doc.add_paragraph()
-            p.paragraph_format.space_after = Pt(48) 
-            p.add_run(f"Q{counter}. ").bold = True
-            p.add_run(q['question_text'])
-            counter += 1
+        c_l = t_qh.cell(0, 0).paragraphs[0]
+        c_l.paragraph_format.space_after = Pt(2)
+        r_ql = c_l.add_run(f"Question {q_counter:02d}: Fill in the blanks with appropriate technical terms:")
+        r_ql.bold = True
+        r_ql.font.name = "Times New Roman"
+        r_ql.font.size = Pt(10)
 
+        c_r = t_qh.cell(0, 1).paragraphs[0]
+        c_r.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+        c_r.paragraph_format.space_after = Pt(2)
+        r_qr = c_r.add_run(clo_tag)
+        r_qr.bold = True
+        r_qr.font.name = "Times New Roman"
+        r_qr.font.size = Pt(10)
+
+        for fb_idx, q in enumerate(quiz_data["fill_blank_questions"], 1):
+            p_fb = doc.add_paragraph()
+            p_fb.paragraph_format.left_indent = Inches(0.2)
+            p_fb.paragraph_format.space_after = Pt(3)
+            r_fbt = p_fb.add_run(f"{fb_idx}. {q['question_text']}")
+            r_fbt.font.name = "Times New Roman"
+            r_fbt.font.size = Pt(9.5)
+
+        q_counter += 1
+
+    # (D) Short / Conceptual Questions (Matching Photos 1, 2, 3)
+    short_qs = quiz_data.get("short_questions", [])
+    if quiz_data.get("reading_passage"):
+        short_qs = short_qs[4:]
+
+    for sq_idx, q in enumerate(short_qs):
+        clo_num = f"0{(sq_idx % 3) + 1}"
+        clo_val = q.get("clo") or f"CLO - {clo_num}"
+        m_val = q.get("marks", 5)
+        clo_tag = f"({clo_val})  ({m_val:02d})" if include_clo else f"({m_val:02d} Marks)"
+
+        t_qh = doc.add_table(rows=1, cols=2)
+        t_qh.autofit = False
+        t_qh.columns[0].width = Inches(5.5)
+        t_qh.columns[1].width = Inches(1.8)
+
+        c_l = t_qh.cell(0, 0).paragraphs[0]
+        c_l.paragraph_format.space_after = Pt(2)
+        r_ql = c_l.add_run(f"Question {q_counter:02d}:")
+        r_ql.bold = True
+        r_ql.font.name = "Times New Roman"
+        r_ql.font.size = Pt(10.5)
+
+        c_r = t_qh.cell(0, 1).paragraphs[0]
+        c_r.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+        c_r.paragraph_format.space_after = Pt(2)
+        r_qr = c_r.add_run(clo_tag)
+        r_qr.bold = True
+        r_qr.font.name = "Times New Roman"
+        r_qr.font.size = Pt(10.5)
+
+        p_qt = doc.add_paragraph(q['question_text'])
+        p_qt.paragraph_format.space_after = Pt(5)
+        p_qt.runs[0].font.name = "Times New Roman"
+        p_qt.runs[0].font.size = Pt(10)
+
+        q_counter += 1
+
+    # (E) Descriptive / Long / Practical Questions (Matching Photo 1 & 3)
+    for lq_idx, q in enumerate(quiz_data.get("long_questions", [])):
+        clo_num = f"0{(lq_idx % 2) + 2}"
+        clo_val = q.get("clo") or f"CLO - {clo_num}"
+        if q.get("marks"):
+            marks_str = f"({q['marks']:02d})"
+        else:
+            marks_str = "(1 + 2 + 2 + 3 + 2)" if (exam_category == "PRACTICAL" or (lq_idx == 0 and len(quiz_data.get("long_questions", [])) == 1)) else f"({8 - (lq_idx * 2):02d})"
+        clo_tag = f"({clo_val})  {marks_str}" if include_clo else f"{marks_str}"
+
+        t_qh = doc.add_table(rows=1, cols=2)
+        t_qh.autofit = False
+        t_qh.columns[0].width = Inches(5.2)
+        t_qh.columns[1].width = Inches(2.1)
+
+        c_l = t_qh.cell(0, 0).paragraphs[0]
+        c_l.paragraph_format.space_after = Pt(2)
+        r_ql = c_l.add_run(f"Question {q_counter:02d}:")
+        r_ql.bold = True
+        r_ql.font.name = "Times New Roman"
+        r_ql.font.size = Pt(10.5)
+
+        c_r = t_qh.cell(0, 1).paragraphs[0]
+        c_r.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+        c_r.paragraph_format.space_after = Pt(2)
+        r_qr = c_r.add_run(clo_tag)
+        r_qr.bold = True
+        r_qr.font.name = "Times New Roman"
+        r_qr.font.size = Pt(10.5)
+
+        p_qt = doc.add_paragraph(q['question_text'])
+        p_qt.paragraph_format.space_after = Pt(6)
+        p_qt.runs[0].font.name = "Times New Roman"
+        p_qt.runs[0].font.size = Pt(10)
+
+        q_counter += 1
+
+    # 7. SIGNATURE FOOTER (Exact Match to Photo 1 & Photo 3)
+    p_luck = doc.add_paragraph()
+    p_luck.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p_luck.paragraph_format.space_before = Pt(18)
+    p_luck.paragraph_format.space_after = Pt(6)
+    r_luck = p_luck.add_run("*****Good Luck*****")
+    r_luck.bold = True
+    r_luck.font.name = "Times New Roman"
+    r_luck.font.size = Pt(10)
+
+    # 8. CONFIDENTIAL TEACHER MARKING SCHEME
     if req.include_answer_key:
         doc.add_page_break()
-        doc.add_heading("Answer Key", level=1)
-        for sec in ["mcq_questions", "fill_blank_questions", "short_questions", "long_questions"]:
-            if quiz_data.get(sec):
-                k = 1
-                for q in quiz_data[sec]:
-                    ans = q.get('correct_answer') or q.get('model_answer')
-                    p = doc.add_paragraph()
-                    p.paragraph_format.space_after = Pt(4)
-                    p.add_run(f"Q{k}. ").bold = True
-                    p.add_run(str(ans))
-                    k += 1
+        p_mh = doc.add_paragraph()
+        p_mh.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p_mh.paragraph_format.space_after = Pt(2)
+        r_mh = p_mh.add_run("CONFIDENTIAL — INSTRUCTOR MARKING SCHEME & RUBRICS\n")
+        r_mh.bold = True
+        r_mh.font.name = "Times New Roman"
+        r_mh.font.size = Pt(13)
+        r_mh.font.color.rgb = RGBColor(185, 28, 28)
+
+        r_subm = p_mh.add_run(f"EXAMINATION SET: {set_label} • EVALUATION GUIDE ONLY")
+        r_subm.bold = True
+        r_subm.font.name = "Times New Roman"
+        r_subm.font.size = Pt(9.5)
+        r_subm.font.color.rgb = RGBColor(71, 85, 105)
+
+        doc.add_paragraph().paragraph_format.space_after = Pt(4)
+
+        for sec_name, sec_key in [
+            ("Objective Answer Key", "mcq_questions"),
+            ("Fill in the Blanks Key", "fill_blank_questions"),
+            ("Short Questions Model Points", "short_questions"),
+            ("Descriptive Questions Evaluation Guide", "long_questions")
+        ]:
+            if quiz_data.get(sec_key):
+                p_sh = doc.add_paragraph()
+                p_sh.paragraph_format.space_after = Pt(2)
+                r_sh = p_sh.add_run(sec_name)
+                r_sh.bold = True
+                r_sh.font.name = "Times New Roman"
+                r_sh.font.size = Pt(10.5)
+
+                for k, q in enumerate(quiz_data[sec_key], 1):
+                    ans = q.get('correct_answer') or q.get('model_answer') or ""
+                    expl = q.get('explanation') or ""
+                    p_a = doc.add_paragraph()
+                    p_a.paragraph_format.space_after = Pt(2)
+                    r_ak = p_a.add_run(f"Q{k}. ")
+                    r_ak.bold = True
+                    r_ak.font.name = "Times New Roman"
+                    r_ak.font.size = Pt(9)
+
+                    r_at = p_a.add_run(f"Answer: {ans}")
+                    r_at.font.name = "Times New Roman"
+                    r_at.font.size = Pt(9)
+
+                    if expl:
+                        p_e = doc.add_paragraph(f"     Explanation / Rubric: {expl}")
+                        p_e.paragraph_format.space_after = Pt(3)
+                        p_e.runs[0].font.name = "Times New Roman"
+                        p_e.runs[0].font.size = Pt(8.5)
+                        p_e.runs[0].font.italic = True
+                        p_e.runs[0].font.color.rgb = RGBColor(71, 85, 105)
+
+                doc.add_paragraph().paragraph_format.space_after = Pt(4)
 
     if logo_path and os.path.exists(logo_path):
         os.remove(logo_path)
@@ -592,114 +1199,277 @@ def export_quiz_docx(quiz_id: int, req: ExportQuizRequest, user=Depends(require_
     buffer = io.BytesIO()
     doc.save(buffer)
     buffer.seek(0)
-    return StreamingResponse(buffer, media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document", headers={"Content-Disposition": f"attachment; filename=Quiz_{quiz_id}.docx"})
+    safe_fn = re.sub(r'[^a-zA-Z0-9_-]', '_', f"{subject_val}_{exam_title}_{req.exam_set}")[:45]
+    return StreamingResponse(buffer, media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document", headers={"Content-Disposition": f"attachment; filename=Exam_{safe_fn}.docx"})
 
 @app.post("/quiz/{quiz_id}/export/pdf")
-def export_quiz_pdf(quiz_id: int, req: ExportQuizRequest, user=Depends(require_teacher)):
+def export_quiz_pdf(quiz_id: int, req: ExportQuizRequest, user=Depends(get_current_user)):
     quiz = database.get_quiz(quiz_id)
     if not quiz: raise HTTPException(status_code=404, detail="Quiz not found.")
+
+    # If the user is a student and this quiz is an assigned classroom examination, deny confidential answer key
+    if user.get("role") != "teacher":
+        conn = database.get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT a.id FROM assignments a
+            JOIN classroom_students cs ON cs.classroom_id = a.classroom_id
+            WHERE a.quiz_id = ? AND cs.student_id = ?
+        ''', (quiz_id, user["id"]))
+        if cursor.fetchone():
+            req.include_answer_key = False
+        conn.close()
 
     buffer = io.BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=36, leftMargin=36, topMargin=36, bottomMargin=36)
     styles = getSampleStyleSheet()
-    
-    q_style = ParagraphStyle(name='Question', parent=styles['Normal'], fontName='Helvetica', spaceBefore=8, spaceAfter=2, leading=14)
-    opt_style = ParagraphStyle(name='Option', parent=styles['Normal'], leftIndent=20, spaceAfter=2, leading=12)
-    
-    elements = []
+
     meta = quiz["exam_metadata"]
-    quiz_data = quiz["quiz_data"]
-    
+    raw_quiz_data = quiz["quiz_data"]
+    quiz_data = prepare_exam_data(raw_quiz_data, req.exam_set)
+
     branding = database.get_teacher_branding(user["id"])
-    academy_name = branding["academy_name"] if branding and branding.get("academy_name") else meta.get("institution_name", "Academy Worksheet")
-    
+    inst_name = req.institution_name.strip() or (branding["academy_name"] if branding and branding.get("academy_name") else meta.get("institution_name", "Academic Examination Department"))
+    dept_name = req.department_name.strip() or meta.get("department_name", "Examination Branch")
+    exam_title = req.exam_title.strip() or meta.get("exam_title", "Assessment Examination")
+    exam_category = (req.exam_category.strip() if req.exam_category else "THEORY").upper()
+    course_code = req.course_code.strip() or meta.get("course_code", "CSC-262")
+    subject_val = req.subject.strip() or meta.get("subject", "Machine Learning")
+    course_str = f"{subject_val} ({course_code})" if course_code else subject_val
+    class_val = req.class_name.strip() or meta.get("class_name", "BSCS - 4")
+    t_name = req.teacher_name.strip() or meta.get('teacher_name', user['name'])
+    dur = req.duration_minutes if req.duration_minutes is not None else meta.get("duration_minutes", 90)
+    marks = req.total_marks if req.total_marks is not None else meta.get("total_marks", 20)
+    set_label = req.exam_set.upper()
+    include_clo = req.include_clo
+
     logo_path = process_base64_logo_safe(branding)
     logo_img = None
-
     if logo_path and os.path.exists(logo_path):
         try:
-            logo_img = RLImage(logo_path, width=1.0*72, height=1.0*72, kind='proportional')
+            logo_img = RLImage(logo_path, width=0.9 * 72, height=0.9 * 72, kind='proportional')
         except Exception as e:
             logger.error(f"Failed to add logo to PDF: {e}")
 
-    exam_title = meta.get("exam_title", "Assessment Examination")
-    t_name = str(meta.get('teacher_name', user['name'])).upper()
-    subject_val = meta.get('subject', 'Not Specified')
-    class_val = meta.get('class_name', 'Not Specified')
-    dur = meta.get('duration_minutes', 60)
-    marks = meta.get('total_marks', 100)
-    
+    # Custom ReportLab Typography styles (Times New Roman / Times-Roman)
+    styles.add(ParagraphStyle(name='AridInst', fontName='Times-Bold', fontSize=14.5, leading=17, alignment=TA_CENTER))
+    styles.add(ParagraphStyle(name='AridDept', fontName='Times-Roman', fontSize=11, leading=14, alignment=TA_CENTER))
+    styles.add(ParagraphStyle(name='AridExam', fontName='Times-Bold', fontSize=11, leading=14, alignment=TA_CENTER))
+    styles.add(ParagraphStyle(name='AridCat', fontName='Times-Bold', fontSize=11, leading=14, alignment=TA_CENTER))
+    styles.add(ParagraphStyle(name='AridMetaL', fontName='Times-Bold', fontSize=9.5, leading=12, alignment=TA_LEFT))
+    styles.add(ParagraphStyle(name='AridMetaR', fontName='Times-Bold', fontSize=9.5, leading=12, alignment=TA_RIGHT))
+    styles.add(ParagraphStyle(name='AridReg', fontName='Times-Bold', fontSize=9, leading=12, alignment=TA_LEFT))
+    styles.add(ParagraphStyle(name='AridNoteH', fontName='Times-Bold', fontSize=9, leading=12, alignment=TA_LEFT))
+    styles.add(ParagraphStyle(name='AridNoteB', fontName='Times-Roman', fontSize=8.5, leading=11.5, alignment=TA_LEFT))
+    styles.add(ParagraphStyle(name='AridQL', fontName='Times-Bold', fontSize=10.5, leading=13, alignment=TA_LEFT))
+    styles.add(ParagraphStyle(name='AridQR', fontName='Times-Bold', fontSize=10.5, leading=13, alignment=TA_RIGHT))
+    styles.add(ParagraphStyle(name='AridQBody', fontName='Times-Roman', fontSize=10, leading=13.5, alignment=TA_LEFT, spaceAfter=4))
+    styles.add(ParagraphStyle(name='AridGoodLuck', fontName='Times-Bold', fontSize=10, leading=13, alignment=TA_CENTER, spaceBefore=16, spaceAfter=6))
+
+    elements = []
+
+    # 1. HEADER (Centered, Times-Roman)
     p_header = Paragraph(f"""
-        <font size="16"><b>{academy_name}</b></font><br/>
-        <font size="13"><b>{exam_title}</b></font><br/><br/>
-        <font size="10">Subject: {subject_val} &nbsp;&nbsp;|&nbsp;&nbsp; Class/Semester: {class_val}</font><br/>
-        <font size="10">Teacher: <b><font color='blue'>{t_name}</font></b> &nbsp;&nbsp;|&nbsp;&nbsp; Duration: {dur} mins &nbsp;&nbsp;|&nbsp;&nbsp; Total Marks: {marks}</font>
-    """, ParagraphStyle(name='HeaderStyle', alignment=TA_CENTER, leading=14))
+        <para align='center'>
+            <font size='14.5' face='Times-Bold'><b>{inst_name}</b></font><br/>
+            <font size='11' face='Times-Roman'>{dept_name}</font><br/>
+            <font size='11' face='Times-Bold'><b>{exam_title}</b></font><br/>
+            <font size='11' face='Times-Bold'><u><b>{exam_category}</b></u></font>
+        </para>
+    """, styles['Normal'])
 
     if logo_img:
-        header_table = Table([[logo_img, p_header]], colWidths=[1.2*72, 6.0*72])
+        header_table = Table([[logo_img, p_header]], colWidths=[1.0 * 72, 6.4 * 72])
         header_table.setStyle(TableStyle([
-            ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
-            ('ALIGN', (0,0), (0,0), 'CENTER'),
-            ('ALIGN', (1,0), (1,0), 'CENTER')
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('ALIGN', (0, 0), (0, 0), 'CENTER'),
+            ('ALIGN', (1, 0), (1, 0), 'CENTER')
         ]))
     else:
-        header_table = Table([[p_header]], colWidths=[7.2*72])
-        header_table.setStyle(TableStyle([('ALIGN', (0,0), (-1,-1), 'CENTER')]))
+        header_table = Table([[p_header]], colWidths=[7.4 * 72])
+        header_table.setStyle(TableStyle([('ALIGN', (0, 0), (-1, -1), 'CENTER')]))
     
     elements.append(header_table)
-    elements.append(Spacer(1, 10))
+    elements.append(Spacer(1, 4))
 
-    elements.append(Paragraph("_" * 70, ParagraphStyle(name='Line', alignment=TA_CENTER)))
-    elements.append(Spacer(1, 5))
-    elements.append(Paragraph("<b>Student Name:</b> ___________________________   <b>Roll No:</b> _____________   <b>Date:</b> ___________", styles['Normal']))
-    elements.append(Spacer(1, 15))
+    # 2. METADATA LEFT & RIGHT ROW
+    dur_text = f"{dur} Min" if dur < 60 else f"{dur // 60} Hour{'s' if dur >= 120 else ''} {dur % 60} Min" if dur % 60 else f"{dur // 60} Hours" if dur > 60 else "1.5 Hours" if dur == 90 else "1 Hour"
+    set_suffix = f" &nbsp; [{set_label}]" if set_label != "STANDARD" else ""
     
+    p_metal = Paragraph(f"<b>Class:</b> {class_val}<br/><b>{course_str}</b>", styles['AridMetaL'])
+    p_metar = Paragraph(f"<b>Time Allowed:</b> {dur_text}<br/><b>Maximum Points:</b> {marks}{set_suffix}", styles['AridMetaR'])
+    t_meta = Table([[p_metal, p_metar]], colWidths=[3.7 * 72, 3.7 * 72])
+    t_meta.setStyle(TableStyle([
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ('PADDING', (0, 0), (-1, -1), 0),
+    ]))
+    elements.append(t_meta)
+    elements.append(Spacer(1, 4))
+
+    # 3. REGISTRATION LINE
+    elements.append(Paragraph("<b>Registration No.</b> __________________ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <b>Students Name:</b> __________________", styles['AridReg']))
+    elements.append(Spacer(1, 2))
+
+    # 4. DASHED SEPARATOR LINE
+    elements.append(Paragraph("<font color='#64748b' size='8'>----------------------------------------------------------------------------------------------------------------------------------</font>", styles['Normal']))
+    elements.append(Spacer(1, 3))
+
+    # 5. NOTE / INSTRUCTIONS SECTION
+    if req.include_instructions:
+        elements.append(Paragraph("<b>Note: &nbsp; Solve all the questions.</b>", styles['AridNoteH']))
+        elements.append(Paragraph("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Support your answer with mathematical equations and graphs where applicable.<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Provide code examples where necessary.<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;All electronic devices, smartwatches, and programmable calculators are strictly prohibited.", styles['AridNoteB']))
+        elements.append(Spacer(1, 6))
+
+    # 6. QUESTIONS
+    q_counter = 1
+
+    # (A) Reading Comprehension (Matching Photo 2)
+    if quiz_data.get("reading_passage"):
+        passage_text = str(quiz_data["reading_passage"])
+        clo_tag = "(CLO - 02) &nbsp;(04)" if include_clo else "(04 Marks)"
+        
+        p_ql = Paragraph(f"<b>Question {q_counter:02d}:</b> Write short and to the point answers to the questions given below from the following Reading Comprehension passage:", styles['AridQL'])
+        p_qr = Paragraph(f"<b>{clo_tag}</b>", styles['AridQR'])
+        t_qh = Table([[p_ql, p_qr]], colWidths=[5.6 * 72, 1.8 * 72])
+        t_qh.setStyle(TableStyle([('VALIGN', (0, 0), (-1, -1), 'TOP'), ('PADDING', (0, 0), (-1, -1), 0)]))
+        elements.append(t_qh)
+        elements.append(Spacer(1, 2))
+
+        elements.append(Paragraph("<b>Comprehension passage:</b>", styles['AridReg']))
+        for para in passage_text.split("\n"):
+            if para.strip():
+                elements.append(Paragraph(f"<i>&nbsp;&nbsp;&nbsp;&nbsp;{para.strip()}</i>", styles['AridNoteB']))
+                elements.append(Spacer(1, 2))
+
+        elements.append(Paragraph("<b>Questions:</b>", styles['AridReg']))
+        comp_questions = quiz_data.get("short_questions", [])[:4]
+        for sub_idx, sq in enumerate(comp_questions):
+            elements.append(Paragraph(f"&nbsp;&nbsp;&nbsp;&nbsp;<b>{chr(97 + sub_idx)})</b> {sq.get('question_text')}", styles['AridQBody']))
+        elements.append(Spacer(1, 4))
+        q_counter += 1
+
+    # (B) Multiple Choice Questions
     if quiz_data.get("mcq_questions"):
-        elements.append(Paragraph("<b>Section A: Multiple Choice</b>", styles['Heading3']))
-        counter = 1
-        for q in quiz_data["mcq_questions"]:
-            elements.append(Paragraph(f"<b>Q{counter}.</b> {q['question_text']}", q_style))
-            for j, opt in enumerate(q['options']):
-                elements.append(Paragraph(f"{chr(65+j)}. {opt}", opt_style))
-            counter += 1
-            elements.append(Spacer(1, 4))
+        mcq_count = len(quiz_data["mcq_questions"])
+        clo_tag = f"(CLO - 01) &nbsp;({mcq_count:02d})" if include_clo else f"({mcq_count} Marks)"
 
+        p_ql = Paragraph(f"<b>Question {q_counter:02d}:</b> Multiple Choice Questions (Select the most appropriate option):", styles['AridQL'])
+        p_qr = Paragraph(f"<b>{clo_tag}</b>", styles['AridQR'])
+        t_qh = Table([[p_ql, p_qr]], colWidths=[5.6 * 72, 1.8 * 72])
+        t_qh.setStyle(TableStyle([('VALIGN', (0, 0), (-1, -1), 'TOP'), ('PADDING', (0, 0), (-1, -1), 0)]))
+        elements.append(t_qh)
+        elements.append(Spacer(1, 3))
+
+        for m_idx, q in enumerate(quiz_data["mcq_questions"], 1):
+            elements.append(Paragraph(f"<b>{m_idx}.</b> {q['question_text']}", styles['AridQBody']))
+            opts = q.get('options', [])
+            if len(opts) >= 4:
+                opts_data = [
+                    [Paragraph(f"a) {opts[0]}", styles['AridNoteB']), Paragraph(f"b) {opts[1]}", styles['AridNoteB'])],
+                    [Paragraph(f"c) {opts[2]}", styles['AridNoteB']), Paragraph(f"d) {opts[3]}", styles['AridNoteB'])]
+                ]
+                t_o = Table(opts_data, colWidths=[3.7 * 72, 3.7 * 72])
+                t_o.setStyle(TableStyle([('PADDING', (0, 0), (-1, -1), 1), ('VALIGN', (0, 0), (-1, -1), 'MIDDLE')]))
+                elements.append(t_o)
+            else:
+                for j, opt in enumerate(opts):
+                    elements.append(Paragraph(f"&nbsp;&nbsp;&nbsp;&nbsp;{chr(97+j)}) {opt}", styles['AridNoteB']))
+            elements.append(Spacer(1, 3))
+
+        q_counter += 1
+
+    # (C) Fill in the Blanks
     if quiz_data.get("fill_blank_questions"):
-        elements.append(Paragraph("<b>Section B: Fill in the Blanks</b>", styles['Heading3']))
-        counter = 1
-        for q in quiz_data["fill_blank_questions"]:
-            elements.append(Paragraph(f"<b>Q{counter}.</b> {q['question_text']}", q_style))
-            elements.append(Spacer(1, 12)) 
-            counter += 1
+        fb_count = len(quiz_data["fill_blank_questions"])
+        clo_tag = f"(CLO - 01) &nbsp;({fb_count:02d})" if include_clo else f"({fb_count} Marks)"
 
-    if quiz_data.get("short_questions"):
-        elements.append(Paragraph("<b>Section C: Short Answer</b>", styles['Heading3']))
-        counter = 1
-        for q in quiz_data["short_questions"]:
-            elements.append(Paragraph(f"<b>Q{counter}.</b> {q['question_text']}", q_style))
-            elements.append(Spacer(1, 30)) 
-            counter += 1
+        p_ql = Paragraph(f"<b>Question {q_counter:02d}:</b> Fill in the blanks with appropriate technical terms:", styles['AridQL'])
+        p_qr = Paragraph(f"<b>{clo_tag}</b>", styles['AridQR'])
+        t_qh = Table([[p_ql, p_qr]], colWidths=[5.6 * 72, 1.8 * 72])
+        t_qh.setStyle(TableStyle([('VALIGN', (0, 0), (-1, -1), 'TOP'), ('PADDING', (0, 0), (-1, -1), 0)]))
+        elements.append(t_qh)
+        elements.append(Spacer(1, 3))
 
-    if quiz_data.get("long_questions"):
-        elements.append(Paragraph("<b>Section D: Detailed Explanation</b>", styles['Heading3']))
-        counter = 1
-        for q in quiz_data["long_questions"]:
-            elements.append(Paragraph(f"<b>Q{counter}.</b> {q['question_text']}", q_style))
-            elements.append(Spacer(1, 50)) 
-            counter += 1
+        for fb_idx, q in enumerate(quiz_data["fill_blank_questions"], 1):
+            elements.append(Paragraph(f"<b>{fb_idx}.</b> {q['question_text']}", styles['AridQBody']))
+            elements.append(Spacer(1, 2))
 
+        q_counter += 1
+
+    # (D) Short Questions
+    short_qs = quiz_data.get("short_questions", [])
+    if quiz_data.get("reading_passage"):
+        short_qs = short_qs[4:]
+
+    for sq_idx, q in enumerate(short_qs):
+        clo_num = f"0{(sq_idx % 3) + 1}"
+        clo_val = q.get("clo") or f"CLO - {clo_num}"
+        m_val = q.get("marks", 5)
+        clo_tag = f"({clo_val}) &nbsp;({m_val:02d})" if include_clo else f"({m_val:02d} Marks)"
+
+        p_ql = Paragraph(f"<b>Question {q_counter:02d}:</b>", styles['AridQL'])
+        p_qr = Paragraph(f"<b>{clo_tag}</b>", styles['AridQR'])
+        t_qh = Table([[p_ql, p_qr]], colWidths=[5.6 * 72, 1.8 * 72])
+        t_qh.setStyle(TableStyle([('VALIGN', (0, 0), (-1, -1), 'TOP'), ('PADDING', (0, 0), (-1, -1), 0)]))
+        elements.append(t_qh)
+        elements.append(Spacer(1, 2))
+
+        elements.append(Paragraph(q['question_text'], styles['AridQBody']))
+        elements.append(Spacer(1, 4))
+        q_counter += 1
+
+    # (E) Long / Practical Questions (Matching Photos 1 & 3)
+    for lq_idx, q in enumerate(quiz_data.get("long_questions", [])):
+        clo_num = f"0{(lq_idx % 2) + 2}"
+        clo_val = q.get("clo") or f"CLO - {clo_num}"
+        if q.get("marks"):
+            marks_str = f"({q['marks']:02d})"
+        else:
+            marks_str = "(1 + 2 + 2 + 3 + 2)" if (exam_category == "PRACTICAL" or (lq_idx == 0 and len(quiz_data.get("long_questions", [])) == 1)) else f"({8 - (lq_idx * 2):02d})"
+        clo_tag = f"({clo_val}) &nbsp;{marks_str}" if include_clo else f"{marks_str}"
+
+        p_ql = Paragraph(f"<b>Question {q_counter:02d}:</b>", styles['AridQL'])
+        p_qr = Paragraph(f"<b>{clo_tag}</b>", styles['AridQR'])
+        t_qh = Table([[p_ql, p_qr]], colWidths=[5.4 * 72, 2.0 * 72])
+        t_qh.setStyle(TableStyle([('VALIGN', (0, 0), (-1, -1), 'TOP'), ('PADDING', (0, 0), (-1, -1), 0)]))
+        elements.append(t_qh)
+        elements.append(Spacer(1, 2))
+
+        elements.append(Paragraph(q['question_text'], styles['AridQBody']))
+        elements.append(Spacer(1, 5))
+        q_counter += 1
+
+    # 7. SIGNATURE FOOTER (Matching Photos 1 & 3)
+    elements.append(Paragraph("*****Good Luck*****", styles['AridGoodLuck']))
+
+    # 8. CONFIDENTIAL MARKING SCHEME
     if req.include_answer_key:
         elements.append(PageBreak())
-        elements.append(Paragraph("Answer Key", styles['Heading2']))
-        for sec in ["mcq_questions", "fill_blank_questions", "short_questions", "long_questions"]:
-            if quiz_data.get(sec):
-                k = 1
-                for q in quiz_data[sec]:
-                    ans = q.get('correct_answer') or q.get('model_answer')
-                    elements.append(Paragraph(f"<b>Q{k}.</b> {ans}", styles['Normal']))
-                    elements.append(Spacer(1, 4))
-                    k += 1
+        elements.append(Paragraph(f"""
+            <para align='center'>
+                <font size='13' face='Times-Bold' color='#b91c1c'><b>CONFIDENTIAL — INSTRUCTOR MARKING SCHEME & RUBRICS</b></font><br/>
+                <font size='9.5' face='Times-Bold' color='#475569'><b>EXAMINATION SET: {set_label} • EVALUATION GUIDE ONLY</b></font>
+            </para>
+        """, styles['Normal']))
+        elements.append(Spacer(1, 8))
+
+        for sec_name, sec_key in [
+            ("Objective Answer Key", "mcq_questions"),
+            ("Fill in the Blanks Key", "fill_blank_questions"),
+            ("Short Questions Model Points", "short_questions"),
+            ("Descriptive Questions Evaluation Guide", "long_questions")
+        ]:
+            if quiz_data.get(sec_key):
+                elements.append(Paragraph(f"<font size='10.5' face='Times-Bold' color='#1e3a8a'><b>{sec_name}</b></font>", styles['Normal']))
+                elements.append(Spacer(1, 3))
+                for k, q in enumerate(quiz_data[sec_key], 1):
+                    ans = q.get('correct_answer') or q.get('model_answer') or ""
+                    expl = q.get('explanation') or ""
+                    elements.append(Paragraph(f"<font size='9' face='Times-Roman'><b>Q{k}. Answer:</b> {ans}</font>", styles['Normal']))
+                    if expl:
+                        elements.append(Paragraph(f"<font size='8.5' face='Times-Italic' color='#475569'>&nbsp;&nbsp;&nbsp;&nbsp;Explanation: {expl}</font>", styles['Normal']))
+                    elements.append(Spacer(1, 2))
+                elements.append(Spacer(1, 6))
 
     doc.build(elements)
     buffer.seek(0)
@@ -707,15 +1477,72 @@ def export_quiz_pdf(quiz_id: int, req: ExportQuizRequest, user=Depends(require_t
     if logo_path and os.path.exists(logo_path):
         os.remove(logo_path)
 
-    return StreamingResponse(buffer, media_type="application/pdf", headers={"Content-Disposition": f"attachment; filename=Quiz_{quiz_id}.pdf"})
+    safe_fn = re.sub(r'[^a-zA-Z0-9_-]', '_', f"{subject_val}_{exam_title}_{req.exam_set}")[:45]
+    return StreamingResponse(buffer, media_type="application/pdf", headers={"Content-Disposition": f"attachment; filename=Exam_{safe_fn}.pdf"})
 
 # ==========================================
 # Baqi Code (Teacher Quizzes, Classes, Submissions, Analytics, Branding waghaira)
 # ==========================================
 @app.get("/quiz/{quiz_id}")
-def get_quiz_for_student(quiz_id: int, request: Request):
+def get_quiz_for_student(
+    quiz_id: int, 
+    request: Request, 
+    assignment_id: Optional[int] = None,
+    user=Depends(get_optional_user)
+):
     quiz = database.get_quiz(quiz_id)
     if not quiz: raise HTTPException(status_code=404, detail="Quiz not found.")
+
+    # Check if this quiz is an assignment for the student
+    is_assignment = False
+    has_submitted = False
+    classroom_name = None
+    teacher_name = None
+    asgn_id_resolved = assignment_id
+
+    if user:
+        conn = database.get_db_connection()
+        cursor = conn.cursor()
+        
+        # Look up if this quiz is assigned to any classroom the student is enrolled in
+        if asgn_id_resolved:
+            cursor.execute('''
+                SELECT a.id, c.name as classroom_name, u.name as teacher_name
+                FROM assignments a
+                JOIN classrooms c ON a.classroom_id = c.id
+                JOIN classroom_students cs ON cs.classroom_id = c.id
+                JOIN users u ON c.teacher_id = u.id
+                WHERE a.id = ? AND cs.student_id = ?
+            ''', (asgn_id_resolved, user["id"]))
+        else:
+            cursor.execute('''
+                SELECT a.id, c.name as classroom_name, u.name as teacher_name
+                FROM assignments a
+                JOIN classrooms c ON a.classroom_id = c.id
+                JOIN classroom_students cs ON cs.classroom_id = c.id
+                JOIN users u ON c.teacher_id = u.id
+                WHERE a.quiz_id = ? AND cs.student_id = ?
+                ORDER BY a.id DESC LIMIT 1
+            ''', (quiz_id, user["id"]))
+        
+        asgn_match = cursor.fetchone()
+        if asgn_match:
+            is_assignment = True
+            asgn_id_resolved = asgn_match["id"]
+            classroom_name = asgn_match["classroom_name"]
+            teacher_name = asgn_match["teacher_name"]
+
+            # Check if this student has already submitted
+            cursor.execute('''
+                SELECT id FROM attempts
+                WHERE user_id = ? AND (assignment_id = ? OR quiz_id = ?)
+                ORDER BY id DESC LIMIT 1
+            ''', (user["id"], asgn_id_resolved, quiz_id))
+            if cursor.fetchone():
+                has_submitted = True
+        
+        conn.close()
+
     quiz_data = quiz["quiz_data"]
     safe_quiz_data = {
         "mcq_questions": [{"question_text": q["question_text"], "options": q["options"]} for q in quiz_data.get("mcq_questions", [])],
@@ -723,12 +1550,104 @@ def get_quiz_for_student(quiz_id: int, request: Request):
         "short_questions": [{"question_text": q["question_text"]} for q in quiz_data.get("short_questions", [])],
         "long_questions": [{"question_text": q["question_text"]} for q in quiz_data.get("long_questions", [])],
     }
-    return {"quiz_id": quiz_id, "exam_metadata": quiz["exam_metadata"], "quiz_data": safe_quiz_data}
+    if "reading_passage" in quiz_data:
+        safe_quiz_data["reading_passage"] = quiz_data["reading_passage"]
+    return {
+        "quiz_id": quiz_id, 
+        "exam_metadata": quiz["exam_metadata"], 
+        "quiz_data": safe_quiz_data,
+        "is_assignment": is_assignment,
+        "has_submitted": has_submitted,
+        "assignment_id": asgn_id_resolved,
+        "classroom_name": classroom_name,
+        "teacher_name": teacher_name
+    }
+
+@app.get("/quiz/{quiz_id}/study-mode")
+def get_quiz_for_study(quiz_id: int, user=Depends(get_optional_user)):
+    quiz = database.get_quiz(quiz_id)
+    if not quiz:
+        raise HTTPException(status_code=404, detail="Quiz not found.")
+    
+    # If the user is a student and this quiz is an assigned classroom examination, deny study mode
+    if user:
+        conn = database.get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT a.id FROM assignments a
+            JOIN classroom_students cs ON cs.classroom_id = a.classroom_id
+            WHERE a.quiz_id = ? AND cs.student_id = ?
+        ''', (quiz_id, user["id"]))
+        if cursor.fetchone():
+            conn.close()
+            raise HTTPException(
+                status_code=403, 
+                detail="Study mode with answer key is disabled for assigned classroom examinations."
+            )
+        conn.close()
+
+    import copy
+    quiz_data = copy.deepcopy(quiz["quiz_data"])
+    for q in quiz_data.get("short_questions", []):
+        if isinstance(q, dict):
+            ans = q.get("model_answer") or q.get("correct_answer") or q.get("explanation") or ""
+            q["model_answer"] = ans
+            q["correct_answer"] = ans
+    for q in quiz_data.get("long_questions", []):
+        if isinstance(q, dict):
+            ans = q.get("model_answer") or q.get("correct_answer") or ""
+            q["model_answer"] = ans
+            q["correct_answer"] = ans
+
+    return {
+        "quiz_id": quiz_id,
+        "exam_metadata": quiz["exam_metadata"],
+        "quiz_data": quiz_data,
+    }
 
 @app.post("/quiz/{quiz_id}/submit")
 def submit_attempt(quiz_id: int, req: SubmitAttemptRequest, request: Request, user=Depends(get_optional_user)):
     quiz = database.get_quiz(quiz_id)
     if not quiz: raise HTTPException(status_code=404, detail="Quiz not found.")
+
+    # Determine if this attempt is for an assigned classroom quiz
+    is_assignment = False
+    asgn_id = req.assignment_id
+
+    if user:
+        conn = database.get_db_connection()
+        cursor = conn.cursor()
+        if asgn_id:
+            cursor.execute('''
+                SELECT a.id FROM assignments a
+                JOIN classroom_students cs ON cs.classroom_id = a.classroom_id
+                WHERE a.id = ? AND cs.student_id = ?
+            ''', (asgn_id, user["id"]))
+        else:
+            cursor.execute('''
+                SELECT a.id FROM assignments a
+                JOIN classroom_students cs ON cs.classroom_id = a.classroom_id
+                WHERE a.quiz_id = ? AND cs.student_id = ?
+                ORDER BY a.id DESC LIMIT 1
+            ''', (quiz_id, user["id"]))
+        asgn_match = cursor.fetchone()
+        if asgn_match:
+            is_assignment = True
+            asgn_id = asgn_match["id"]
+
+            # Check if student already submitted this assignment
+            cursor.execute('''
+                SELECT id FROM attempts
+                WHERE user_id = ? AND (assignment_id = ? OR quiz_id = ?)
+            ''', (user["id"], asgn_id, quiz_id))
+            if cursor.fetchone():
+                conn.close()
+                raise HTTPException(
+                    status_code=400,
+                    detail="You have already submitted this assignment. Multiple attempts are not permitted."
+                )
+        conn.close()
+
     quiz_data = quiz["quiz_data"]
     answers = req.answers
     results = {"mcq": [], "fill_blank": [], "short": [], "long": [], "total_score": 0.0, "max_score": 0}
@@ -761,14 +1680,30 @@ def submit_attempt(quiz_id: int, req: SubmitAttemptRequest, request: Request, us
         results["max_score"] += 5
         results["total_score"] += (grade["score_percent"] / 100) * 5
 
-    attempt_id = database.save_attempt(quiz_id, req.student_name, answers, results)
+    attempt_id = database.save_attempt(
+        quiz_id, 
+        req.student_name, 
+        answers, 
+        results, 
+        user_id=user["id"] if user else None,
+        assignment_id=asgn_id if is_assignment else None
+    )
     
     if user: database.update_streak_and_badges(user["id"])
     if user and req.challenge_code:
         challenge = database.get_challenge_by_code(req.challenge_code)
         if challenge: database.record_challenge_participant(challenge["id"], user["id"], attempt_id)
 
-    return {"attempt_id": attempt_id, "results": results}
+    if is_assignment:
+        # Confidentiality: conceal marks and answer key from student on classroom assignment submission
+        return {
+            "attempt_id": attempt_id, 
+            "is_assignment": True,
+            "message": "Assignment submitted successfully and delivered to your instructor.",
+            "submitted_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        }
+
+    return {"attempt_id": attempt_id, "is_assignment": False, "results": results}
 
 @app.post("/challenge/create")
 def create_challenge(req: ChallengeCreateRequest, user=Depends(get_current_user)):
@@ -889,6 +1824,8 @@ def get_classrooms_api(user=Depends(require_teacher)):
     ''', (user["id"],))
     classes = [dict(row) for row in cursor.fetchall()]
     conn.close()
+    for cl in classes:
+        cl["assignments"] = database.get_classroom_assignments(cl["id"])
     return {"classes": classes}
 
 @app.post("/student/classrooms/join")
@@ -899,6 +1836,51 @@ def join_classroom_api(req: JoinClassroomRequest, user=Depends(get_current_user)
     if "error" in result:
         raise HTTPException(status_code=400, detail=result["error"])
     return {"message": "Successfully joined the classroom!", "classroom_id": result["classroom_id"]}
+
+@app.post("/teacher/classrooms/{class_id}/assign")
+def assign_quiz_to_classroom_api(class_id: int, req: AssignQuizRequest, user=Depends(require_teacher)):
+    """Teacher assigns a quiz to a classroom with an optional due date."""
+    conn = database.get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id FROM classrooms WHERE id = ? AND teacher_id = ?", (class_id, user["id"]))
+    if not cursor.fetchone():
+        conn.close()
+        raise HTTPException(status_code=404, detail="Classroom not found or unauthorized.")
+    
+    cursor.execute("SELECT id FROM quizzes WHERE id = ? AND teacher_id = ?", (req.quiz_id, user["id"]))
+    if not cursor.fetchone():
+        conn.close()
+        raise HTTPException(status_code=404, detail="Quiz not found or unauthorized.")
+    conn.close()
+
+    assignment_id = database.create_assignment(class_id, req.quiz_id, req.due_date or "")
+    return {"message": "Quiz assigned successfully!", "assignment_id": assignment_id}
+
+@app.get("/teacher/classrooms/{class_id}/assignments")
+def get_classroom_assignments_api(class_id: int, user=Depends(require_teacher)):
+    """Fetches all assignments for a specific classroom with submission counts."""
+    assignments = database.get_classroom_assignments(class_id)
+    return {"assignments": assignments}
+
+@app.get("/teacher/assignments/{assignment_id}/submissions")
+def get_assignment_submissions_api(assignment_id: int, user=Depends(require_teacher)):
+    """Teacher fetches all student submissions, marks, and answers for a specific classroom assignment."""
+    data = database.get_assignment_submissions_for_teacher(assignment_id, user["id"])
+    if not data:
+        raise HTTPException(status_code=404, detail="Assignment not found or unauthorized.")
+    return data
+
+@app.get("/student/classrooms")
+def get_student_classrooms_api(user=Depends(get_current_user)):
+    """Returns classrooms joined by the student, along with all active assignments."""
+    classes = database.get_student_classrooms_and_assignments(user["id"])
+    return {"classrooms": classes}
+
+@app.get("/student/attempts")
+def get_student_attempts_api(user=Depends(get_current_user)):
+    """Returns historical quiz attempts and scores for the logged in student."""
+    attempts = database.get_student_attempts(user_id=user["id"], student_name=user["name"])
+    return {"attempts": attempts}
 
 @app.get("/teacher/analytics/recent-attempts")
 def get_recent_attempts_api(user=Depends(require_teacher)):

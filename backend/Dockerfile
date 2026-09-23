@@ -1,8 +1,8 @@
 # 1. Base Image (Python)
 FROM python:3.10-slim
 
-# 2. Install Tesseract OCR (For your Snap & Quiz feature)
-RUN apt-get update && apt-get install -y tesseract-ocr libtesseract-dev
+# 2. Install Tesseract OCR and FFmpeg (For Snap & Quiz and YouTube Audio transcription)
+RUN apt-get update && apt-get install -y tesseract-ocr libtesseract-dev ffmpeg
 
 # 3. Setup Working Directory
 WORKDIR /app

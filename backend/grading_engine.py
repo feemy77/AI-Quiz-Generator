@@ -31,16 +31,44 @@ You MUST return ONLY a valid JSON object. Follow this EXACT format:
     input_variables=["question", "model_answer", "key_points", "student_answer"]
 )
 
+import string
+
+def _normalize_text(text: str) -> str:
+    if not text:
+        return ""
+    t = text.strip().lower()
+    t = t.strip(string.punctuation)
+    return " ".join(t.split())
+
 def check_mcq(student_answer: str, correct_answer: str) -> bool:
-    if not student_answer:
+    if not student_answer or not correct_answer:
         return False
-    return student_answer.strip().lower() == correct_answer.strip().lower()
+    s = _normalize_text(student_answer)
+    c = _normalize_text(correct_answer)
+    if s == c:
+        return True
+    if s.startswith(('a)', 'b)', 'c)', 'd)', 'a.', 'b.', 'c.', 'd.')):
+        s_clean = _normalize_text(s[2:])
+        if s_clean == c:
+            return True
+    return False
 
 def check_fill_blank(student_answer: str, correct_answer: str) -> bool:
-    if not student_answer:
+    if not student_answer or not correct_answer:
         return False
-    return student_answer.strip().lower() in correct_answer.strip().lower() or \
-           correct_answer.strip().lower() in student_answer.strip().lower()
+    s = _normalize_text(student_answer)
+    c = _normalize_text(correct_answer)
+    if not s or not c:
+        return False
+    if s == c:
+        return True
+    # Avoid single-character or trivial false positives (e.g. typing "a" matching "cat")
+    if len(s) >= 3 and len(c) >= 3:
+        if s in c or c in s:
+            len_ratio = min(len(s), len(c)) / max(len(s), len(c))
+            if len_ratio >= 0.65:
+                return True
+    return False
 
 def grade_long_answer(question: str, model_answer: str, key_points: list, student_answer: str) -> dict:
     if not student_answer or not student_answer.strip() or not llm:
