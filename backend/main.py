@@ -50,7 +50,7 @@ import auth
 from document_extractor import get_document_page_count, extract_text_from_document
 from youtube_extractor import get_youtube_transcript
 import quiz_generator
-from quiz_generator import generate_quiz_from_large_text
+from quiz_generator import generate_quiz_from_large_text, determine_long_question_marks
 from grading_engine import check_mcq, check_fill_blank, grade_long_answer
 from cache_manager import generate_hash, get_cached_quiz, save_quiz_to_cache
 
@@ -433,7 +433,20 @@ async def generate_quiz(
         )
         save_quiz_to_cache(req_hash, quiz_data)
 
-    calculated_marks = (num_mcq * 1) + (num_fill_blank * 1) + (num_short * 2) + (num_long * 5)
+    # Calculate accurate total marks strictly based on question contents:
+    # MCQs: 1 mark, Blanks: 1 mark, Shorts: 2 marks, Longs: 10 marks (if graph/diagram/tree/DSA/visual) else 6 marks
+    calculated_marks = 0
+    for q in quiz_data.get("mcq_questions", []):
+        calculated_marks += q.get("marks", 1)
+    for q in quiz_data.get("fill_blank_questions", []):
+        calculated_marks += q.get("marks", 1)
+    for q in quiz_data.get("short_questions", []):
+        calculated_marks += q.get("marks", 2)
+    for q in quiz_data.get("long_questions", []):
+        calculated_marks += q.get("marks") if q.get("marks") else determine_long_question_marks(q)
+    if calculated_marks <= 0:
+        calculated_marks = (num_mcq * 1) + (num_fill_blank * 1) + (num_short * 2) + (num_long * 6)
+
     calculated_duration = (num_mcq * 1) + (num_fill_blank * 1) + (num_short * 3) + (num_long * 8)
     if calculated_duration < 15: calculated_duration = 15
 
@@ -850,7 +863,36 @@ def export_quiz_docx(quiz_id: int, req: ExportQuizRequest, user=Depends(get_curr
     class_label = "Semester" if is_university else "Class"
     t_name = req.teacher_name.strip() or meta.get('teacher_name', user['name'])
     dur = req.duration_minutes if req.duration_minutes is not None else meta.get("duration_minutes", (20 if is_quiz else 90))
-    marks = req.total_marks if req.total_marks is not None else meta.get("total_marks", (10 if is_quiz else 20))
+
+    # Compute accurate total marks strictly based on question contents:
+    # MCQs: 1 mark, Blanks: 1 mark, Shorts: 2 marks, Longs: 10 marks (if graph/diagram/tree/DSA/visual) else 6 marks
+    computed_total_marks = 0
+    if quiz_data.get("mcq_questions"):
+        computed_total_marks += len(quiz_data["mcq_questions"]) * 1
+    if quiz_data.get("fill_blank_questions"):
+        computed_total_marks += len(quiz_data["fill_blank_questions"]) * 1
+    if quiz_data.get("short_questions"):
+        short_qs_all = quiz_data["short_questions"]
+        if quiz_data.get("reading_passage"):
+            computed_total_marks += 4  # 4 marks for comprehension passage
+            computed_total_marks += sum(sq.get("marks", 2) for sq in short_qs_all[4:])
+        else:
+            computed_total_marks += sum(sq.get("marks", 2) for sq in short_qs_all)
+    if quiz_data.get("long_questions"):
+        for lq in quiz_data["long_questions"]:
+            lq_m = lq.get("marks")
+            if not lq_m or not isinstance(lq_m, (int, float)):
+                lq_m = determine_long_question_marks(lq)
+            computed_total_marks += int(lq_m)
+
+    if computed_total_marks > 0:
+        if req.total_marks is not None and req.total_marks > 0 and req.total_marks not in (20, 50, 10):
+            marks = req.total_marks
+        else:
+            marks = computed_total_marks
+    else:
+        marks = req.total_marks if req.total_marks is not None else meta.get("total_marks", (10 if is_quiz else 20))
+
     set_label = req.exam_set.upper()
     include_clo = req.include_clo
 
@@ -1134,7 +1176,7 @@ def export_quiz_docx(quiz_id: int, req: ExportQuizRequest, user=Depends(get_curr
     for sq_idx, q in enumerate(short_qs):
         clo_num = f"0{(sq_idx % 3) + 1}"
         clo_val = q.get("clo") or f"CLO - {clo_num}"
-        m_val = q.get("marks", 5)
+        m_val = q.get("marks", 2)
         clo_tag = f"({clo_val})  ({m_val:02d})" if include_clo else f"({m_val:02d} Marks)"
 
         t_qh = doc.add_table(rows=1, cols=2)
@@ -1168,10 +1210,12 @@ def export_quiz_docx(quiz_id: int, req: ExportQuizRequest, user=Depends(get_curr
     for lq_idx, q in enumerate(quiz_data.get("long_questions", [])):
         clo_num = f"0{(lq_idx % 2) + 2}"
         clo_val = q.get("clo") or f"CLO - {clo_num}"
-        if q.get("marks"):
-            marks_str = f"({q['marks']:02d})"
+        lq_m = q.get("marks")
+        if not lq_m or not isinstance(lq_m, (int, float)):
+            lq_m = determine_long_question_marks(q)
         else:
-            marks_str = "(1 + 2 + 2 + 3 + 2)" if (exam_category == "PRACTICAL" or (lq_idx == 0 and len(quiz_data.get("long_questions", [])) == 1)) else f"({8 - (lq_idx * 2):02d})"
+            lq_m = int(lq_m)
+        marks_str = f"({lq_m:02d})"
         clo_tag = f"({clo_val})  {marks_str}" if include_clo else f"{marks_str}"
 
         t_qh = doc.add_table(rows=1, cols=2)
@@ -1355,7 +1399,35 @@ def export_quiz_pdf(quiz_id: int, req: ExportQuizRequest, user=Depends(get_curre
     class_label = "Semester" if is_university else "Class"
     t_name = req.teacher_name.strip() or meta.get('teacher_name', user['name'])
     dur = req.duration_minutes if req.duration_minutes is not None else meta.get("duration_minutes", (20 if is_quiz else 90))
-    marks = req.total_marks if req.total_marks is not None else meta.get("total_marks", (10 if is_quiz else 20))
+
+    # Compute accurate total marks strictly based on question contents:
+    computed_total_marks = 0
+    if quiz_data.get("mcq_questions"):
+        computed_total_marks += len(quiz_data["mcq_questions"]) * 1
+    if quiz_data.get("fill_blank_questions"):
+        computed_total_marks += len(quiz_data["fill_blank_questions"]) * 1
+    if quiz_data.get("short_questions"):
+        short_qs_all = quiz_data["short_questions"]
+        if quiz_data.get("reading_passage"):
+            computed_total_marks += 4  # 4 marks for comprehension passage
+            computed_total_marks += sum(sq.get("marks", 2) for sq in short_qs_all[4:])
+        else:
+            computed_total_marks += sum(sq.get("marks", 2) for sq in short_qs_all)
+    if quiz_data.get("long_questions"):
+        for lq in quiz_data["long_questions"]:
+            lq_m = lq.get("marks")
+            if not lq_m or not isinstance(lq_m, (int, float)):
+                lq_m = determine_long_question_marks(lq)
+            computed_total_marks += int(lq_m)
+
+    if computed_total_marks > 0:
+        if req.total_marks is not None and req.total_marks > 0 and req.total_marks not in (20, 50, 10):
+            marks = req.total_marks
+        else:
+            marks = computed_total_marks
+    else:
+        marks = req.total_marks if req.total_marks is not None else meta.get("total_marks", (10 if is_quiz else 20))
+
     set_label = req.exam_set.upper()
     include_clo = req.include_clo
 
@@ -1520,7 +1592,7 @@ def export_quiz_pdf(quiz_id: int, req: ExportQuizRequest, user=Depends(get_curre
     for sq_idx, q in enumerate(short_qs):
         clo_num = f"0{(sq_idx % 3) + 1}"
         clo_val = q.get("clo") or f"CLO - {clo_num}"
-        m_val = q.get("marks", 5)
+        m_val = q.get("marks", 2)
         clo_tag = f"({clo_val}) &nbsp;({m_val:02d})" if include_clo else f"({m_val:02d} Marks)"
 
         p_ql = Paragraph(f"<b>Question {q_counter:02d}:</b>", styles['AridQL'])
@@ -1538,10 +1610,12 @@ def export_quiz_pdf(quiz_id: int, req: ExportQuizRequest, user=Depends(get_curre
     for lq_idx, q in enumerate(quiz_data.get("long_questions", [])):
         clo_num = f"0{(lq_idx % 2) + 2}"
         clo_val = q.get("clo") or f"CLO - {clo_num}"
-        if q.get("marks"):
-            marks_str = f"({q['marks']:02d})"
+        lq_m = q.get("marks")
+        if not lq_m or not isinstance(lq_m, (int, float)):
+            lq_m = determine_long_question_marks(q)
         else:
-            marks_str = "(1 + 2 + 2 + 3 + 2)" if (exam_category == "PRACTICAL" or (lq_idx == 0 and len(quiz_data.get("long_questions", [])) == 1)) else f"({8 - (lq_idx * 2):02d})"
+            lq_m = int(lq_m)
+        marks_str = f"({lq_m:02d})"
         clo_tag = f"({clo_val}) &nbsp;{marks_str}" if include_clo else f"{marks_str}"
 
         p_ql = Paragraph(f"<b>Question {q_counter:02d}:</b>", styles['AridQL'])
@@ -1793,8 +1867,15 @@ def submit_attempt(quiz_id: int, req: SubmitAttemptRequest, request: Request, us
         student_ans = answers.get(f"long_{i}", "")
         grade = grade_long_answer(q["question_text"], q["model_answer"], q.get("key_points", []), student_ans)
         results["long"].append({"question": q["question_text"], "student_answer": student_ans, "model_answer": q["model_answer"], "score_percent": grade["score_percent"], "feedback": grade["feedback"]})
-        results["max_score"] += 5
-        results["total_score"] += (grade["score_percent"] / 100) * 5
+        lq_marks = q.get("marks")
+        if not lq_marks or not isinstance(lq_marks, (int, float)):
+            lq_marks = determine_long_question_marks(q)
+        else:
+            lq_marks = int(lq_marks)
+        results["max_score"] += lq_marks
+        results["total_score"] += (grade["score_percent"] / 100) * lq_marks
+
+    results["total_score"] = round(results["total_score"], 2)
 
     attempt_id = database.save_attempt(
         quiz_id, 

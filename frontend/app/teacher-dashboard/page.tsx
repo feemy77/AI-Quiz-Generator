@@ -435,13 +435,33 @@ export default function TeacherDashboard() {
       (rawQuizData.short_questions?.length || 0) +
       (rawQuizData.long_questions?.length || 0);
 
-    const calculatedMarks =
-      totalQCount > 0
-        ? (rawQuizData.mcq_questions?.length || 0) * 1 +
-          (rawQuizData.fill_blank_questions?.length || 0) * 1 +
-          (rawQuizData.short_questions?.length || 0) * 3 +
-          (rawQuizData.long_questions?.length || 0) * 5
-        : 50;
+    const isDiagramOrDsaQuestion = (q: any) => {
+      const text = `${q?.question_text || ""} ${q?.model_answer || ""}`.toLowerCase();
+      const keywords = [
+        "graph", "tree", "diagram", "draw", "sketch", "flowchart", "plot", "visualize",
+        "dijkstra", "kruskal", "prim", "bfs", "dfs", "avl", "b-tree", "b+ tree",
+        "binary search tree", "bst", "heap", "min-heap", "max-heap", "red-black",
+        "state machine", "transition diagram", "er diagram", "erd", "schema diagram",
+        "architecture diagram", "dynamic programming table", "knapsack", "recursion tree",
+        "trace the algorithm", "step-by-step trace", "traversal", "topological"
+      ];
+      return keywords.some((kw) => text.includes(kw));
+    };
+
+    const determineLqMarks = (q: any) => {
+      if (q?.marks && (q.marks === 6 || q.marks === 10)) return Number(q.marks);
+      return isDiagramOrDsaQuestion(q) ? 10 : 6;
+    };
+
+    let calculatedMarks = 0;
+    if (totalQCount > 0) {
+      calculatedMarks += (rawQuizData.mcq_questions?.length || 0) * 1;
+      calculatedMarks += (rawQuizData.fill_blank_questions?.length || 0) * 1;
+      calculatedMarks += (rawQuizData.short_questions || []).reduce((acc: number, sq: any) => acc + (sq.marks ? Number(sq.marks) : 2), 0);
+      calculatedMarks += (rawQuizData.long_questions || []).reduce((acc: number, lq: any) => acc + determineLqMarks(lq), 0);
+    } else {
+      calculatedMarks = 20;
+    }
 
     const meta = quiz.exam_metadata || {};
     const defaultCategory = (meta.exam_category || (meta.exam_track?.toLowerCase() === "practical" ? "PRACTICAL" : "THEORY")) as "THEORY" | "PRACTICAL";
@@ -483,7 +503,7 @@ export default function TeacherDashboard() {
       className: meta.class_name || (tier === "University" ? "BSCS 5th" : tier === "School" ? "10th" : "1st Year"),
       teacherName: meta.teacher_name || teacherName.trim() || "Course Instructor",
       durationMinutes: meta.duration_minutes || (isQuiz ? 20 : 75),
-      totalMarks: meta.total_marks || (isQuiz ? 10 : calculatedMarks) || 20,
+      totalMarks: totalQCount > 0 ? calculatedMarks : (meta.total_marks || (isQuiz ? 10 : 20)),
       examSet: "Set A",
       examCategory: defaultCategory,
       includeInstructions: true,
@@ -2311,9 +2331,42 @@ export default function TeacherDashboard() {
                       </button>
                     </div>
 
-                    <p className="text-xs font-black text-blue-600 uppercase tracking-widest mb-2">
-                      Question {index + 1}
-                    </p>
+                    <div className="flex items-center gap-2 mb-2">
+                      <p className="text-xs font-black text-blue-600 uppercase tracking-widest">
+                        Question {index + 1}
+                      </p>
+                      {editModal.activeSec === "mcq" && (
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                          1 Mark
+                        </span>
+                      )}
+                      {editModal.activeSec === "blank" && (
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">
+                          1 Mark
+                        </span>
+                      )}
+                      {editModal.activeSec === "short" && (
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                          2 Marks
+                        </span>
+                      )}
+                      {editModal.activeSec === "long" && (() => {
+                        const isDiagram = [
+                          "graph", "tree", "diagram", "draw", "sketch", "flowchart", "plot", "visualize",
+                          "dijkstra", "kruskal", "prim", "bfs", "dfs", "avl", "b-tree", "b+ tree",
+                          "binary search tree", "bst", "heap", "min-heap", "max-heap", "red-black",
+                          "state machine", "transition diagram", "er diagram", "erd", "schema diagram",
+                          "architecture diagram", "dynamic programming table", "knapsack", "recursion tree",
+                          "trace the algorithm", "step-by-step trace", "traversal", "topological"
+                        ].some(kw => `${q.question_text || ""} ${q.model_answer || ""}`.toLowerCase().includes(kw));
+                        const marksVal = q.marks === 6 || q.marks === 10 ? q.marks : (isDiagram ? 10 : 6);
+                        return (
+                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${marksVal === 10 ? 'bg-amber-50 text-amber-800 border-amber-300' : 'bg-emerald-50 text-emerald-800 border-emerald-200'}`}>
+                            {marksVal} Marks {marksVal === 10 ? "⚡ (Diagram / DSA / Visual)" : "(Comprehensive)"}
+                          </span>
+                        );
+                      })()}
+                    </div>
                     <textarea
                       value={q.question_text || ""}
                       onChange={(e) => handleEditChange(editModal.activeSec, index, "question_text", e.target.value)}

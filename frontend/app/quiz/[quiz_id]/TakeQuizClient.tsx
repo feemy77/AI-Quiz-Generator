@@ -1285,7 +1285,7 @@ export default function TakeQuizClient() {
                     <div className="border-b border-amber-100 pb-3 mb-6 flex items-center justify-between">
                       <h3 className="text-lg sm:text-xl font-extrabold text-amber-900 flex items-center gap-2">
                         <span>Section D: Detailed Explanations</span>
-                        <span className="text-xs text-gray-400 font-normal">(5 Marks Each)</span>
+                        <span className="text-xs text-gray-400 font-normal">(6 or 10 Marks Each)</span>
                       </h3>
                       <span className="text-xs font-bold text-amber-800 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full">
                         Full Solutions
@@ -1298,9 +1298,14 @@ export default function TakeQuizClient() {
 
                         return (
                           <div key={i} className="p-5 sm:p-6 bg-gray-50/50 rounded-2xl border border-gray-200/80 shadow-2xs space-y-3">
-                            <p className="font-bold text-base sm:text-lg text-gray-900 leading-relaxed">
-                              Q{i + 1}. {q.question_text}
-                            </p>
+                            <div className="flex items-start justify-between gap-2">
+                              <p className="font-bold text-base sm:text-lg text-gray-900 leading-relaxed">
+                                Q{i + 1}. {q.question_text}
+                              </p>
+                              <span className="text-xs font-extrabold px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200 shrink-0">
+                                {q.marks || 6} Marks
+                              </span>
+                            </div>
                             <div className="p-5 rounded-2xl bg-amber-50/60 border border-amber-200 space-y-3">
                               <div>
                                 <span className="text-xs font-bold text-amber-900 uppercase tracking-wider block mb-1.5">
@@ -1617,9 +1622,14 @@ export default function TakeQuizClient() {
                   <div className="space-y-6">
                     {quizData.short_questions.map((q: any, i: number) => (
                       <div key={i} className="p-5 sm:p-6 bg-white rounded-2xl border border-gray-200/80 shadow-xs hover:border-indigo-200 transition-all">
-                        <p className="font-bold text-base sm:text-lg mb-4 text-gray-900 leading-relaxed">
-                          Q{i + 1}. {q.question_text}
-                        </p>
+                        <div className="flex items-start justify-between gap-3 mb-4">
+                          <p className="font-bold text-base sm:text-lg text-gray-900 leading-relaxed">
+                            Q{i + 1}. {q.question_text}
+                          </p>
+                          <span className="text-xs font-extrabold px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 shrink-0">
+                            2 Marks
+                          </span>
+                        </div>
                         <textarea
                           rows={3}
                           value={answers[`short_${i}`] || ""}
@@ -1638,14 +1648,19 @@ export default function TakeQuizClient() {
                 <div>
                   <h3 className="text-xl font-extrabold text-amber-800 mb-6 border-b border-amber-100 pb-3 mt-10 flex items-center gap-2">
                     <span>Section D: Detailed Explanations</span>
-                    <span className="text-xs font-bold text-gray-400 font-normal">(5 Marks Each)</span>
+                    <span className="text-xs font-bold text-gray-400 font-normal">(6 or 10 Marks Each)</span>
                   </h3>
                   <div className="space-y-6">
                     {quizData.long_questions.map((q: any, i: number) => (
                       <div key={i} className="p-5 sm:p-6 bg-white rounded-2xl border border-gray-200/80 shadow-xs hover:border-amber-200 transition-all">
-                        <p className="font-bold text-base sm:text-lg mb-4 text-gray-900 leading-relaxed">
-                          Q{i + 1}. {q.question_text}
-                        </p>
+                        <div className="flex items-start justify-between gap-3 mb-4">
+                          <p className="font-bold text-base sm:text-lg text-gray-900 leading-relaxed">
+                            Q{i + 1}. {q.question_text}
+                          </p>
+                          <span className="text-xs font-extrabold px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200 shrink-0">
+                            {q.marks || 6} Marks
+                          </span>
+                        </div>
                         <textarea
                           rows={5}
                           value={answers[`long_${i}`] || ""}

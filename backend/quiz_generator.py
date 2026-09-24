@@ -268,6 +268,9 @@ You are an expert educator and university examiner. Based strictly on the provid
 Difficulty level: {difficulty}
 {dynamic_rules}
 
+MARK DISTRIBUTION RULE:
+Every short question is strictly worth 2 Marks. You MUST set "marks": 2.
+
 ALTERNATIVE QUESTIONS REQUIREMENT:
 For each question:
 1. Provide the primary question in `question_text`. Set `style_type` to one of ("conceptual", "coding", "scenario", "difference", "definition").
@@ -280,7 +283,7 @@ You MUST return ONLY a valid JSON object. Follow this EXACT format:
       "question_text": "Write the direct question or analytical calculation here in English?",
       "style_type": "conceptual",
       "clo": "CLO-2",
-      "marks": 5,
+      "marks": 2,
       "correct_answer": "Model short answer in English (or short code block).",
       "explanation": "Brief explanation in English.",
       "alternatives": [
@@ -288,7 +291,7 @@ You MUST return ONLY a valid JSON object. Follow this EXACT format:
           "question_text": "Alternative question testing practical code, debugging, or trace?",
           "style_type": "coding",
           "clo": "CLO-2",
-          "marks": 5,
+          "marks": 2,
           "correct_answer": "Model short answer.",
           "explanation": "Brief explanation."
         }},
@@ -296,7 +299,7 @@ You MUST return ONLY a valid JSON object. Follow this EXACT format:
           "question_text": "Alternative question asking to compare/differentiate two concepts or evaluate a scenario?",
           "style_type": "difference",
           "clo": "CLO-2",
-          "marks": 5,
+          "marks": 2,
           "correct_answer": "Model short answer.",
           "explanation": "Brief explanation."
         }}
@@ -316,6 +319,10 @@ long_prompt = PromptTemplate(
 You are an expert educator and university examiner. Based strictly on the provided text, generate {num_questions} open-ended long-answer questions, comprehensive case studies, or practical implementation tasks.
 Difficulty level: {difficulty}
 {dynamic_rules}
+
+MARK DISTRIBUTION RULES:
+- Assign "marks": 10 for questions requiring diagram/graph/tree drawing, visual modeling, data structure & algorithm traces (e.g. Graph traversal, Trees, Dijkstra, BST, AVL, DP tables, Flowcharts, State machines), or comprehensive multi-part practical case studies.
+- Assign "marks": 6 for standard analytical, descriptive, or conceptual long questions without diagram/graph construction.
 
 ALTERNATIVE QUESTIONS REQUIREMENT:
 For each question:
@@ -363,6 +370,48 @@ Document Text:
 # ==========================================
 # 5. HELPERS
 # ==========================================
+def determine_long_question_marks(question_obj: dict) -> int:
+    """
+    Intelligently assigns marks to long questions based on academic standards:
+    - 10 Marks: Questions requiring diagram/graph/tree drawing, visual modeling,
+      data structure & algorithm (DSA) trace/traversal/tables (e.g. Dijkstra, AVL, Graphs, BST),
+      or comprehensive multi-part practical case studies.
+    - 6 Marks: Standard descriptive, conceptual, architectural, or analytical long questions.
+    """
+    if not isinstance(question_obj, dict):
+        return 6
+
+    # Respect explicit teacher override if set to 6 or 10 or custom
+    existing_marks = question_obj.get("marks")
+    if existing_marks and isinstance(existing_marks, (int, float)) and existing_marks in (6, 10):
+        return int(existing_marks)
+
+    text = (
+        str(question_obj.get("question_text", "")) + " " +
+        str(question_obj.get("model_answer", ""))
+    ).lower()
+
+    # High-weight indicator patterns for 10-mark questions (Diagrams, Graphs, Trees, DSA, Visuals)
+    graph_dsa_keywords = [
+        "graph", "tree", "diagram", "draw", "sketch", "flowchart", "plot", "visualize",
+        "dijkstra", "kruskal", "prim", "bfs", "dfs", "avl", "b-tree", "b+ tree",
+        "binary search tree", "bst", "heap", "min-heap", "max-heap", "red-black",
+        "state machine", "transition diagram", "er diagram", "erd", "schema diagram",
+        "architecture diagram", "dynamic programming table", "knapsack", "recursion tree",
+        "trace the algorithm", "step-by-step trace", "traversal", "topological"
+    ]
+
+    for kw in graph_dsa_keywords:
+        if re.search(r'\b' + re.escape(kw) + r'\b', text):
+            return 10
+
+    # Also check if the question has 3+ subparts (a, b, c, d)
+    subpart_matches = re.findall(r'\b[a-e]\)', text)
+    if len(subpart_matches) >= 3:
+        return 10
+
+    return 6
+
 _META_PATTERNS = [
     r"\btitle of (the|this) document\b", r"\bname of (the|this) document\b",
     r"\bwho (prepared|compiled|wrote|authored)\b", r"\bauthor'?s? (website|email|contact)\b"
@@ -676,11 +725,21 @@ def generate_quiz_from_large_text(
 
     if mcq_count > 0:
         raw_mcqs = _generate_batch_from_chunks(mcq_prompt, chunks, mcq_count, difficulty, dynamic_rules, "MCQ")
-        quiz["mcq_questions"] = [_ensure_question_schema(_normalize_and_shuffle_mcq(q), "conceptual") for q in raw_mcqs]
+        clean_mcqs = []
+        for q in raw_mcqs:
+            if isinstance(q, dict):
+                q["marks"] = 1
+                clean_mcqs.append(_ensure_question_schema(_normalize_and_shuffle_mcq(q), "conceptual"))
+        quiz["mcq_questions"] = clean_mcqs
         
     if fill_blank_count > 0:
         raw_blanks = _generate_batch_from_chunks(fill_blank_prompt, chunks, fill_blank_count, difficulty, dynamic_rules, "Fill-in-the-blank")
-        quiz["fill_blank_questions"] = [_ensure_question_schema(q, "factual") for q in raw_blanks]
+        clean_blanks = []
+        for q in raw_blanks:
+            if isinstance(q, dict):
+                q["marks"] = 1
+                clean_blanks.append(_ensure_question_schema(q, "factual"))
+        quiz["fill_blank_questions"] = clean_blanks
         
     if short_count > 0:
         raw_shorts = _generate_batch_from_chunks(short_prompt, chunks, short_count, difficulty, dynamic_rules, "Short-answer")
@@ -689,6 +748,7 @@ def generate_quiz_from_large_text(
                 ans = q.get("correct_answer") or q.get("model_answer") or q.get("explanation") or ""
                 q["correct_answer"] = ans
                 q["model_answer"] = ans
+                q["marks"] = 2  # Each short question is strictly 2 Marks
                 _ensure_question_schema(q, "conceptual")
         quiz["short_questions"] = raw_shorts
         
@@ -699,6 +759,7 @@ def generate_quiz_from_large_text(
                 ans = q.get("model_answer") or q.get("correct_answer") or ""
                 q["model_answer"] = ans
                 q["correct_answer"] = ans
+                q["marks"] = determine_long_question_marks(q)  # 10 Marks if graph/diagram/tree/DSA/visual, else 6 Marks
                 _ensure_question_schema(q, "scenario")
         quiz["long_questions"] = raw_longs
 
