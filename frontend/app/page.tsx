@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { apiFetch } from "@/lib/api";
+import { apiFetch, getApiBaseUrl, setCustomBackendUrl } from "@/lib/api";
 import { toast } from "sonner";
 import {
   Sparkles,
@@ -20,6 +20,10 @@ import {
   Award,
   Zap,
   BookOpen,
+  Wifi,
+  Server,
+  Settings,
+  Check,
 } from "lucide-react";
 
 export default function AuthPage() {
@@ -31,9 +35,13 @@ export default function AuthPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [serverModalOpen, setServerModalOpen] = useState(false);
+  const [serverUrl, setServerUrl] = useState("");
+  const [testingServer, setTestingServer] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
+    setServerUrl(getApiBaseUrl());
     const token = localStorage.getItem("token");
     const role = localStorage.getItem("role");
     if (token) {
@@ -42,6 +50,24 @@ export default function AuthPage() {
       else if (role === "student") router.push("/student-dashboard");
     }
   }, [router]);
+
+  const handleSaveServerUrl = async (customVal?: string) => {
+    setTestingServer(true);
+    const targetUrl = (customVal !== undefined ? customVal : serverUrl).trim().replace(/\/+$/, "");
+    setCustomBackendUrl(targetUrl);
+    setServerUrl(targetUrl || "http://localhost:8000");
+
+    try {
+      await apiFetch("/docs", { auth: false });
+      toast.success("Backend server connected successfully!");
+      setServerModalOpen(false);
+    } catch {
+      toast.warning("Server URL saved! If request failed, ensure your backend or tunnel is active.");
+      setServerModalOpen(false);
+    } finally {
+      setTestingServer(false);
+    }
+  };
 
   if (!isMounted) return null;
 
@@ -79,7 +105,8 @@ export default function AuthPage() {
         toast.error(error || "Authentication failed. Please check credentials.");
       }
     } catch {
-      toast.error("Network error. Make sure your FastAPI backend is running.");
+      toast.error("Failed to fetch from backend. Please configure your API server URL.");
+      setServerModalOpen(true);
     } finally {
       setLoading(false);
     }
@@ -120,8 +147,19 @@ export default function AuthPage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-3 text-sm text-slate-400 font-medium">
-          <span>Switchable Teacher & Student Modes</span>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setServerModalOpen(true)}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-slate-300 transition-all shadow-sm"
+            title="Configure Backend API Server URL"
+          >
+            <Server className="w-3.5 h-3.5 text-blue-400" />
+            <span className="hidden sm:inline text-slate-400">API:</span>
+            <span className="font-mono text-[11px] text-emerald-400 max-w-[140px] truncate">{serverUrl || "http://localhost:8000"}</span>
+            <Settings className="w-3 h-3 text-slate-500 hover:text-white" />
+          </button>
+          <span className="hidden md:inline text-sm text-slate-400 font-medium">Switchable Teacher & Student Modes</span>
         </div>
       </header>
 
@@ -372,6 +410,91 @@ export default function AuthPage() {
           <span>Safe & Isolated Data</span>
         </div>
       </footer>
+
+      {/* Backend Server Configuration Modal */}
+      {serverModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-in fade-in">
+          <div className="w-full max-w-md p-6 rounded-3xl bg-slate-900 border border-white/20 shadow-2xl shadow-black/80 space-y-5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2.5 rounded-xl bg-blue-500/20 text-blue-400">
+                  <Server className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-white text-base">Backend API Server</h3>
+                  <p className="text-xs text-slate-400">Connect this app to your AI FastAPI backend</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setServerModalOpen(false)}
+                className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-white/10"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+                  Backend API Base URL
+                </label>
+                <input
+                  type="url"
+                  placeholder="https://true-waves-pick.loca.lt or http://localhost:8000"
+                  value={serverUrl}
+                  onChange={(e) => setServerUrl(e.target.value)}
+                  className="w-full px-4 py-2.5 bg-black/40 border border-white/15 rounded-xl text-sm font-mono text-emerald-300 placeholder:text-slate-600 focus:outline-none focus:border-blue-500"
+                />
+              </div>
+
+              <div className="p-3.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-xs text-blue-300 space-y-1.5">
+                <div className="flex items-center gap-2 font-semibold">
+                  <Wifi className="w-4 h-4 text-emerald-400" />
+                  <span>Free Tunnel Link (Live Right Now):</span>
+                </div>
+                <div className="flex items-center justify-between bg-black/40 p-2 rounded-lg border border-white/10">
+                  <code className="text-emerald-400 font-mono text-xs select-all">https://true-waves-pick.loca.lt</code>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setServerUrl("https://true-waves-pick.loca.lt");
+                      handleSaveServerUrl("https://true-waves-pick.loca.lt");
+                    }}
+                    className="px-2 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded text-[11px] font-bold"
+                  >
+                    Use This
+                  </button>
+                </div>
+                <p className="text-[11px] text-slate-400">
+                  This tunnel connects directly to your laptop's running FastAPI server with zero card required.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2.5 pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setServerUrl("http://localhost:8000");
+                  handleSaveServerUrl("http://localhost:8000");
+                }}
+                className="px-3.5 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-semibold text-slate-400 hover:text-white transition-all"
+              >
+                Reset Default
+              </button>
+              <button
+                type="button"
+                onClick={() => handleSaveServerUrl()}
+                disabled={testingServer}
+                className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-blue-600/30 transition-all disabled:opacity-50"
+              >
+                {testingServer ? "Connecting..." : "Save & Connect"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

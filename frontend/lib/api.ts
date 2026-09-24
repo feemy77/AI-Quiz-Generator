@@ -3,11 +3,39 @@
  * Handles base URL, auth tokens, headers, and uniform error handling.
  */
 
-export const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL ||
-  (typeof window !== "undefined" && window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1"
-    ? `http://${window.location.hostname}:8000`
-    : "http://localhost:8000");
+export function getApiBaseUrl(): string {
+  if (typeof window !== "undefined") {
+    const custom = localStorage.getItem("custom_backend_url");
+    if (custom && custom.trim()) {
+      return custom.trim().replace(/\/+$/, "");
+    }
+  }
+
+  if (process.env.NEXT_PUBLIC_API_URL && process.env.NEXT_PUBLIC_API_URL.trim()) {
+    return process.env.NEXT_PUBLIC_API_URL.trim().replace(/\/+$/, "");
+  }
+
+  if (typeof window !== "undefined") {
+    const host = window.location.hostname;
+    if (host === "localhost" || host === "127.0.0.1") {
+      return "http://localhost:8000";
+    }
+  }
+
+  return "http://localhost:8000";
+}
+
+export const API_BASE_URL = getApiBaseUrl();
+
+export function setCustomBackendUrl(url: string): void {
+  if (typeof window === "undefined") return;
+  const cleaned = url.trim().replace(/\/+$/, "");
+  if (cleaned) {
+    localStorage.setItem("custom_backend_url", cleaned);
+  } else {
+    localStorage.removeItem("custom_backend_url");
+  }
+}
 
 export function getAuthToken(): string | null {
   if (typeof window === "undefined") return null;
@@ -40,9 +68,13 @@ export async function apiFetch<T = any>(
   options: ApiOptions = {}
 ): Promise<{ ok: boolean; status: number; data: T; error?: string }> {
   const { auth = true, headers = {}, ...rest } = options;
-  const url = `${API_BASE_URL}${endpoint.startsWith("/") ? endpoint : `/${endpoint}`}`;
+  const baseUrl = getApiBaseUrl();
+  const url = `${baseUrl}${endpoint.startsWith("/") ? endpoint : `/${endpoint}`}`;
 
-  const requestHeaders: Record<string, string> = { ...(headers as Record<string, string>) };
+  const requestHeaders: Record<string, string> = { 
+    ...(headers as Record<string, string>),
+    "Bypass-Tunnel-Reminder": "true"
+  };
 
   // Auto attach json content type if body is stringified json and not FormData
   if (rest.body && typeof rest.body === "string" && !requestHeaders["Content-Type"]) {
