@@ -123,6 +123,10 @@ export default function TeacherDashboard() {
   const [examTitle, setExamTitle] = useState("");
   const [examSubject, setExamSubject] = useState("");
   const [examClass, setExamClass] = useState("");
+  const [examInstitution, setExamInstitution] = useState("");
+  const [paperType, setPaperType] = useState<"exam" | "quiz">("exam");
+  const [quizNumber, setQuizNumber] = useState("01");
+  const [courseCode, setCourseCode] = useState("");
 
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [generatingQuiz, setGeneratingQuiz] = useState(false);
@@ -138,6 +142,9 @@ export default function TeacherDashboard() {
     quizId: number | null;
     quizTitle: string;
     format: "pdf" | "docx";
+    academicTier: "University" | "College" | "School";
+    paperType: "exam" | "quiz";
+    quizNumber: string;
     institutionName: string;
     departmentName: string;
     examTitle: string;
@@ -157,6 +164,9 @@ export default function TeacherDashboard() {
     quizId: null,
     quizTitle: "",
     format: "pdf",
+    academicTier: "University",
+    paperType: "exam",
+    quizNumber: "01",
     institutionName: "",
     departmentName: "",
     examTitle: "",
@@ -241,8 +251,10 @@ export default function TeacherDashboard() {
       if (classRes.ok) setClasses(classRes.data.classes || []);
       if (analyticsRes.ok) setRecentAttempts(analyticsRes.data.attempts || []);
       if (brandRes.ok && brandRes.data) {
-        setAcademyName(brandRes.data.academy_name || "");
+        const aName = brandRes.data.academy_name || "";
+        setAcademyName(aName);
         setLogoBase64(brandRes.data.logo_path || "");
+        setExamInstitution((prev) => prev || aName);
       }
       if (bookmarkRes.ok) setBookmarks(bookmarkRes.data.bookmarks || []);
     } catch (error) {
@@ -353,10 +365,19 @@ export default function TeacherDashboard() {
     formData.append("academic_tier", academicTier);
     formData.append("exam_track", examTrack);
     formData.append("include_comprehension", includeComprehension ? "true" : "false");
-    formData.append("exam_title", examTitle.trim() || "Course Examination Paper");
+
+    const finalExamTitle =
+      paperType === "quiz"
+        ? (examTitle.trim() || `Quiz No. ${quizNumber ? quizNumber.padStart(2, "0") : "01"}`)
+        : (examTitle.trim() || "Mid Term Examination (Fall-2026)");
+
+    formData.append("exam_title", finalExamTitle);
+    formData.append("paper_type", paperType);
+    formData.append("quiz_number", quizNumber.trim());
+    formData.append("course_code", academicTier === "University" ? courseCode.trim() : "");
     formData.append("subject", examSubject.trim() || "General Subject");
     formData.append("class_name", examClass.trim());
-    formData.append("institution_name", academyName || "Academic Examination Department");
+    formData.append("institution_name", examInstitution.trim() || academyName.trim() || "Academic Examination Department");
 
     try {
       const response = await fetch(`${API_BASE_URL}/quiz/generate`, {
@@ -372,6 +393,8 @@ export default function TeacherDashboard() {
         setExamTitle("");
         setExamSubject("");
         setExamClass("");
+        setCourseCode("");
+        setQuizNumber("01");
         setYoutubeUrl("");
         setImagePreview(null);
       } else {
@@ -422,21 +445,45 @@ export default function TeacherDashboard() {
 
     const meta = quiz.exam_metadata || {};
     const defaultCategory = (meta.exam_category || (meta.exam_track?.toLowerCase() === "practical" ? "PRACTICAL" : "THEORY")) as "THEORY" | "PRACTICAL";
+    const tier = (meta.academic_tier || academicTier || "University") as "University" | "College" | "School";
+
+    const rawTitle = quiz.title || meta.exam_title || "";
+    const isQuiz = meta.paper_type === "quiz" || /quiz/i.test(rawTitle);
+    const quizMatch = rawTitle.match(/quiz\s*(?:no\.?|#)?\s*(\d+)/i) || (meta.quiz_number ? [null, meta.quiz_number] : null);
+    const detectedQuizNum = quizMatch ? String(quizMatch[1]).padStart(2, "0") : (meta.quiz_number ? String(meta.quiz_number).padStart(2, "0") : "01");
+
+    let cleanTitle = "";
+    if (isQuiz) {
+      cleanTitle = `Quiz No. ${detectedQuizNum}`;
+    } else if (/mid\s*term/i.test(rawTitle) || /midterm/i.test(rawTitle)) {
+      cleanTitle = "Mid Term Examination (Fall-2026)";
+    } else if (/final\s*term/i.test(rawTitle) || /final/i.test(rawTitle)) {
+      cleanTitle = "Final Term Examination (Fall-2026)";
+    } else if (rawTitle && !rawTitle.toLowerCase().includes("assessment examination")) {
+      cleanTitle = rawTitle;
+    } else {
+      cleanTitle = "Mid Term Examination (Fall-2026)";
+    }
+
+    const effectiveInstName = academyName.trim() || meta.institution_name || "Academic Examination Department";
 
     setExportModal({
       show: true,
       quizId: quiz.id,
       quizTitle: quiz.title || "Examination Paper",
       format: format,
-      institutionName: meta.institution_name || academyName.trim() || "Academic Examination Department",
-      departmentName: meta.department || "Examination Branch",
-      examTitle: meta.exam_title || (quiz.title ? `${quiz.title} - Mid Term Exam (Fall-2024)` : "Mid Term Exam (Fall-2024)"),
-      courseCode: meta.course_code || "CSC-204",
-      subject: meta.subject || quiz.subject || "Computer Networks",
-      className: meta.class_name || "BSCS - 3",
+      academicTier: tier,
+      paperType: isQuiz ? "quiz" : "exam",
+      quizNumber: detectedQuizNum,
+      institutionName: effectiveInstName,
+      departmentName: meta.department || meta.department_name || "Examination Branch",
+      examTitle: cleanTitle,
+      courseCode: tier === "University" ? (meta.course_code || "CSC-204") : "",
+      subject: meta.subject || quiz.subject || "Computer Science",
+      className: meta.class_name || (tier === "University" ? "BSCS 5th" : tier === "School" ? "10th" : "1st Year"),
       teacherName: meta.teacher_name || teacherName.trim() || "Course Instructor",
-      durationMinutes: meta.duration_minutes || 75,
-      totalMarks: meta.total_marks || calculatedMarks || 12,
+      durationMinutes: meta.duration_minutes || (isQuiz ? 20 : 75),
+      totalMarks: meta.total_marks || (isQuiz ? 10 : calculatedMarks) || 20,
       examSet: "Set A",
       examCategory: defaultCategory,
       includeInstructions: true,
@@ -458,16 +505,19 @@ export default function TeacherDashboard() {
         department_name: exportModal.departmentName,
         exam_title: exportModal.examTitle,
         exam_category: exportModal.examCategory,
-        course_code: exportModal.courseCode,
+        course_code: exportModal.academicTier === "University" ? exportModal.courseCode : "",
         subject: exportModal.subject,
         class_name: exportModal.className,
         teacher_name: exportModal.teacherName,
-        duration_minutes: Number(exportModal.durationMinutes) || 90,
-        total_marks: Number(exportModal.totalMarks) || 20,
+        duration_minutes: Number(exportModal.durationMinutes) || (exportModal.paperType === "quiz" ? 20 : 90),
+        total_marks: Number(exportModal.totalMarks) || (exportModal.paperType === "quiz" ? 10 : 20),
         exam_set: exportModal.examSet,
         include_instructions: exportModal.includeInstructions,
         include_answer_key: exportModal.includeAnswerKey,
         include_clo: exportModal.includeClo,
+        academic_tier: exportModal.academicTier,
+        paper_type: exportModal.paperType,
+        quiz_number: exportModal.quizNumber,
       };
 
       const response = await fetch(`${API_BASE_URL}/quiz/${quizId}/export/${format}`, {
@@ -1350,32 +1400,165 @@ export default function TeacherDashboard() {
                       </div>
                     )}
 
-                    <div className="mb-6">
-                      <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">
-                        2. Exam Metadata
-                      </label>
+                    <div className="mb-6 bg-slate-50/70 border border-slate-200/80 rounded-2xl p-5 space-y-4">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                          <FileText className="w-4 h-4 text-blue-600" />
+                          2. Assessment & Paper Type Configuration
+                        </label>
+                        <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                          <Check className="w-3 h-3" /> Auto-Branding Active
+                        </span>
+                      </div>
+
+                      {/* Institution / University Name (Pre-filled from Teacher Branding) */}
+                      <div>
+                        <div className="flex items-center justify-between mb-1">
+                          <label className="text-[11px] font-bold text-gray-700">
+                            Institution / Academy / University Name
+                          </label>
+                          {academyName && (
+                            <span className="text-[10px] text-blue-600 font-semibold">
+                              ✓ Auto-filled from your Branding profile
+                            </span>
+                          )}
+                        </div>
+                        <input
+                          type="text"
+                          value={examInstitution || academyName}
+                          onChange={(e) => setExamInstitution(e.target.value)}
+                          placeholder="e.g. Arid Agriculture University of Rawalpindi"
+                          className="w-full px-3 py-2.5 bg-white border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium text-gray-900"
+                        />
+                      </div>
+
+                      {/* Paper Type Preset Selector */}
+                      <div>
+                        <label className="text-[11px] font-bold text-gray-700 block mb-1.5">
+                          Paper Format Preset
+                        </label>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                          {[
+                            { id: "midterm", label: "Mid Term Exam", title: "Mid Term Exam" },
+                            { id: "final", label: "Final Term Exam", title: "Final Term Exam" },
+                            { id: "quiz", label: "Quiz Paper", title: `Quiz No. ${quizNumber.padStart(2, "0")}` },
+                            { id: "custom", label: "Class Test / Custom", title: "Class Assessment Test" },
+                          ].map((p) => {
+                            const isCurrent =
+                              (p.id === "quiz" && paperType === "quiz") ||
+                              (p.id === "midterm" && paperType === "exam" && (examTitle.toLowerCase().includes("mid") || (!examTitle && p.id === "midterm"))) ||
+                              (p.id === "final" && paperType === "exam" && examTitle.toLowerCase().includes("final")) ||
+                              (p.id === "custom" && paperType === "exam" && !examTitle.toLowerCase().includes("mid") && !examTitle.toLowerCase().includes("final"));
+                            return (
+                              <button
+                                key={p.id}
+                                type="button"
+                                onClick={() => {
+                                  if (p.id === "quiz") {
+                                    setPaperType("quiz");
+                                    setExamTitle(`Quiz No. ${quizNumber.padStart(2, "0")}`);
+                                  } else {
+                                    setPaperType("exam");
+                                    setExamTitle(p.title);
+                                  }
+                                }}
+                                className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all text-center cursor-pointer ${
+                                  isCurrent
+                                    ? "bg-blue-600 text-white border-blue-600 shadow-xs"
+                                    : "bg-white text-gray-700 border-gray-200 hover:border-gray-300"
+                                }`}
+                              >
+                                {p.label}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Dynamic Inputs: Title/Quiz Number, Subject, Class/Semester */}
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        <input
-                          type="text"
-                          placeholder="Exam Title (e.g. Midterm)"
-                          value={examTitle}
-                          onChange={(e) => setExamTitle(e.target.value)}
-                          className="px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium"
-                        />
-                        <input
-                          type="text"
-                          placeholder="Subject (e.g. Operating Systems)"
-                          value={examSubject}
-                          onChange={(e) => setExamSubject(e.target.value)}
-                          className="px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium"
-                        />
-                        <input
-                          type="text"
-                          placeholder="Class / Semester (e.g. CS 3rd Year)"
-                          value={examClass}
-                          onChange={(e) => setExamClass(e.target.value)}
-                          className="px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium"
-                        />
+                        {paperType === "quiz" ? (
+                          <div>
+                            <label className="text-[11px] font-bold text-gray-700 block mb-1">
+                              Quiz Number
+                            </label>
+                            <input
+                              type="text"
+                              value={quizNumber}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setQuizNumber(val);
+                                setExamTitle(`Quiz No. ${val ? val.padStart(2, "0") : "01"}`);
+                              }}
+                              placeholder="01"
+                              className="w-full px-3 py-2.5 bg-white border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-sm font-bold text-center text-gray-900"
+                            />
+                          </div>
+                        ) : (
+                          <div>
+                            <label className="text-[11px] font-bold text-gray-700 block mb-1">
+                              Examination Title
+                            </label>
+                            <input
+                              type="text"
+                              placeholder="e.g. Mid Term Exam (Fall-2026)"
+                              value={examTitle}
+                              onChange={(e) => setExamTitle(e.target.value)}
+                              className="w-full px-3 py-2.5 bg-white border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium text-gray-900"
+                            />
+                          </div>
+                        )}
+
+                        <div>
+                          <label className="text-[11px] font-bold text-gray-700 block mb-1">
+                            Course / Subject Name
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="e.g. Operating Systems / Physics"
+                            value={examSubject}
+                            onChange={(e) => setExamSubject(e.target.value)}
+                            className="w-full px-3 py-2.5 bg-white border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium text-gray-900"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="text-[11px] font-bold text-gray-700 block mb-1">
+                            {academicTier === "University"
+                              ? "Semester & Degree"
+                              : academicTier === "College"
+                              ? "Class / Year"
+                              : "Class / Grade"}
+                          </label>
+                          <input
+                            type="text"
+                            placeholder={
+                              academicTier === "University"
+                                ? "e.g. BSCS 5th Semester"
+                                : academicTier === "College"
+                                ? "e.g. 1st Year (FSc Pre-Engineering)"
+                                : "e.g. 10th Class (Section A)"
+                            }
+                            value={examClass}
+                            onChange={(e) => setExamClass(e.target.value)}
+                            className="w-full px-3 py-2.5 bg-white border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium text-gray-900"
+                          />
+                        </div>
+
+                        {academicTier === "University" && (
+                          <div className="sm:col-span-3">
+                            <label className="text-[11px] font-bold text-gray-700 block mb-1">
+                              Course Code & Number (University Only)
+                            </label>
+                            <input
+                              type="text"
+                              placeholder="e.g. CSC-204 / CS-301"
+                              value={courseCode}
+                              onChange={(e) => setCourseCode(e.target.value)}
+                              className="w-full px-3 py-2.5 bg-white border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium text-gray-900"
+                            />
+                          </div>
+                        )}
                       </div>
                     </div>
 
@@ -2639,11 +2822,114 @@ export default function TeacherDashboard() {
                 </div>
               </div>
 
+              {/* ACADEMIC TIER & PAPER FORMAT SELECTION */}
+              <div className="bg-slate-50/80 p-4 rounded-2xl border border-slate-200/80 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center gap-1.5">
+                    <GraduationCap className="w-3.5 h-3.5 text-blue-600" />
+                    <span>Academic Format & Paper Standard</span>
+                  </div>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800">
+                    {exportModal.academicTier} Tier Active
+                  </span>
+                </div>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[11px] font-bold text-gray-600 mb-1">
+                      Academic Tier
+                    </label>
+                    <div className="grid grid-cols-3 gap-1 bg-white p-1 rounded-xl border border-gray-200">
+                      {[
+                        { id: "University", label: "University", icon: "🎓" },
+                        { id: "College", label: "College", icon: "🏛️" },
+                        { id: "School", label: "School", icon: "🏫" },
+                      ].map((t) => (
+                        <button
+                          key={t.id}
+                          type="button"
+                          onClick={() => {
+                            const newTier = t.id as "University" | "College" | "School";
+                            setExportModal((prev) => ({
+                              ...prev,
+                              academicTier: newTier,
+                              courseCode: newTier === "University" ? (prev.courseCode || "CSC-204") : "",
+                              className: prev.className || (newTier === "University" ? "BSCS 5th" : newTier === "School" ? "10th" : "1st Year"),
+                            }));
+                          }}
+                          className={`py-1.5 px-2 text-center rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                            exportModal.academicTier === t.id
+                              ? "bg-blue-600 text-white shadow-xs"
+                              : "text-gray-600 hover:bg-gray-100"
+                          }`}
+                        >
+                          <span>{t.icon}</span> <span>{t.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-gray-600 mb-1">
+                      Paper Format
+                    </label>
+                    <div className="grid grid-cols-2 gap-1 bg-white p-1 rounded-xl border border-gray-200">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setExportModal((prev) => ({
+                            ...prev,
+                            paperType: "exam",
+                            examTitle: "Mid Term Examination (Fall-2026)",
+                            durationMinutes: 75,
+                            totalMarks: 50,
+                          }));
+                        }}
+                        className={`py-1.5 px-2 text-center rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                          exportModal.paperType === "exam"
+                            ? "bg-blue-600 text-white shadow-xs"
+                            : "text-gray-600 hover:bg-gray-100"
+                        }`}
+                      >
+                        📄 Term Exam
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const qNum = exportModal.quizNumber || "01";
+                          setExportModal((prev) => ({
+                            ...prev,
+                            paperType: "quiz",
+                            examTitle: `Quiz No. ${qNum.padStart(2, "0")}`,
+                            durationMinutes: 20,
+                            totalMarks: 10,
+                          }));
+                        }}
+                        className={`py-1.5 px-2 text-center rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                          exportModal.paperType === "quiz"
+                            ? "bg-blue-600 text-white shadow-xs"
+                            : "text-gray-600 hover:bg-gray-100"
+                        }`}
+                      >
+                        ⚡ Quiz
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               {/* INSTITUTION & DEPARTMENT HEADER FIELDS */}
               <div className="bg-gray-50/70 p-4 rounded-2xl border border-gray-100 space-y-3">
-                <div className="text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center gap-1.5">
-                  <School className="w-3.5 h-3.5 text-blue-600" />
-                  <span>Institutional Header Details</span>
+                <div className="flex items-center justify-between">
+                  <div className="text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center gap-1.5">
+                    <School className="w-3.5 h-3.5 text-blue-600" />
+                    <span>Institutional Header Details</span>
+                  </div>
+                  {academyName && (
+                    <span className="text-[10px] text-blue-600 font-semibold">
+                      ✓ Auto-filled from Teacher Branding
+                    </span>
+                  )}
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div>
@@ -2654,7 +2940,7 @@ export default function TeacherDashboard() {
                       type="text"
                       value={exportModal.institutionName}
                       onChange={(e) => setExportModal((prev) => ({ ...prev, institutionName: e.target.value }))}
-                      placeholder="e.g. National University of Sciences & Technology"
+                      placeholder="e.g. Arid Agriculture University of Rawalpindi"
                       className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -2680,18 +2966,60 @@ export default function TeacherDashboard() {
                   <span>Course & Examination Paper Metadata</span>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-[11px] font-bold text-gray-600 mb-1">
-                      Examination Title
-                    </label>
-                    <input
-                      type="text"
-                      value={exportModal.examTitle}
-                      onChange={(e) => setExportModal((prev) => ({ ...prev, examTitle: e.target.value }))}
-                      placeholder="e.g. Final Term Exam (Spring-2026)"
-                      className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
+                  {exportModal.paperType === "quiz" ? (
+                    <div>
+                      <label className="block text-[11px] font-bold text-gray-600 mb-1">
+                        Quiz Number (e.g. 01, 02)
+                      </label>
+                      <input
+                        type="text"
+                        value={exportModal.quizNumber}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setExportModal((prev) => ({
+                            ...prev,
+                            quizNumber: val,
+                            examTitle: `Quiz No. ${val ? val.padStart(2, "0") : "01"}`,
+                          }));
+                        }}
+                        placeholder="01"
+                        className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                  ) : (
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="block text-[11px] font-bold text-gray-600">
+                          Examination Title
+                        </label>
+                        <div className="flex gap-1">
+                          <button
+                            type="button"
+                            onClick={() => setExportModal((prev) => ({ ...prev, examTitle: "Mid Term Examination (Fall-2026)" }))}
+                            className="text-[10px] text-blue-600 font-bold hover:underline"
+                          >
+                            Midterm
+                          </button>
+                          <span className="text-gray-300">|</span>
+                          <button
+                            type="button"
+                            onClick={() => setExportModal((prev) => ({ ...prev, examTitle: "Final Term Examination (Fall-2026)" }))}
+                            className="text-[10px] text-blue-600 font-bold hover:underline"
+                          >
+                            Final
+                          </button>
+                        </div>
+                      </div>
+                      <input
+                        type="text"
+                        value={exportModal.examTitle}
+                        onChange={(e) => setExportModal((prev) => ({ ...prev, examTitle: e.target.value }))}
+                        placeholder="e.g. Mid Term Examination (Fall-2026)"
+                        className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                  )}
+
                   <div>
                     <label className="block text-[11px] font-bold text-gray-600 mb-1">
                       Examination Category (Format Header)
@@ -2721,18 +3049,27 @@ export default function TeacherDashboard() {
                       </button>
                     </div>
                   </div>
-                  <div>
-                    <label className="block text-[11px] font-bold text-gray-600 mb-1">
-                      Course Code & Number
-                    </label>
-                    <input
-                      type="text"
-                      value={exportModal.courseCode}
-                      onChange={(e) => setExportModal((prev) => ({ ...prev, courseCode: e.target.value }))}
-                      placeholder="e.g. CSC-262 / CS-301"
-                      className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
+
+                  {/* Course Code ONLY FOR UNIVERSITY */}
+                  {exportModal.academicTier === "University" ? (
+                    <div>
+                      <label className="block text-[11px] font-bold text-gray-600 mb-1">
+                        Course Code & Number (University Only)
+                      </label>
+                      <input
+                        type="text"
+                        value={exportModal.courseCode}
+                        onChange={(e) => setExportModal((prev) => ({ ...prev, courseCode: e.target.value }))}
+                        placeholder="e.g. CSC-204 / CS-301"
+                        className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                  ) : (
+                    <div className="flex items-center px-3 py-2 bg-indigo-50/50 border border-indigo-100 rounded-xl text-[11px] text-indigo-700">
+                      ℹ️ Course Code is omitted automatically for {exportModal.academicTier} format.
+                    </div>
+                  )}
+
                   <div>
                     <label className="block text-[11px] font-bold text-gray-600 mb-1">
                       Course / Subject
@@ -2741,22 +3078,34 @@ export default function TeacherDashboard() {
                       type="text"
                       value={exportModal.subject}
                       onChange={(e) => setExportModal((prev) => ({ ...prev, subject: e.target.value }))}
-                      placeholder="e.g. Artificial Intelligence & Expert Systems"
+                      placeholder="e.g. Mobile Application Development"
                       className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
+
                   <div>
                     <label className="block text-[11px] font-bold text-gray-600 mb-1">
-                      Class / Program / Semester
+                      {exportModal.academicTier === "University"
+                        ? "Semester & Degree"
+                        : exportModal.academicTier === "College"
+                        ? "Class / Year"
+                        : "Class / Grade"}
                     </label>
                     <input
                       type="text"
                       value={exportModal.className}
                       onChange={(e) => setExportModal((prev) => ({ ...prev, className: e.target.value }))}
-                      placeholder="e.g. BSCS - 6th Semester"
+                      placeholder={
+                        exportModal.academicTier === "University"
+                          ? "e.g. BSCS 5th Semester"
+                          : exportModal.academicTier === "College"
+                          ? "e.g. 1st Year (FSc)"
+                          : "e.g. 10th Class"
+                      }
                       className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
+
                   <div>
                     <label className="block text-[11px] font-bold text-gray-600 mb-1">
                       Instructor / Examiner Name

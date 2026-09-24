@@ -156,6 +156,9 @@ class ExportQuizRequest(BaseModel):
     exam_set: str = "Standard" # "Standard", "Set A", "Set B"
     include_instructions: bool = True
     include_clo: bool = True
+    academic_tier: Optional[str] = None
+    paper_type: Optional[str] = None
+    quiz_number: Optional[str] = None
 
 class CreateClassroomRequest(BaseModel):
     name: str
@@ -316,6 +319,9 @@ async def generate_quiz(
     class_name: str = Form(""),
     teacher_name: str = Form(""),
     exam_title: str = Form(""),
+    course_code: str = Form(""),
+    paper_type: str = Form("exam"),
+    quiz_number: str = Form(""),
     user=Depends(get_current_user), 
 ):
     req_id = getattr(request.state, "req_id", "Unknown")
@@ -431,7 +437,34 @@ async def generate_quiz(
     calculated_duration = (num_mcq * 1) + (num_fill_blank * 1) + (num_short * 3) + (num_long * 8)
     if calculated_duration < 15: calculated_duration = 15
 
-    clean_title = exam_title.strip() if exam_title.strip() else "Assessment Examination"
+    # Auto-resolve teacher branding if institution name is empty or default
+    teacher_branding = database.get_teacher_branding(user["id"])
+    if teacher_branding and teacher_branding.get("academy_name") and (not institution_name.strip() or institution_name.strip() == "Academic Examination Department"):
+        institution_name = teacher_branding["academy_name"]
+
+    is_university = tier_lower == "university"
+    final_course_code = course_code.strip() if is_university else ""
+
+    # Clean and resolve exam title to eliminate repetition and handle Quiz vs Term Exam
+    clean_title = exam_title.strip()
+    is_quiz = (paper_type.lower().strip() == "quiz") or ("quiz" in clean_title.lower())
+    q_num = ""
+    if is_quiz:
+        q_num = quiz_number.strip()
+        if not q_num:
+            match = re.search(r"quiz\s*(?:no\.?|#)?\s*(\d+)", clean_title, re.IGNORECASE)
+            q_num = match.group(1).zfill(2) if match else "01"
+        else:
+            q_num = str(q_num).zfill(2)
+        clean_title = f"Quiz No. {q_num}"
+    else:
+        if re.search(r"mid\s*term.*mid\s*term", clean_title, re.IGNORECASE) or re.search(r"midterm.*midterm", clean_title, re.IGNORECASE) or (clean_title.lower() in ("midterm", "mid term", "mid-term")):
+            clean_title = "Mid Term Examination (Fall-2026)"
+        elif re.search(r"final\s*term.*final\s*term", clean_title, re.IGNORECASE) or re.search(r"final.*final", clean_title, re.IGNORECASE) or (clean_title.lower() in ("final", "final term", "finalterm", "final-term")):
+            clean_title = "Final Term Examination (Fall-2026)"
+        elif not clean_title or clean_title.lower() == "assessment examination":
+            clean_title = "Mid Term Examination (Fall-2026)"
+
     is_practical_exam = (track_lower in ("practical", "lab") or "practical" in effective_style.lower())
     is_self_study = (user.get("role") == "student")
 
@@ -442,6 +475,9 @@ async def generate_quiz(
         "class_name": class_name.strip(),
         "teacher_name": teacher_name.strip() or user["name"], 
         "exam_title": clean_title,
+        "course_code": final_course_code,
+        "paper_type": "quiz" if is_quiz else "exam",
+        "quiz_number": q_num if is_quiz else "",
         "duration_minutes": calculated_duration, 
         "total_marks": calculated_marks,
         "academic_tier": academic_tier,
@@ -763,18 +799,58 @@ def export_quiz_docx(quiz_id: int, req: ExportQuizRequest, user=Depends(get_curr
     raw_quiz_data = quiz["quiz_data"]
     quiz_data = prepare_exam_data(raw_quiz_data, req.exam_set)
 
-    branding = database.get_teacher_branding(user["id"])
-    inst_name = req.institution_name.strip() or (branding["academy_name"] if branding and branding.get("academy_name") else meta.get("institution_name", "Academic Examination Department"))
-    dept_name = req.department_name.strip() or meta.get("department_name", "Examination Branch")
-    exam_title = req.exam_title.strip() or meta.get("exam_title", "Assessment Examination")
+    branding = database.get_teacher_branding(quiz.get("teacher_id") or user["id"])
+    inst_name = req.institution_name.strip()
+    if not inst_name or inst_name == "Academic Examination Department":
+        if branding and branding.get("academy_name"):
+            inst_name = branding["academy_name"]
+        else:
+            inst_name = meta.get("institution_name", "Academic Examination Department")
+    dept_name = req.department_name.strip() or meta.get("department_name") or meta.get("department", "Examination Branch")
+
+    academic_tier = (req.academic_tier or meta.get("academic_tier", "University")).strip()
+    is_university = academic_tier.lower() == "university"
+
+    raw_exam_title = req.exam_title.strip() or meta.get("exam_title", "")
+    paper_type = (req.paper_type or meta.get("paper_type", "")).strip().lower()
+    quiz_num = (req.quiz_number or meta.get("quiz_number", "")).strip()
+
+    is_quiz = (paper_type == "quiz") or ("quiz" in raw_exam_title.lower())
+    if is_quiz:
+        if not quiz_num:
+            match = re.search(r"quiz\s*(?:no\.?|#)?\s*(\d+)", raw_exam_title, re.IGNORECASE)
+            quiz_num = match.group(1).zfill(2) if match else "01"
+        else:
+            quiz_num = str(quiz_num).zfill(2)
+        exam_title = f"Quiz No. {quiz_num}"
+    else:
+        exam_title = raw_exam_title
+        if re.search(r"mid\s*term.*mid\s*term", exam_title, re.IGNORECASE) or re.search(r"midterm.*midterm", exam_title, re.IGNORECASE) or (exam_title.lower() in ("midterm", "mid term", "mid-term")):
+            exam_title = "Mid Term Examination (Fall-2026)"
+        elif re.search(r"final\s*term.*final\s*term", exam_title, re.IGNORECASE) or re.search(r"final.*final", exam_title, re.IGNORECASE) or (exam_title.lower() in ("final", "final term", "finalterm", "final-term")):
+            exam_title = "Final Term Examination (Fall-2026)"
+        elif not exam_title or exam_title.lower() == "assessment examination":
+            exam_title = "Mid Term Examination (Fall-2026)"
+
     exam_category = (req.exam_category.strip() if req.exam_category else "THEORY").upper()
-    course_code = req.course_code.strip() or meta.get("course_code", "CSC-262")
-    subject_val = req.subject.strip() or meta.get("subject", "Machine Learning")
+
+    # Course Code: STRICTLY UNIVERSITY ONLY
+    if is_university:
+        course_code = req.course_code.strip() or meta.get("course_code", "")
+    else:
+        course_code = ""
+
+    subject_val = req.subject.strip() or meta.get("subject", "General Subject")
     course_str = f"{subject_val} ({course_code})" if course_code else subject_val
-    class_val = req.class_name.strip() or meta.get("class_name", "BSCS - 4")
+
+    class_val = req.class_name.strip() or meta.get("class_name", "")
+    if not class_val:
+        class_val = "BSCS - 5th" if is_university else "10th" if academic_tier.lower() == "school" else "1st Year"
+
+    class_label = "Semester" if is_university else "Class"
     t_name = req.teacher_name.strip() or meta.get('teacher_name', user['name'])
-    dur = req.duration_minutes if req.duration_minutes is not None else meta.get("duration_minutes", 90)
-    marks = req.total_marks if req.total_marks is not None else meta.get("total_marks", 20)
+    dur = req.duration_minutes if req.duration_minutes is not None else meta.get("duration_minutes", (20 if is_quiz else 90))
+    marks = req.total_marks if req.total_marks is not None else meta.get("total_marks", (10 if is_quiz else 20))
     set_label = req.exam_set.upper()
     include_clo = req.include_clo
 
@@ -826,7 +902,7 @@ def export_quiz_docx(quiz_id: int, req: ExportQuizRequest, user=Depends(get_curr
 
     c_left = t_meta.cell(0, 0).paragraphs[0]
     c_left.paragraph_format.space_after = Pt(1)
-    r_cl1 = c_left.add_run(f"Class: {class_val}\n")
+    r_cl1 = c_left.add_run(f"{class_label}: {class_val}\n")
     r_cl1.font.name = "Times New Roman"
     r_cl1.font.size = Pt(9.5)
     r_cl1.bold = True
@@ -1228,18 +1304,58 @@ def export_quiz_pdf(quiz_id: int, req: ExportQuizRequest, user=Depends(get_curre
     raw_quiz_data = quiz["quiz_data"]
     quiz_data = prepare_exam_data(raw_quiz_data, req.exam_set)
 
-    branding = database.get_teacher_branding(user["id"])
-    inst_name = req.institution_name.strip() or (branding["academy_name"] if branding and branding.get("academy_name") else meta.get("institution_name", "Academic Examination Department"))
-    dept_name = req.department_name.strip() or meta.get("department_name", "Examination Branch")
-    exam_title = req.exam_title.strip() or meta.get("exam_title", "Assessment Examination")
+    branding = database.get_teacher_branding(quiz.get("teacher_id") or user["id"])
+    inst_name = req.institution_name.strip()
+    if not inst_name or inst_name == "Academic Examination Department":
+        if branding and branding.get("academy_name"):
+            inst_name = branding["academy_name"]
+        else:
+            inst_name = meta.get("institution_name", "Academic Examination Department")
+    dept_name = req.department_name.strip() or meta.get("department_name") or meta.get("department", "Examination Branch")
+
+    academic_tier = (req.academic_tier or meta.get("academic_tier", "University")).strip()
+    is_university = academic_tier.lower() == "university"
+
+    raw_exam_title = req.exam_title.strip() or meta.get("exam_title", "")
+    paper_type = (req.paper_type or meta.get("paper_type", "")).strip().lower()
+    quiz_num = (req.quiz_number or meta.get("quiz_number", "")).strip()
+
+    is_quiz = (paper_type == "quiz") or ("quiz" in raw_exam_title.lower())
+    if is_quiz:
+        if not quiz_num:
+            match = re.search(r"quiz\s*(?:no\.?|#)?\s*(\d+)", raw_exam_title, re.IGNORECASE)
+            quiz_num = match.group(1).zfill(2) if match else "01"
+        else:
+            quiz_num = str(quiz_num).zfill(2)
+        exam_title = f"Quiz No. {quiz_num}"
+    else:
+        exam_title = raw_exam_title
+        if re.search(r"mid\s*term.*mid\s*term", exam_title, re.IGNORECASE) or re.search(r"midterm.*midterm", exam_title, re.IGNORECASE) or (exam_title.lower() in ("midterm", "mid term", "mid-term")):
+            exam_title = "Mid Term Examination (Fall-2026)"
+        elif re.search(r"final\s*term.*final\s*term", exam_title, re.IGNORECASE) or re.search(r"final.*final", exam_title, re.IGNORECASE) or (exam_title.lower() in ("final", "final term", "finalterm", "final-term")):
+            exam_title = "Final Term Examination (Fall-2026)"
+        elif not exam_title or exam_title.lower() == "assessment examination":
+            exam_title = "Mid Term Examination (Fall-2026)"
+
     exam_category = (req.exam_category.strip() if req.exam_category else "THEORY").upper()
-    course_code = req.course_code.strip() or meta.get("course_code", "CSC-262")
-    subject_val = req.subject.strip() or meta.get("subject", "Machine Learning")
+
+    # Course Code: STRICTLY UNIVERSITY ONLY
+    if is_university:
+        course_code = req.course_code.strip() or meta.get("course_code", "")
+    else:
+        course_code = ""
+
+    subject_val = req.subject.strip() or meta.get("subject", "General Subject")
     course_str = f"{subject_val} ({course_code})" if course_code else subject_val
-    class_val = req.class_name.strip() or meta.get("class_name", "BSCS - 4")
+
+    class_val = req.class_name.strip() or meta.get("class_name", "")
+    if not class_val:
+        class_val = "BSCS - 5th" if is_university else "10th" if academic_tier.lower() == "school" else "1st Year"
+
+    class_label = "Semester" if is_university else "Class"
     t_name = req.teacher_name.strip() or meta.get('teacher_name', user['name'])
-    dur = req.duration_minutes if req.duration_minutes is not None else meta.get("duration_minutes", 90)
-    marks = req.total_marks if req.total_marks is not None else meta.get("total_marks", 20)
+    dur = req.duration_minutes if req.duration_minutes is not None else meta.get("duration_minutes", (20 if is_quiz else 90))
+    marks = req.total_marks if req.total_marks is not None else meta.get("total_marks", (10 if is_quiz else 20))
     set_label = req.exam_set.upper()
     include_clo = req.include_clo
 
@@ -1296,7 +1412,7 @@ def export_quiz_pdf(quiz_id: int, req: ExportQuizRequest, user=Depends(get_curre
     dur_text = f"{dur} Min" if dur < 60 else f"{dur // 60} Hour{'s' if dur >= 120 else ''} {dur % 60} Min" if dur % 60 else f"{dur // 60} Hours" if dur > 60 else "1.5 Hours" if dur == 90 else "1 Hour"
     set_suffix = f" &nbsp; [{set_label}]" if set_label != "STANDARD" else ""
     
-    p_metal = Paragraph(f"<b>Class:</b> {class_val}<br/><b>{course_str}</b>", styles['AridMetaL'])
+    p_metal = Paragraph(f"<b>{class_label}:</b> {class_val}<br/><b>{course_str}</b>", styles['AridMetaL'])
     p_metar = Paragraph(f"<b>Time Allowed:</b> {dur_text}<br/><b>Maximum Points:</b> {marks}{set_suffix}", styles['AridMetaR'])
     t_meta = Table([[p_metal, p_metar]], colWidths=[3.7 * 72, 3.7 * 72])
     t_meta.setStyle(TableStyle([
