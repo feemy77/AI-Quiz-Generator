@@ -35,11 +35,32 @@ from docx.oxml.ns import nsdecls
 
 # NEW: PDF Export Libraries
 from reportlab.lib.pagesizes import letter
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak, Image as RLImage, Table, TableStyle
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak, Image as RLImage, Table, TableStyle, HRFlowable
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
 from reportlab.lib.utils import ImageReader
 from reportlab.lib import colors
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+
+# Register TrueType fonts for Unicode & Urdu support safely
+for font_cand in [('Arial', 'C:/Windows/Fonts/arial.ttf'), ('Tahoma', 'C:/Windows/Fonts/tahoma.ttf')]:
+    try:
+        if os.path.exists(font_cand[1]):
+            pdfmetrics.registerFont(TTFont(font_cand[0], font_cand[1]))
+    except Exception:
+        pass
+
+def format_urdu_pdf_text(text: str) -> str:
+    """Reshapes Arabic/Urdu characters and handles BiDi directional rendering for PDF."""
+    if not text:
+        return ""
+    try:
+        import arabic_reshaper
+        from bidi.algorithm import get_display
+        return get_display(arabic_reshaper.reshape(str(text)))
+    except Exception:
+        return str(text)
 
 # NOTE FOR WINDOWS: Point pytesseract to the installed executable
 #pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
@@ -329,6 +350,7 @@ async def generate_quiz(
     course_code: str = Form(""),
     paper_type: str = Form("exam"),
     quiz_number: str = Form(""),
+    language: str = Form("English"),
     user=Depends(get_current_user), 
 ):
     req_id = getattr(request.state, "req_id", "Unknown")
@@ -428,15 +450,15 @@ async def generate_quiz(
     combined_identifier = "_".join(source_identifiers)
     req_hash = generate_hash(
         source_identifier=combined_identifier, mcq=num_mcq, fill_blank=num_fill_blank,
-        short_ans=num_short, long_ans=num_long, difficulty=difficulty, question_style=f"{effective_style}_{include_comprehension}"
+        short_ans=num_short, long_ans=num_long, difficulty=difficulty, question_style=f"{effective_style}_{include_comprehension}_{language}"
     )
 
     quiz_data = get_cached_quiz(req_hash)
     if not quiz_data:
-        # 🧠 Pass effective_style down to the generator, running in threadpool to prevent blocking the event loop
+        # 🧠 Pass effective_style and language down to the generator, running in threadpool to prevent blocking the event loop
         quiz_data = await run_in_threadpool(
             generate_quiz_from_large_text,
-            raw_text, question_counts, difficulty, question_style=effective_style, include_comprehension=include_comprehension
+            raw_text, question_counts, difficulty, question_style=effective_style, include_comprehension=include_comprehension, language=language
         )
         save_quiz_to_cache(req_hash, quiz_data)
 
@@ -506,6 +528,7 @@ async def generate_quiz(
         "question_style": effective_style,
         "include_comprehension": include_comprehension,
         "is_self_study": is_self_study,
+        "language": "Urdu" if str(language).lower() in ("urdu", "اردو") else "English",
         "source_text_context": raw_text[:25000] # 🧠 Save context for Phase 1 Regeneration & Alternative Generation securely
     }
 
@@ -2170,4 +2193,589 @@ def get_attempt_detail_for_teacher_api(attempt_id: int, user=Depends(require_tea
     quiz = database.get_quiz(detail["quiz_id"])
     if not quiz or quiz["teacher_id"] != user["id"]:
         raise HTTPException(status_code=403, detail="Unauthorized access to this attempt.")
-    return {"attempt": detail, "exam_metadata": quiz["exam_metadata"]}
+    return {"attempt": detail, "exam_metadata": quiz["exam_metadata"]}
+
+
+# ==========================================
+# 📊 TEACHER CLASS ANALYTICS EXPORT ENGINE (DOCX & PDF)
+# ==========================================
+def build_analytics_docx(analytics_data: dict, institution: str, teacher_name: str, quiz_title: str) -> io.BytesIO:
+    """Generates an executive-grade Word (.docx) Class Performance Analytics & Gradebook Report."""
+    doc = Document()
+    for section in doc.sections:
+        section.top_margin = Inches(0.6)
+        section.bottom_margin = Inches(0.6)
+        section.left_margin = Inches(0.6)
+        section.right_margin = Inches(0.6)
+
+    # 1. Header
+    p_inst = doc.add_paragraph()
+    p_inst.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    r_inst = p_inst.add_run(institution.upper())
+    r_inst.bold = True
+    r_inst.font.size = Pt(14)
+    r_inst.font.color.rgb = RGBColor(30, 58, 138)
+
+    p_title = doc.add_paragraph()
+    p_title.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    r_title = p_title.add_run("CLASS PERFORMANCE ANALYTICS & GRADEBOOK REPORT")
+    r_title.bold = True
+    r_title.font.size = Pt(12)
+    r_title.font.color.rgb = RGBColor(15, 23, 42)
+
+    p_meta = doc.add_paragraph()
+    p_meta.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    r_meta = p_meta.add_run(f"Instructor: {teacher_name}  |  Assessment Scope: {quiz_title}  |  Generated: {datetime.now().strftime('%Y-%m-%d %H:%M')}")
+    r_meta.font.size = Pt(9)
+    r_meta.font.color.rgb = RGBColor(100, 116, 139)
+
+    doc.add_paragraph()  # spacer
+
+    # 2. Executive KPIs
+    ov = analytics_data.get("overview", {})
+    p_kpi = doc.add_paragraph()
+    r_kpi_head = p_kpi.add_run("1. EXECUTIVE SUMMARY & CLASS PERFORMANCE KPIS")
+    r_kpi_head.bold = True
+    r_kpi_head.font.size = Pt(11)
+    r_kpi_head.font.color.rgb = RGBColor(30, 58, 138)
+
+    table_kpi = doc.add_table(rows=2, cols=4)
+    table_kpi.autofit = True
+    kpi_headers = ["Total Submissions", "Class Average", "Pass Rate", "Score Range"]
+    kpi_vals = [
+        str(ov.get("total_attempts", 0)),
+        f"{ov.get('avg_score', 0)}%",
+        f"{ov.get('pass_rate', 0)}%",
+        f"{ov.get('lowest_score', 0)}% - {ov.get('highest_score', 0)}%"
+    ]
+    for c_idx, head in enumerate(kpi_headers):
+        cell = table_kpi.cell(0, c_idx)
+        set_docx_cell_shading(cell, "EFF6FF")
+        p = cell.paragraphs[0]
+        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        r = p.add_run(head)
+        r.bold = True
+        r.font.size = Pt(9)
+        r.font.color.rgb = RGBColor(30, 58, 138)
+
+        v_cell = table_kpi.cell(1, c_idx)
+        set_docx_cell_shading(v_cell, "F8FAFC")
+        vp = v_cell.paragraphs[0]
+        vp.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        vr = vp.add_run(kpi_vals[c_idx])
+        vr.bold = True
+        vr.font.size = Pt(12)
+        vr.font.color.rgb = RGBColor(15, 23, 42)
+
+    doc.add_paragraph()
+
+    # 3. Score Distribution
+    p_dist = doc.add_paragraph()
+    r_dist = p_dist.add_run("2. SCORE DISTRIBUTION BREAKDOWN")
+    r_dist.bold = True
+    r_dist.font.size = Pt(11)
+    r_dist.font.color.rgb = RGBColor(30, 58, 138)
+
+    dist = analytics_data.get("score_distribution", {})
+    tot = max(1, ov.get("total_attempts", 1))
+    dist_table = doc.add_table(rows=5, cols=3)
+    dist_table.autofit = True
+    headers = ["Mastery Tier", "Student Count", "Class Percentage"]
+    for i, h in enumerate(headers):
+        cell = dist_table.cell(0, i)
+        set_docx_cell_shading(cell, "F1F5F9")
+        p = cell.paragraphs[0]
+        p.alignment = WD_ALIGN_PARAGRAPH.LEFT if i == 0 else WD_ALIGN_PARAGRAPH.CENTER
+        r = p.add_run(h)
+        r.bold = True
+        r.font.size = Pt(9)
+
+    tiers = [
+        ("Mastery (90% - 100%)", dist.get("mastery", 0), f"{round(dist.get('mastery', 0)/tot*100, 1)}%"),
+        ("Proficient (75% - 89%)", dist.get("proficient", 0), f"{round(dist.get('proficient', 0)/tot*100, 1)}%"),
+        ("Passing (50% - 74%)", dist.get("passing", 0), f"{round(dist.get('passing', 0)/tot*100, 1)}%"),
+        ("Needs Attention (< 50%)", dist.get("needs_help", 0), f"{round(dist.get('needs_help', 0)/tot*100, 1)}%")
+    ]
+    for row_idx, (t_name, count, pct) in enumerate(tiers, start=1):
+        c0 = dist_table.cell(row_idx, 0)
+        c0.paragraphs[0].add_run(t_name).font.size = Pt(9)
+        c1 = dist_table.cell(row_idx, 1)
+        p1 = c1.paragraphs[0]
+        p1.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p1.add_run(str(count)).font.size = Pt(9)
+        c2 = dist_table.cell(row_idx, 2)
+        p2 = c2.paragraphs[0]
+        p2.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p2.add_run(pct).font.size = Pt(9)
+
+    doc.add_paragraph()
+
+    # 4. At-Risk Students Early Warning
+    at_risk = analytics_data.get("at_risk_students", [])
+    if at_risk:
+        p_risk = doc.add_paragraph()
+        r_risk = p_risk.add_run("3. AT-RISK STUDENTS EARLY WARNING (< 50%)")
+        r_risk.bold = True
+        r_risk.font.size = Pt(11)
+        r_risk.font.color.rgb = RGBColor(190, 18, 60)
+
+        risk_table = doc.add_table(rows=len(at_risk) + 1, cols=5)
+        risk_table.autofit = True
+        r_heads = ["Student Name", "Assessment", "Score", "Percentage", "Intervention Status"]
+        for i, h in enumerate(r_heads):
+            cell = risk_table.cell(0, i)
+            set_docx_cell_shading(cell, "FFF1F2")
+            p = cell.paragraphs[0]
+            r = p.add_run(h)
+            r.bold = True
+            r.font.size = Pt(9)
+            r.font.color.rgb = RGBColor(190, 18, 60)
+        for row_idx, st in enumerate(at_risk, start=1):
+            risk_table.cell(row_idx, 0).paragraphs[0].add_run(st.get("student_name", "")).font.size = Pt(9)
+            risk_table.cell(row_idx, 1).paragraphs[0].add_run(st.get("quiz_title", "")).font.size = Pt(9)
+            risk_table.cell(row_idx, 2).paragraphs[0].add_run(f"{st.get('total_score',0)}/{st.get('max_score',0)}").font.size = Pt(9)
+            p_p = risk_table.cell(row_idx, 3).paragraphs[0]
+            p_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            p_p.add_run(f"{st.get('score_percent', 0)}%").font.size = Pt(9)
+            risk_table.cell(row_idx, 4).paragraphs[0].add_run("Needs Remedial Review").font.size = Pt(9)
+        doc.add_paragraph()
+
+    # 5. Hardest Questions Heatmap
+    hq = analytics_data.get("hardest_questions", [])
+    if hq:
+        p_hq = doc.add_paragraph()
+        r_hq = p_hq.add_run("4. QUESTION DIFFICULTY & CONCEPT GAP HEATMAP")
+        r_hq.bold = True
+        r_hq.font.size = Pt(11)
+        r_hq.font.color.rgb = RGBColor(180, 83, 9)
+
+        hq_table = doc.add_table(rows=len(hq) + 1, cols=4)
+        hq_table.autofit = True
+        hq_heads = ["Question Description", "Type", "Error Rate", "Missed / Total"]
+        for i, h in enumerate(hq_heads):
+            cell = hq_table.cell(0, i)
+            set_docx_cell_shading(cell, "FFFBEB")
+            p = cell.paragraphs[0]
+            r = p.add_run(h)
+            r.bold = True
+            r.font.size = Pt(9)
+            r.font.color.rgb = RGBColor(180, 83, 9)
+        for row_idx, q in enumerate(hq, start=1):
+            q_desc = q.get("question", "")
+            if len(q_desc) > 85:
+                q_desc = q_desc[:85] + "..."
+            hq_table.cell(row_idx, 0).paragraphs[0].add_run(q_desc).font.size = Pt(8.5)
+            hq_table.cell(row_idx, 1).paragraphs[0].add_run(q.get("type", "")).font.size = Pt(8.5)
+            p_err = hq_table.cell(row_idx, 2).paragraphs[0]
+            p_err.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            p_err.add_run(f"{q.get('error_rate', 0)}%").font.size = Pt(8.5)
+            p_tot = hq_table.cell(row_idx, 3).paragraphs[0]
+            p_tot.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            p_tot.add_run(f"{q.get('incorrect_count', 0)} / {q.get('total_attempts', 0)}").font.size = Pt(8.5)
+        doc.add_paragraph()
+
+    # 6. Student Gradebook Roster
+    attempts = analytics_data.get("recent_attempts", [])
+    if attempts:
+        p_gb = doc.add_paragraph()
+        r_gb = p_gb.add_run("5. COMPLETE STUDENT GRADEBOOK ROSTER")
+        r_gb.bold = True
+        r_gb.font.size = Pt(11)
+        r_gb.font.color.rgb = RGBColor(30, 58, 138)
+
+        gb_table = doc.add_table(rows=len(attempts) + 1, cols=6)
+        gb_table.autofit = True
+        gb_heads = ["#", "Student Name", "Assessment Title", "Score", "Percentage", "Date"]
+        for i, h in enumerate(gb_heads):
+            cell = gb_table.cell(0, i)
+            set_docx_cell_shading(cell, "EFF6FF")
+            p = cell.paragraphs[0]
+            r = p.add_run(h)
+            r.bold = True
+            r.font.size = Pt(9)
+            r.font.color.rgb = RGBColor(30, 58, 138)
+        for row_idx, a in enumerate(attempts, start=1):
+            gb_table.cell(row_idx, 0).paragraphs[0].add_run(str(row_idx)).font.size = Pt(8.5)
+            gb_table.cell(row_idx, 1).paragraphs[0].add_run(a.get("student_name", "")).font.size = Pt(8.5)
+            gb_table.cell(row_idx, 2).paragraphs[0].add_run(a.get("quiz_title", "")).font.size = Pt(8.5)
+            p_s = gb_table.cell(row_idx, 3).paragraphs[0]
+            p_s.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            p_s.add_run(f"{a.get('total_score',0)} / {a.get('max_score',0)}").font.size = Pt(8.5)
+            p_pct = gb_table.cell(row_idx, 4).paragraphs[0]
+            p_pct.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            p_pct.add_run(f"{a.get('score_percent',0)}%").font.size = Pt(8.5)
+            p_d = gb_table.cell(row_idx, 5).paragraphs[0]
+            p_d.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            p_d.add_run(f"{a.get('date', '')}").font.size = Pt(8.5)
+
+    buffer = io.BytesIO()
+    doc.save(buffer)
+    buffer.seek(0)
+    return buffer
+
+
+def build_analytics_pdf(analytics_data: dict, institution: str, teacher_name: str, quiz_title: str) -> io.BytesIO:
+    """Generates a professional PDF Class Performance Analytics & Gradebook Report via ReportLab."""
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=36, leftMargin=36, topMargin=36, bottomMargin=36)
+    styles = getSampleStyleSheet()
+
+    title_style = ParagraphStyle(
+        'DocTitle',
+        parent=styles['Normal'],
+        fontName='Helvetica-Bold',
+        fontSize=15,
+        leading=18,
+        alignment=TA_CENTER,
+        textColor=colors.HexColor('#1E3A8A')
+    )
+    subtitle_style = ParagraphStyle(
+        'DocSubtitle',
+        parent=styles['Normal'],
+        fontName='Helvetica-Bold',
+        fontSize=11,
+        leading=15,
+        alignment=TA_CENTER,
+        textColor=colors.HexColor('#0F172A')
+    )
+    meta_style = ParagraphStyle(
+        'DocMeta',
+        parent=styles['Normal'],
+        fontName='Helvetica',
+        fontSize=8.5,
+        leading=11,
+        alignment=TA_CENTER,
+        textColor=colors.HexColor('#64748B')
+    )
+    sec_style = ParagraphStyle(
+        'SecHeader',
+        parent=styles['Normal'],
+        fontName='Helvetica-Bold',
+        fontSize=10.5,
+        leading=14,
+        textColor=colors.HexColor('#1E3A8A')
+    )
+    cell_style = ParagraphStyle(
+        'CellText',
+        parent=styles['Normal'],
+        fontName='Helvetica',
+        fontSize=8,
+        leading=10
+    )
+    cell_center = ParagraphStyle(
+        'CellCenter',
+        parent=cell_style,
+        alignment=TA_CENTER
+    )
+    cell_bold_center = ParagraphStyle(
+        'CellBoldCenter',
+        parent=cell_style,
+        fontName='Helvetica-Bold',
+        alignment=TA_CENTER
+    )
+
+    story = []
+    story.append(Paragraph(institution.upper(), title_style))
+    story.append(Spacer(1, 3))
+    story.append(Paragraph("CLASS PERFORMANCE ANALYTICS & GRADEBOOK REPORT", subtitle_style))
+    story.append(Spacer(1, 3))
+    story.append(Paragraph(f"Instructor: {teacher_name}  |  Assessment Scope: {quiz_title}  |  Generated: {datetime.now().strftime('%Y-%m-%d %H:%M')}", meta_style))
+    story.append(Spacer(1, 10))
+    story.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor("#CBD5E1"), spaceAfter=10))
+
+    # 1. KPIs
+    ov = analytics_data.get("overview", {})
+    story.append(Paragraph("1. EXECUTIVE SUMMARY & CLASS PERFORMANCE KPIS", sec_style))
+    story.append(Spacer(1, 6))
+
+    kpi_data = [
+        [
+            Paragraph("<b>Total Submissions</b>", cell_bold_center),
+            Paragraph("<b>Class Average</b>", cell_bold_center),
+            Paragraph("<b>Pass Rate</b>", cell_bold_center),
+            Paragraph("<b>Score Range</b>", cell_bold_center)
+        ],
+        [
+            Paragraph(f"<font size=12><b>{ov.get('total_attempts', 0)}</b></font>", cell_center),
+            Paragraph(f"<font size=12 color='#2563EB'><b>{ov.get('avg_score', 0)}%</b></font>", cell_center),
+            Paragraph(f"<font size=12 color='#16A34A'><b>{ov.get('pass_rate', 0)}%</b></font>", cell_center),
+            Paragraph(f"<font size=10><b>{ov.get('lowest_score', 0)}% - {ov.get('highest_score', 0)}%</b></font>", cell_center)
+        ]
+    ]
+    t_kpi = Table(kpi_data, colWidths=[135, 135, 135, 135])
+    t_kpi.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#EFF6FF')),
+        ('BACKGROUND', (0, 1), (-1, 1), colors.HexColor('#F8FAFC')),
+        ('BOX', (0, 0), (-1, -1), 0.75, colors.HexColor('#BFDBFE')),
+        ('INNERGRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#E2E8F0')),
+        ('TOPPADDING', (0, 0), (-1, -1), 6),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+    ]))
+    story.append(t_kpi)
+    story.append(Spacer(1, 12))
+
+    # 2. Distribution
+    dist = analytics_data.get("score_distribution", {})
+    tot = max(1, ov.get("total_attempts", 1))
+    story.append(Paragraph("2. SCORE DISTRIBUTION BREAKDOWN", sec_style))
+    story.append(Spacer(1, 6))
+    dist_data = [
+        [Paragraph("<b>Performance Tier</b>", cell_style), Paragraph("<b>Student Count</b>", cell_center), Paragraph("<b>Percentage of Class</b>", cell_center)],
+        [Paragraph("Mastery (90% - 100%)", cell_style), Paragraph(str(dist.get("mastery", 0)), cell_center), Paragraph(f"{round(dist.get('mastery', 0)/tot*100, 1)}%", cell_center)],
+        [Paragraph("Proficient (75% - 89%)", cell_style), Paragraph(str(dist.get("proficient", 0)), cell_center), Paragraph(f"{round(dist.get('proficient', 0)/tot*100, 1)}%", cell_center)],
+        [Paragraph("Passing (50% - 74%)", cell_style), Paragraph(str(dist.get("passing", 0)), cell_center), Paragraph(f"{round(dist.get('passing', 0)/tot*100, 1)}%", cell_center)],
+        [Paragraph("Needs Attention (< 50%)", cell_style), Paragraph(str(dist.get("needs_help", 0)), cell_center), Paragraph(f"{round(dist.get('needs_help', 0)/tot*100, 1)}%", cell_center)]
+    ]
+    t_dist = Table(dist_data, colWidths=[240, 150, 150])
+    t_dist.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#F1F5F9')),
+        ('BOX', (0, 0), (-1, -1), 0.5, colors.HexColor('#CBD5E1')),
+        ('INNERGRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#E2E8F0')),
+        ('TOPPADDING', (0, 0), (-1, -1), 4),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+    ]))
+    story.append(t_dist)
+    story.append(Spacer(1, 12))
+
+    # 3. At-Risk Students
+    at_risk = analytics_data.get("at_risk_students", [])
+    if at_risk:
+        risk_sec_style = ParagraphStyle('RiskSec', parent=sec_style, textColor=colors.HexColor('#BE123C'))
+        story.append(Paragraph("3. AT-RISK STUDENTS EARLY WARNING (< 50%)", risk_sec_style))
+        story.append(Spacer(1, 6))
+        r_rows = [[
+            Paragraph("<b>Student Name</b>", cell_style),
+            Paragraph("<b>Assessment Title</b>", cell_style),
+            Paragraph("<b>Score</b>", cell_center),
+            Paragraph("<b>Percentage</b>", cell_center),
+            Paragraph("<b>Intervention Status</b>", cell_center)
+        ]]
+        for st in at_risk:
+            r_rows.append([
+                Paragraph(st.get("student_name", ""), cell_style),
+                Paragraph(st.get("quiz_title", ""), cell_style),
+                Paragraph(f"{st.get('total_score',0)}/{st.get('max_score',0)}", cell_center),
+                Paragraph(f"<font color='#BE123C'><b>{st.get('score_percent',0)}%</b></font>", cell_center),
+                Paragraph("<font color='#BE123C'>Needs Remedial Review</font>", cell_center)
+            ])
+        t_risk = Table(r_rows, colWidths=[120, 170, 70, 70, 110])
+        t_risk.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#FFF1F2')),
+            ('BOX', (0, 0), (-1, -1), 0.75, colors.HexColor('#FECDD3')),
+            ('INNERGRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#FFE4E6')),
+            ('TOPPADDING', (0, 0), (-1, -1), 4),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+        ]))
+        story.append(t_risk)
+        story.append(Spacer(1, 12))
+
+    # 4. Hardest Questions
+    hq = analytics_data.get("hardest_questions", [])
+    if hq:
+        hq_sec_style = ParagraphStyle('HqSec', parent=sec_style, textColor=colors.HexColor('#B45309'))
+        story.append(Paragraph("4. QUESTION DIFFICULTY & CONCEPT GAP HEATMAP", hq_sec_style))
+        story.append(Spacer(1, 6))
+        hq_rows = [[
+            Paragraph("<b>Question Description</b>", cell_style),
+            Paragraph("<b>Type</b>", cell_center),
+            Paragraph("<b>Error Rate</b>", cell_center),
+            Paragraph("<b>Missed / Total</b>", cell_center)
+        ]]
+        for q in hq:
+            desc = q.get("question", "")
+            if len(desc) > 85:
+                desc = desc[:85] + "..."
+            hq_rows.append([
+                Paragraph(desc, cell_style),
+                Paragraph(q.get("type", ""), cell_center),
+                Paragraph(f"<font color='#B45309'><b>{q.get('error_rate',0)}%</b></font>", cell_center),
+                Paragraph(f"{q.get('incorrect_count',0)} / {q.get('total_attempts',0)}", cell_center)
+            ])
+        t_hq = Table(hq_rows, colWidths=[270, 90, 90, 90])
+        t_hq.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#FFFBEB')),
+            ('BOX', (0, 0), (-1, -1), 0.75, colors.HexColor('#FDE68A')),
+            ('INNERGRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#FEF3C7')),
+            ('TOPPADDING', (0, 0), (-1, -1), 4),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+        ]))
+        story.append(t_hq)
+        story.append(Spacer(1, 12))
+
+    # 5. Student Gradebook Roster
+    attempts = analytics_data.get("recent_attempts", [])
+    if attempts:
+        story.append(Paragraph("5. COMPLETE STUDENT GRADEBOOK ROSTER", sec_style))
+        story.append(Spacer(1, 6))
+        gb_rows = [[
+            Paragraph("<b>#</b>", cell_center),
+            Paragraph("<b>Student Name</b>", cell_style),
+            Paragraph("<b>Assessment Title</b>", cell_style),
+            Paragraph("<b>Score</b>", cell_center),
+            Paragraph("<b>Percentage</b>", cell_center),
+            Paragraph("<b>Date</b>", cell_center)
+        ]]
+        for idx, a in enumerate(attempts, start=1):
+            gb_rows.append([
+                Paragraph(str(idx), cell_center),
+                Paragraph(a.get("student_name", ""), cell_style),
+                Paragraph(a.get("quiz_title", ""), cell_style),
+                Paragraph(f"{a.get('total_score',0)}/{a.get('max_score',0)}", cell_center),
+                Paragraph(f"<b>{a.get('score_percent',0)}%</b>", cell_center),
+                Paragraph(a.get("date", ""), cell_center)
+            ])
+        t_gb = Table(gb_rows, colWidths=[30, 130, 190, 60, 60, 70])
+        t_gb.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#EFF6FF')),
+            ('BOX', (0, 0), (-1, -1), 0.5, colors.HexColor('#CBD5E1')),
+            ('INNERGRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#E2E8F0')),
+            ('TOPPADDING', (0, 0), (-1, -1), 3),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
+        ]))
+        story.append(t_gb)
+
+    doc.build(story)
+    buffer.seek(0)
+    return buffer
+
+
+@app.get("/teacher/analytics/export/docx")
+def export_teacher_analytics_docx(quiz_id: Optional[int] = None, user=Depends(require_teacher)):
+    """Exports class performance analytics and student gradebook to a formatted Word (.docx) document."""
+    analytics_data = database.get_teacher_detailed_analytics(user["id"], quiz_id=quiz_id)
+    branding = database.get_teacher_branding(user["id"])
+    inst_name = branding.get("academy_name") if (branding and branding.get("academy_name")) else "Academic Examination Department"
+    teacher_name = branding.get("teacher_name") if (branding and branding.get("teacher_name")) else user.get("name", "Instructor")
+    quiz_title = "All Assessments Combined"
+    if quiz_id:
+        quiz = database.get_quiz(quiz_id)
+        if quiz and quiz.get("exam_metadata"):
+            quiz_title = quiz["exam_metadata"].get("exam_title", f"Quiz #{quiz_id}")
+
+    buffer = build_analytics_docx(analytics_data, inst_name, teacher_name, quiz_title)
+    safe_fn = re.sub(r'[^a-zA-Z0-9_-]', '_', f"Analytics_{quiz_title}")[:40]
+    return StreamingResponse(
+        buffer,
+        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        headers={"Content-Disposition": f"attachment; filename=Class_Analytics_{safe_fn}.docx"}
+    )
+
+
+@app.get("/teacher/analytics/export/pdf")
+def export_teacher_analytics_pdf(quiz_id: Optional[int] = None, user=Depends(require_teacher)):
+    """Exports class performance analytics and student gradebook to a formatted PDF document."""
+    analytics_data = database.get_teacher_detailed_analytics(user["id"], quiz_id=quiz_id)
+    branding = database.get_teacher_branding(user["id"])
+    inst_name = branding.get("academy_name") if (branding and branding.get("academy_name")) else "Academic Examination Department"
+    teacher_name = branding.get("teacher_name") if (branding and branding.get("teacher_name")) else user.get("name", "Instructor")
+    quiz_title = "All Assessments Combined"
+    if quiz_id:
+        quiz = database.get_quiz(quiz_id)
+        if quiz and quiz.get("exam_metadata"):
+            quiz_title = quiz["exam_metadata"].get("exam_title", f"Quiz #{quiz_id}")
+
+    buffer = build_analytics_pdf(analytics_data, inst_name, teacher_name, quiz_title)
+    safe_fn = re.sub(r'[^a-zA-Z0-9_-]', '_', f"Analytics_{quiz_title}")[:40]
+    return StreamingResponse(
+        buffer,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f"attachment; filename=Class_Analytics_{safe_fn}.pdf"}
+    )
+
+
+# ==========================================
+# 📚 QUESTION BANK COMPILER (ASSEMBLE QUIZ FROM BOOKMARKS)
+# ==========================================
+class CompileFromBankRequest(BaseModel):
+    title: str = "Assembled Question Bank Exam"
+    subject: str = "General Subject"
+    class_name: str = ""
+    academic_tier: str = "University"
+    paper_type: str = "exam"
+    language: str = "English"
+    bookmark_ids: List[int]
+
+
+@app.post("/teacher/quiz/compile-from-bank")
+def compile_quiz_from_bank(req: CompileFromBankRequest, user=Depends(require_teacher)):
+    """Assembles a new examination quiz directly from selected Question Bank bookmarks."""
+    if not req.bookmark_ids:
+        raise HTTPException(status_code=400, detail="Please select at least one question from your Question Bank.")
+
+    conn = database.get_db_connection()
+    cursor = conn.cursor()
+    placeholders = ",".join("?" for _ in req.bookmark_ids)
+    cursor.execute(
+        f"SELECT * FROM bookmarked_questions WHERE user_id = ? AND id IN ({placeholders})",
+        [user["id"]] + req.bookmark_ids
+    )
+    rows = cursor.fetchall()
+    conn.close()
+
+    if not rows:
+        raise HTTPException(status_code=404, detail="No matching bookmarks found in your question bank.")
+
+    mcqs = []
+    blanks = []
+    shorts = []
+    longs = []
+
+    for r in rows:
+        try:
+            q_data = json.loads(r["question_data"])
+        except Exception:
+            continue
+        q_type = r["question_type"]
+        if q_type == "mcq":
+            mcqs.append(q_data)
+        elif q_type == "fill_blank":
+            blanks.append(q_data)
+        elif q_type == "short_answer":
+            shorts.append(q_data)
+        elif q_type == "long_answer":
+            longs.append(q_data)
+
+    quiz_data = {
+        "mcq_questions": mcqs,
+        "fill_blank_questions": blanks,
+        "short_questions": shorts,
+        "long_questions": longs,
+        "language": req.language
+    }
+
+    # Compute accurate total marks
+    calc_marks = (len(mcqs) * 1) + (len(blanks) * 1) + (len(shorts) * 2)
+    for lq in longs:
+        calc_marks += lq.get("marks", 6)
+    if calc_marks <= 0:
+        calc_marks = 20
+
+    duration = (len(mcqs) * 1) + (len(blanks) * 1) + (len(shorts) * 3) + (len(longs) * 8)
+    duration = max(15, duration)
+
+    branding = database.get_teacher_branding(user["id"])
+    inst_name = branding.get("academy_name") if (branding and branding.get("academy_name")) else "Academic Examination Department"
+
+    exam_metadata = {
+        "institution_name": inst_name,
+        "department": "Examination Branch",
+        "subject": req.subject.strip() or "General Subject",
+        "class_name": req.class_name.strip(),
+        "teacher_name": branding.get("teacher_name") if (branding and branding.get("teacher_name")) else user["name"],
+        "exam_title": req.title.strip() or "Assembled Question Bank Exam",
+        "course_code": "",
+        "paper_type": req.paper_type,
+        "quiz_number": "01",
+        "duration_minutes": duration,
+        "total_marks": calc_marks,
+        "academic_tier": req.academic_tier,
+        "exam_track": "Standard",
+        "exam_category": "THEORY",
+        "question_style": "Auto",
+        "include_comprehension": False,
+        "is_self_study": False,
+        "language": req.language
+    }
+
+    quiz_id = database.create_quiz(user["id"], exam_metadata, quiz_data)
+    return {"quiz_id": quiz_id, "message": "Quiz compiled successfully from Question Bank!"}

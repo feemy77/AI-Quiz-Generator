@@ -89,6 +89,26 @@ export default function TeacherDashboard() {
   const [bookmarks, setBookmarks] = useState<any[]>([]);
   const [bookmarkFilter, setBookmarkFilter] = useState("all");
   const [copiedId, setCopiedId] = useState<number | null>(null);
+  const [selectedBookmarks, setSelectedBookmarks] = useState<number[]>([]);
+  const [compileModal, setCompileModal] = useState<{
+    show: boolean;
+    title: string;
+    subject: string;
+    academicTier: string;
+    language: string;
+    compiling: boolean;
+  }>({
+    show: false,
+    title: "Question Bank Assessment",
+    subject: "General Subject",
+    academicTier: "University",
+    language: "English",
+    compiling: false,
+  });
+
+  // Class Analytics Export & Quiz Language State
+  const [exportingAnalytics, setExportingAnalytics] = useState<"docx" | "pdf" | null>(null);
+  const [quizLanguage, setQuizLanguage] = useState<"English" | "Urdu">("English");
 
 
   // Classroom Assignment Modal
@@ -303,6 +323,113 @@ export default function TeacherDashboard() {
     }
   };
 
+  const handleExportAnalytics = async (format: "docx" | "pdf") => {
+    setExportingAnalytics(format);
+    try {
+      const token = localStorage.getItem("token");
+      const qParam = analyticsQuizFilter !== "all" ? `?quiz_id=${analyticsQuizFilter}` : "";
+      const response = await fetch(`${API_BASE_URL}/teacher/analytics/export/${format}${qParam}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to generate ${format.toUpperCase()} analytics report`);
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      const filterName = analyticsQuizFilter !== "all" ? `Quiz_${analyticsQuizFilter}` : "All_Assessments";
+      a.download = `Class_Analytics_${filterName}.${format}`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+      setCustomPopup({
+        show: true,
+        title: "Export Completed",
+        message: `Class Analytics report successfully exported as ${format.toUpperCase()}.`,
+        type: "success",
+      });
+    } catch (err: any) {
+      setCustomPopup({
+        show: true,
+        title: "Export Failed",
+        message: err?.message || "Failed to download analytics report.",
+        type: "error",
+      });
+    } finally {
+      setExportingAnalytics(null);
+    }
+  };
+
+  const handleToggleSelectBookmark = (id: number) => {
+    setSelectedBookmarks((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
+
+  const handleSelectAllBookmarks = () => {
+    const visibleIds = bookmarks
+      .filter((b) => (bookmarkFilter === "all" ? true : b.question_type === bookmarkFilter))
+      .map((b) => b.id);
+    setSelectedBookmarks(visibleIds);
+  };
+
+  const handleClearSelectedBookmarks = () => {
+    setSelectedBookmarks([]);
+  };
+
+  const handleExecuteCompileFromBank = async () => {
+    if (selectedBookmarks.length === 0) return;
+    setCompileModal((prev) => ({ ...prev, compiling: true }));
+    try {
+      const { ok, data, error } = await apiFetch("/teacher/quiz/compile-from-bank", {
+        method: "POST",
+        body: JSON.stringify({
+          title: compileModal.title,
+          subject: compileModal.subject,
+          academic_tier: compileModal.academicTier,
+          language: compileModal.language,
+          paper_type: "exam",
+          bookmark_ids: selectedBookmarks,
+        }),
+      });
+
+      if (ok && data) {
+        setCompileModal((prev) => ({ ...prev, show: false, compiling: false }));
+        setSelectedBookmarks([]);
+        setCustomPopup({
+          show: true,
+          title: "Exam Assembled!",
+          message: "Selected questions from your bank have been compiled into a new examination.",
+          type: "success",
+        });
+        fetchDashboardData();
+        setActiveTab("quizzes");
+      } else {
+        setCompileModal((prev) => ({ ...prev, compiling: false }));
+        setCustomPopup({
+          show: true,
+          title: "Compilation Failed",
+          message: error || "Could not assemble quiz from question bank.",
+          type: "error",
+        });
+      }
+    } catch {
+      setCompileModal((prev) => ({ ...prev, compiling: false }));
+      setCustomPopup({
+        show: true,
+        title: "Error",
+        message: "Network error during question assembly.",
+        type: "error",
+      });
+    }
+  };
+
   const handleViewAttemptDetail = async (attemptId: number) => {
     setSelectedAttemptModal({ show: true, loading: true, data: null });
     try {
@@ -421,6 +548,7 @@ export default function TeacherDashboard() {
     formData.append("academic_tier", academicTier);
     formData.append("exam_track", examTrack);
     formData.append("include_comprehension", includeComprehension ? "true" : "false");
+    formData.append("language", quizLanguage);
 
     const finalExamTitle =
       paperType === "quiz"
@@ -1650,7 +1778,7 @@ export default function TeacherDashboard() {
                         </span>
                       </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
                         <div>
                           <label className="text-[11px] font-bold text-gray-600 block mb-1">Academic Tier</label>
                           <div className="grid grid-cols-3 gap-1.5 bg-white p-1 rounded-xl border border-gray-200">
@@ -1714,6 +1842,29 @@ export default function TeacherDashboard() {
                                 }`}
                               >
                                 <span>{tr.icon}</span> <span className="block sm:inline">{tr.label}</span>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="text-[11px] font-bold text-gray-600 block mb-1">Language (زبان)</label>
+                          <div className="grid grid-cols-2 gap-1.5 bg-white p-1 rounded-xl border border-gray-200">
+                            {[
+                              { id: "English", label: "English", icon: "🇬🇧" },
+                              { id: "Urdu", label: "اردو (Urdu)", icon: "🇵🇰" },
+                            ].map((lang) => (
+                              <button
+                                key={lang.id}
+                                type="button"
+                                onClick={() => setQuizLanguage(lang.id as "English" | "Urdu")}
+                                className={`py-1.5 px-2 text-center rounded-lg text-xs font-bold transition-all ${
+                                  quizLanguage === lang.id
+                                    ? "bg-emerald-600 text-white shadow-xs"
+                                    : "text-gray-600 hover:bg-gray-100"
+                                }`}
+                              >
+                                <span>{lang.icon}</span> <span className="block sm:inline">{lang.label}</span>
                               </button>
                             ))}
                           </div>
@@ -2032,28 +2183,67 @@ export default function TeacherDashboard() {
               )}
 
               {/* TAB: QUESTION BANK / BOOKMARKS */}
+              {/* TAB: QUESTION BANK & BOOKMARKS */}
               {activeTab === "bookmarks" && (
                 <div className="space-y-6">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  {/* Question Bank Header & Action Toolbar */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-gray-200/80 shadow-xs">
                     <div>
-                      <h2 className="text-2xl font-black text-gray-900 tracking-tight">Question Bank & Bookmarks</h2>
-                      <p className="text-sm text-gray-500 mt-0.5">
-                        Your library of starred and high-value exam questions.
+                      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200 mb-1.5">
+                        <Bookmark className="w-3.5 h-3.5 text-amber-600" />
+                        <span>Curated Question Repository</span>
+                      </div>
+                      <h2 className="text-2xl font-black text-gray-900 tracking-tight">Question Bank & Starred Library</h2>
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        Select questions from your library to compile a tailored examination or export custom test papers.
                       </p>
                     </div>
 
-                    <div className="inline-flex p-1 bg-gray-100 rounded-xl self-start">
-                      {["all", "mcq", "fill_blank", "short_answer", "long_answer"].map((type) => (
-                        <button
-                          key={type}
-                          onClick={() => setBookmarkFilter(type)}
-                          className={`px-3 py-1 rounded-lg text-xs font-bold capitalize transition-all ${
-                            bookmarkFilter === type ? "bg-white text-gray-900 shadow-xs" : "text-gray-500 hover:text-gray-900"
-                          }`}
-                        >
-                          {type.replace("_", " ")}
-                        </button>
-                      ))}
+                    <div className="flex flex-wrap items-center gap-2.5 self-start sm:self-auto">
+                      {/* Question Type Filter Chips */}
+                      <div className="inline-flex p-1 bg-gray-100 rounded-xl">
+                        {["all", "mcq", "fill_blank", "short_answer", "long_answer"].map((type) => (
+                          <button
+                            key={type}
+                            onClick={() => setBookmarkFilter(type)}
+                            className={`px-3 py-1 rounded-lg text-xs font-bold capitalize transition-all ${
+                              bookmarkFilter === type ? "bg-white text-gray-900 shadow-xs" : "text-gray-500 hover:text-gray-900"
+                            }`}
+                          >
+                            {type.replace("_", " ")}
+                          </button>
+                        ))}
+                      </div>
+
+                      {bookmarks.length > 0 && (
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={handleSelectAllBookmarks}
+                            className="px-3 py-2 text-xs font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl transition-all cursor-pointer"
+                          >
+                            Select All
+                          </button>
+                          {selectedBookmarks.length > 0 && (
+                            <button
+                              type="button"
+                              onClick={handleClearSelectedBookmarks}
+                              className="px-3 py-2 text-xs font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-xl transition-all cursor-pointer"
+                            >
+                              Clear ({selectedBookmarks.length})
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            disabled={selectedBookmarks.length === 0}
+                            onClick={() => setCompileModal((prev) => ({ ...prev, show: true }))}
+                            className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold rounded-xl shadow-xs transition-all disabled:opacity-40 cursor-pointer tap-press"
+                          >
+                            <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                            <span>Assemble Exam ({selectedBookmarks.length})</span>
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -2066,46 +2256,183 @@ export default function TeacherDashboard() {
                       </p>
                     </div>
                   ) : (
-                    <div className="space-y-4">
+                    <div className="space-y-3.5">
                       {bookmarks
                         .filter((b) => (bookmarkFilter === "all" ? true : b.question_type === bookmarkFilter))
-                        .map((b) => (
-                          <div key={b.id} className="bg-white p-5 rounded-2xl border border-gray-200/80 shadow-xs">
-                            <div className="flex items-start justify-between gap-3 mb-2">
-                              <span className="text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 bg-blue-50 text-blue-700 rounded-full">
-                                {b.question_type.replace("_", " ")}
-                              </span>
-                              <div className="flex items-center gap-1.5">
-                                <button
-                                  onClick={() => handleCopyQuestion(b.question_data?.question_text || "", b.id)}
-                                  className="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                                  title="Copy text"
-                                >
-                                  {copiedId === b.id ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
-                                </button>
-                                <button
-                                  onClick={() => handleDeleteBookmark(b.id)}
-                                  className="p-1.5 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
-                                  title="Delete bookmark"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
+                        .map((b) => {
+                          const isSelected = selectedBookmarks.includes(b.id);
+                          const isQuestionUrdu = /[\u0600-\u06FF]/.test(b.question_data?.question_text || "");
+
+                          return (
+                            <div
+                              key={b.id}
+                              onClick={() => handleToggleSelectBookmark(b.id)}
+                              className={`p-5 rounded-2xl border transition-all cursor-pointer ${
+                                isSelected
+                                  ? "bg-blue-50/50 border-blue-400 shadow-sm ring-1 ring-blue-400"
+                                  : "bg-white border-gray-200/80 shadow-xs hover:border-gray-300"
+                              }`}
+                            >
+                              <div className="flex items-start justify-between gap-3 mb-2.5">
+                                <div className="flex items-center gap-2.5">
+                                  <input
+                                    type="checkbox"
+                                    checked={isSelected}
+                                    onChange={() => handleToggleSelectBookmark(b.id)}
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 cursor-pointer"
+                                  />
+                                  <span className="text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 bg-blue-50 text-blue-700 rounded-full">
+                                    {b.question_type.replace("_", " ")}
+                                  </span>
+                                  {isQuestionUrdu && (
+                                    <span className="text-xs font-bold px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded-full">
+                                      🇵🇰 اردو
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                                  <button
+                                    onClick={() => handleCopyQuestion(b.question_data?.question_text || "", b.id)}
+                                    className="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
+                                    title="Copy text"
+                                  >
+                                    {copiedId === b.id ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
+                                  </button>
+                                  <button
+                                    onClick={() => handleDeleteBookmark(b.id)}
+                                    className="p-1.5 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                                    title="Delete bookmark"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </div>
                               </div>
-                            </div>
 
-                            <p className="font-bold text-base text-gray-900 mb-2">
-                              {b.question_data?.question_text}
-                            </p>
-
-                            {b.question_data?.correct_answer && (
-                              <p className="text-xs text-emerald-800 font-medium bg-emerald-50 px-3 py-1.5 rounded-xl inline-block">
-                                Answer: {b.question_data.correct_answer}
+                              <p className={`font-bold text-base text-gray-900 mb-2 leading-relaxed ${isQuestionUrdu ? "font-serif text-right" : ""}`} dir={isQuestionUrdu ? "rtl" : "ltr"}>
+                                {b.question_data?.question_text}
                               </p>
-                            )}
-                          </div>
-                        ))}
+
+                              {b.question_data?.correct_answer && (
+                                <p className={`text-xs text-emerald-800 font-medium bg-emerald-50 px-3 py-1.5 rounded-xl inline-block ${isQuestionUrdu ? "font-serif text-right" : ""}`} dir={isQuestionUrdu ? "rtl" : "ltr"}>
+                                  Answer: {b.question_data.correct_answer}
+                                </p>
+                              )}
+                            </div>
+                          );
+                        })}
                     </div>
                   )}
+                </div>
+              )}
+
+              {/* ASSEMBLE QUIZ MODAL */}
+              {compileModal.show && (
+                <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+                  <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-gray-100 space-y-5">
+                    <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+                      <div className="flex items-center gap-2.5">
+                        <div className="p-2 bg-blue-50 text-blue-600 rounded-xl">
+                          <Sparkles className="w-5 h-5 text-blue-600" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-black text-gray-900">Assemble Exam from Bank</h3>
+                          <p className="text-xs text-gray-500">Creating new assessment from {selectedBookmarks.length} selected questions</p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => setCompileModal((prev) => ({ ...prev, show: false }))}
+                        className="p-1.5 text-gray-400 hover:text-gray-700 rounded-xl hover:bg-gray-100 transition-colors"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+
+                    <div className="space-y-4 text-xs font-bold text-gray-700">
+                      <div>
+                        <label className="block mb-1.5 text-gray-600">Exam Title</label>
+                        <input
+                          type="text"
+                          value={compileModal.title}
+                          onChange={(e) => setCompileModal((prev) => ({ ...prev, title: e.target.value }))}
+                          placeholder="e.g. Midterm Examination / Quiz 01"
+                          className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-semibold outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block mb-1.5 text-gray-600">Subject / Course</label>
+                          <input
+                            type="text"
+                            value={compileModal.subject}
+                            onChange={(e) => setCompileModal((prev) => ({ ...prev, subject: e.target.value }))}
+                            placeholder="e.g. Computer Science"
+                            className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-semibold outline-none focus:ring-2 focus:ring-blue-500"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block mb-1.5 text-gray-600">Academic Tier</label>
+                          <select
+                            value={compileModal.academicTier}
+                            onChange={(e) => setCompileModal((prev) => ({ ...prev, academicTier: e.target.value }))}
+                            className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-semibold outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                          >
+                            <option value="University">University</option>
+                            <option value="College">College</option>
+                            <option value="School">School</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block mb-1.5 text-gray-600">Language (زبان)</label>
+                        <div className="grid grid-cols-2 gap-2">
+                          {[
+                            { id: "English", label: "English 🇬🇧" },
+                            { id: "Urdu", label: "اردو (Urdu) 🇵🇰" },
+                          ].map((l) => (
+                            <button
+                              key={l.id}
+                              type="button"
+                              onClick={() => setCompileModal((prev) => ({ ...prev, language: l.id }))}
+                              className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all ${
+                                compileModal.language === l.id
+                                  ? "bg-blue-600 text-white border-blue-600 shadow-xs"
+                                  : "bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100"
+                              }`}
+                            >
+                              {l.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-end gap-3 pt-3 border-t border-gray-100">
+                      <button
+                        type="button"
+                        onClick={() => setCompileModal((prev) => ({ ...prev, show: false }))}
+                        className="px-4 py-2.5 rounded-xl border border-gray-200 text-xs font-bold text-gray-600 hover:bg-gray-50 transition-all cursor-pointer"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
+                        disabled={compileModal.compiling}
+                        onClick={handleExecuteCompileFromBank}
+                        className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-md cursor-pointer disabled:opacity-50"
+                      >
+                        {compileModal.compiling ? (
+                          <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                          <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                        )}
+                        <span>{compileModal.compiling ? "Compiling..." : "Assemble and Create Exam"}</span>
+                      </button>
+                    </div>
+                  </div>
                 </div>
               )}
 
@@ -2141,10 +2468,43 @@ export default function TeacherDashboard() {
                         </select>
                       </div>
 
+                      {/* Export Word (.docx) */}
+                      <button
+                        type="button"
+                        disabled={exportingAnalytics !== null}
+                        onClick={() => handleExportAnalytics("docx")}
+                        className="flex items-center gap-2 px-3.5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition-all shadow-xs cursor-pointer tap-press disabled:opacity-50 no-print"
+                        title="Download Class Performance Analytics in Word (.docx)"
+                      >
+                        {exportingAnalytics === "docx" ? (
+                          <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                          <FileText className="w-3.5 h-3.5" />
+                        )}
+                        <span>{exportingAnalytics === "docx" ? "Exporting Word..." : "Word (.docx)"}</span>
+                      </button>
+
+                      {/* Export PDF */}
+                      <button
+                        type="button"
+                        disabled={exportingAnalytics !== null}
+                        onClick={() => handleExportAnalytics("pdf")}
+                        className="flex items-center gap-2 px-3.5 py-2.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl transition-all shadow-xs cursor-pointer tap-press disabled:opacity-50 no-print"
+                        title="Download Class Performance Analytics in PDF"
+                      >
+                        {exportingAnalytics === "pdf" ? (
+                          <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                          <Download className="w-3.5 h-3.5" />
+                        )}
+                        <span>{exportingAnalytics === "pdf" ? "Exporting PDF..." : "Download PDF"}</span>
+                      </button>
+
+                      {/* Print Report */}
                       <button
                         type="button"
                         onClick={() => window.print()}
-                        className="flex items-center gap-2 px-4 py-2.5 bg-gray-900 hover:bg-black text-white text-xs font-bold rounded-xl transition-all shadow-xs cursor-pointer tap-press no-print"
+                        className="flex items-center gap-2 px-3.5 py-2.5 bg-gray-900 hover:bg-black text-white text-xs font-bold rounded-xl transition-all shadow-xs cursor-pointer tap-press no-print"
                       >
                         <Printer className="w-3.5 h-3.5" />
                         <span>Print Report</span>

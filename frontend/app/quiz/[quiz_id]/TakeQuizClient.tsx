@@ -56,6 +56,17 @@ export default function TakeQuizClient() {
   const [submitting, setSubmitting] = useState(false);
   const [results, setResults] = useState<any>(null);
 
+  // Urdu Language Script Detection
+  const isUrdu = Boolean(
+    metadata?.language === "Urdu" ||
+    quizData?.language === "Urdu" ||
+    /[\u0600-\u06FF]/.test(
+      (metadata?.exam_title || "") +
+      (quizData?.mcq_questions?.[0]?.question_text || "") +
+      (quizData?.short_questions?.[0]?.question_text || "")
+    )
+  );
+
   // Gamification & Share States
   const [actionLoading, setActionLoading] = useState(false);
   const [shareData, setShareData] = useState<{ code: string; link: string } | null>(null);
@@ -1370,13 +1381,13 @@ export default function TakeQuizClient() {
 
         {/* VIEW 1: STUDY MODE (Questions with Answers & Explanations Revealed) */}
         {quizMode === "study" ? (
-          <div className="space-y-6">
+          <div className={`space-y-6 ${isUrdu ? "font-serif" : ""}`} dir={isUrdu ? "rtl" : "ltr"}>
             {/* Study Mode Hero / Header */}
             <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-gray-200/80 text-center relative overflow-hidden">
               <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-indigo-500 via-purple-500 to-teal-500" />
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-bold mb-3">
                 <BookOpen className="w-3.5 h-3.5" />
-                <span>Study Mode & Official Answer Key</span>
+                <span>{isUrdu ? "اردو پرچہ و کلید جوابات" : "Study Mode & Official Answer Key"}</span>
               </div>
               <h1 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">
                 {metadata?.exam_title || metadata?.subject || "Comprehensive Study Guide"}
@@ -1878,9 +1889,14 @@ export default function TakeQuizClient() {
           </div>
         ) : (
           /* VIEW 2: LIVE ASSESSMENT EXAM FORM */
-          <div className="bg-white p-6 sm:p-10 rounded-3xl shadow-sm border border-gray-200/80">
+          <div className={`bg-white p-6 sm:p-10 rounded-3xl shadow-sm border border-gray-200/80 ${isUrdu ? "font-serif" : ""}`} dir={isUrdu ? "rtl" : "ltr"}>
             {/* Exam Header */}
             <div className="text-center border-b border-gray-200 pb-6 mb-8 relative">
+              {isUrdu && (
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-full text-xs font-bold mb-3">
+                  <span>🇵🇰</span> <span>اردو امتحانی پرچہ (Urdu Assessment)</span>
+                </div>
+              )}
               {challengeCode && (
                 <div className="absolute top-0 right-0 bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-xs font-bold border border-indigo-200 flex items-center gap-1">
                   <Award className="w-3.5 h-3.5 text-indigo-600" />

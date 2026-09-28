@@ -62,6 +62,7 @@ export default function StudentDashboard() {
   const [includeComprehension, setIncludeComprehension] = useState(false);
   const [examSubject, setExamSubject] = useState("");
   const [examTitle, setExamTitle] = useState("");
+  const [quizLanguage, setQuizLanguage] = useState<"English" | "Urdu">("English");
   const [exportingId, setExportingId] = useState<number | null>(null);
 
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -309,6 +310,7 @@ export default function StudentDashboard() {
     formData.append("academic_tier", academicTier);
     formData.append("exam_track", examTrack);
     formData.append("include_comprehension", includeComprehension ? "true" : "false");
+    formData.append("language", quizLanguage);
     formData.append("exam_title", examTitle.trim() || "Student Practice Paper");
     formData.append("subject", examSubject.trim() || "General Subject");
     formData.append("institution_name", "Academic Examination Department");
@@ -826,7 +828,7 @@ export default function StudentDashboard() {
                   </span>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
                   <div>
                     <label className="text-[11px] font-bold text-gray-600 block mb-1">Academic Tier</label>
                     <div className="grid grid-cols-3 gap-1.5 bg-white p-1 rounded-xl border border-gray-200">
@@ -890,6 +892,29 @@ export default function StudentDashboard() {
                           }`}
                         >
                           <span>{tr.icon}</span> <span className="block sm:inline">{tr.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-[11px] font-bold text-gray-600 block mb-1">Language (زبان)</label>
+                    <div className="grid grid-cols-2 gap-1.5 bg-white p-1 rounded-xl border border-gray-200">
+                      {[
+                        { id: "English", label: "English", icon: "🇬🇧" },
+                        { id: "Urdu", label: "اردو (Urdu)", icon: "🇵🇰" },
+                      ].map((lang) => (
+                        <button
+                          key={lang.id}
+                          type="button"
+                          onClick={() => setQuizLanguage(lang.id as "English" | "Urdu")}
+                          className={`py-1.5 px-2 text-center rounded-lg text-xs font-bold transition-all ${
+                            quizLanguage === lang.id
+                              ? "bg-emerald-600 text-white shadow-xs"
+                              : "text-gray-600 hover:bg-gray-100"
+                          }`}
+                        >
+                          <span>{lang.icon}</span> <span className="block sm:inline">{lang.label}</span>
                         </button>
                       ))}
                     </div>

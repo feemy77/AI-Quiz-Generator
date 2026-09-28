@@ -26,3 +26,5 @@ bcrypt
 sqlalchemy
 requests
 python-pptx
+arabic-reshaper
+python-bidi

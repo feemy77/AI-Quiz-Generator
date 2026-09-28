@@ -16,7 +16,11 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 # ==========================================
 # 1. API KEYS SETUP
 # ==========================================
-load_dotenv()
+_env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
+if os.path.exists(_env_path):
+    load_dotenv(_env_path)
+else:
+    load_dotenv()
 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
@@ -88,10 +92,6 @@ STRICTLY FORBIDDEN METADATA & INTRODUCTORY SLIDES:
 - NEVER generate questions from front-page / title slides, course headers, instructor details, lecture outlines, table of contents, agendas, grading policies, prerequisite lists, or concluding "Thank You / Q&A / References" slides.
 - FOCUS 100% ON HIGH-YIELD CORE CONCEPTS: Anchor every single question in the primary technical concepts, architectural components, algorithms, scientific definitions, calculations, comparative trade-offs, and substantive mechanisms that have the highest probability of appearing on a university midterm or final exam.
 
-CRITICAL LANGUAGE REQUIREMENT:
-- All questions, options, answers, and explanations MUST be in clear, academic English.
-- If the source text contains Urdu, Hindi, or Roman Urdu, seamlessly translate and explain the core concepts in English.
-
 MCQ QUALITY & DISTRACTOR RULES:
 - Provide exactly 4 plausible, academically sound options.
 - Avoid lazy or obvious distractors like "None of the above", "All of the above", or meaningless silly guesses.
@@ -103,7 +103,24 @@ FILL-IN-THE-BLANKS RULES:
 - NEVER blank out trivial prepositions or filler words (e.g. 'the', 'is', 'in', 'very').
 """
 
-# 🧠 DYNAMIC QUESTION STYLING INSTRUCTION BUILDER
+# 🌐 MULTI-LANGUAGE INSTRUCTION BUILDER (URDU & ENGLISH)
+def _get_language_instruction(language: str = "English") -> str:
+    lang = str(language or "English").lower().strip()
+    if lang in ("urdu", "اردو"):
+        return """
+CRITICAL LANGUAGE REQUIREMENT (URDU - اردو):
+- The entire examination / quiz MUST be generated in high-quality, authentic academic URDU (اردو رسم الخط).
+- All question statements, multiple choice options (الف، ب، ج، د / A, B, C, D), fill-in-the-blank statements, short question descriptions, long questions, model answers, and explanations MUST be in fluent Urdu script (Nastaliq / standard Urdu Unicode).
+- If the source text is in English, adapt and construct high-quality Urdu academic exam questions. For technical computer science / science terms, provide the standard Urdu term or Urdu phonetic transliteration with English technical keyword in parentheses where necessary (e.g. "ڈیٹا اسٹرکچر (Data Structure)").
+- Ensure natural right-to-left linguistic flow, proper grammatical syntax, and authoritative academic Urdu tone suitable for Pakistani board/university standards.
+"""
+    else:
+        return """
+CRITICAL LANGUAGE REQUIREMENT (ENGLISH):
+- All questions, options, answers, and explanations MUST be in clear, academic English.
+- If the source text contains Urdu, Hindi, or Roman Urdu, seamlessly translate and explain the core concepts in English.
+"""
+
 # 🧠 DYNAMIC QUESTION STYLING INSTRUCTION BUILDER
 def _get_style_instruction(style: str) -> str:
     style = style.lower().strip()
@@ -222,11 +239,11 @@ You MUST return ONLY a valid JSON object. Follow this EXACT format:
 {{
   "questions": [
     {{
-      "question_text": "Write the question here in English?",
+      "question_text": "Authoritative question statement in the requested language (Urdu if requested, otherwise English)?",
       "clo": "CLO-1",
-      "options": ["Option A", "Option B", "Option C", "Option D"],
+      "options": ["Option A in requested language", "Option B in requested language", "Option C in requested language", "Option D in requested language"],
       "correct_answer": "Exact matching string from options",
-      "explanation": "Brief explanation in English."
+      "explanation": "Brief explanation in the requested language."
     }}
   ]
 }}
@@ -248,10 +265,10 @@ You MUST return ONLY a valid JSON object. Follow this EXACT format:
 {{
   "questions": [
     {{
-      "question_text": "The sentence with ____ here in English.",
+      "question_text": "The sentence with ____ in the requested language (Urdu if requested, otherwise English).",
       "clo": "CLO-1",
-      "correct_answer": "The missing English word or short code snippet",
-      "explanation": "Brief explanation in English."
+      "correct_answer": "The missing keyword or phrase in the requested language",
+      "explanation": "Brief explanation in the requested language."
     }}
   ]
 }}
@@ -280,15 +297,15 @@ You MUST return ONLY a valid JSON object. Follow this EXACT format:
 {{
   "questions": [
     {{
-      "question_text": "Write the direct question or analytical calculation here in English?",
+      "question_text": "Direct question or analytical problem in the requested language (Urdu if requested, otherwise English)?",
       "style_type": "conceptual",
       "clo": "CLO-2",
       "marks": 2,
-      "correct_answer": "Model short answer in English (or short code block).",
-      "explanation": "Brief explanation in English.",
+      "correct_answer": "Model short answer in the requested language.",
+      "explanation": "Brief explanation in the requested language.",
       "alternatives": [
         {{
-          "question_text": "Alternative question testing practical code, debugging, or trace?",
+          "question_text": "Alternative question testing practical code, debugging, or trace in the requested language?",
           "style_type": "coding",
           "clo": "CLO-2",
           "marks": 2,
@@ -296,7 +313,7 @@ You MUST return ONLY a valid JSON object. Follow this EXACT format:
           "explanation": "Brief explanation."
         }},
         {{
-          "question_text": "Alternative question asking to compare/differentiate two concepts or evaluate a scenario?",
+          "question_text": "Alternative question comparing concepts or evaluating a scenario in the requested language?",
           "style_type": "difference",
           "clo": "CLO-2",
           "marks": 2,
@@ -333,12 +350,12 @@ You MUST return ONLY a valid JSON object. Follow this EXACT format:
 {{
   "questions": [
     {{
-      "question_text": "Write the comprehensive question or practical lab task with sub-parts a), b), c) here in English?",
+      "question_text": "Comprehensive question or practical scenario with sub-parts a), b), c) in the requested language (Urdu if requested, otherwise English)?",
       "style_type": "scenario",
       "clo": "CLO-3",
       "marks": 6,
-      "model_answer": "A detailed model answer in English (or complete implementation code).",
-      "key_points": ["Point 1 in English", "Point 2 in English"],
+      "model_answer": "Detailed model answer in the requested language.",
+      "key_points": ["Point 1 in requested language", "Point 2 in requested language"],
       "alternatives": [
         {{
           "question_text": "Alternative comprehensive question testing coding, pipeline, or implementation?",
@@ -689,7 +706,8 @@ def generate_quiz_from_large_text(
     question_counts: Dict[str, int],
     difficulty: str = "Medium",
     question_style: str = "Auto",
-    include_comprehension: bool = False
+    include_comprehension: bool = False,
+    language: str = "English"
 ) -> dict:
     mcq_count = question_counts.get("mcq", 0)
     fill_blank_count = question_counts.get("fill_blank", 0)
@@ -715,13 +733,15 @@ def generate_quiz_from_large_text(
         chunks = text_splitter.split_text(text)
         print(f"\nDivided text into {len(chunks)} ultra-safe chunks for 3-Tier processing.")
     
-    print(f"Applying Smart Question Style: {question_style} (include_comprehension={include_comprehension})")
+    print(f"Applying Smart Question Style: {question_style} (include_comprehension={include_comprehension}, language={language})")
 
     # Build the dynamic instruction for this specific generation request
-    dynamic_rules = COMMON_RULES + _get_style_instruction(question_style)
+    dynamic_rules = COMMON_RULES + _get_language_instruction(language) + _get_style_instruction(question_style)
     if question_style.lower() in ("college_board", "college", "intermediate"):
         if not include_comprehension:
             dynamic_rules += "\n- NO READING COMPREHENSION: Do not generate reading passage questions. Formulate direct syllabus definitions, comparative differences, and conceptual reasoning questions."
+
+    quiz["language"] = "Urdu" if str(language).lower() in ("urdu", "اردو") else "English"
 
     if mcq_count > 0:
         raw_mcqs = _generate_batch_from_chunks(mcq_prompt, chunks, mcq_count, difficulty, dynamic_rules, "MCQ")
