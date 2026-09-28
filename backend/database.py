@@ -364,6 +364,14 @@ def get_attempt_detail(attempt_id):
         return attempt
     return None
 
+def update_attempt_results(attempt_id, results):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE attempts SET results = ? WHERE id = ?", (json.dumps(results), attempt_id))
+    conn.commit()
+    conn.close()
+    return True
+
 def update_user_profile(user_id, role, institution_name):
     conn = get_db_connection()
     cursor = conn.cursor()

@@ -23,7 +23,18 @@ import {
   ShieldCheck,
   Lock,
   RefreshCw,
+  Volume2,
+  VolumeX,
 } from "lucide-react";
+import { MathRenderer } from "@/components/MathRenderer";
+import { AntiCheatMonitor } from "@/components/AntiCheatMonitor";
+import {
+  playSelectSound,
+  playVictoryFanfare,
+  triggerCelebrationConfetti,
+  isSoundEnabled,
+  setSoundEnabled,
+} from "@/lib/soundEffects";
 
 export default function TakeQuizClient() {
   const router = useRouter();
@@ -71,6 +82,18 @@ export default function TakeQuizClient() {
   const [actionLoading, setActionLoading] = useState(false);
   const [shareData, setShareData] = useState<{ code: string; link: string } | null>(null);
   const [flashcardMsg, setFlashcardMsg] = useState("");
+  const [soundOn, setSoundOn] = useState<boolean>(true);
+
+  useEffect(() => {
+    setSoundOn(isSoundEnabled());
+  }, []);
+
+  const toggleSound = () => {
+    const next = !soundOn;
+    setSoundOn(next);
+    setSoundEnabled(next);
+    toast.info(next ? "Sound Effects: Enabled 🔊" : "Sound Effects: Muted 🔇", { duration: 1500 });
+  };
 
   // Timer States
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
@@ -299,6 +322,8 @@ export default function TakeQuizClient() {
             toast.success("Assignment submitted to instructor successfully!");
           } else {
             setResults(data.results);
+            triggerCelebrationConfetti();
+            playVictoryFanfare();
             if (isAutoSubmit) {
               toast.info("⏰ Time is up! Your answers were automatically submitted and graded.", { duration: 6000 });
             } else {
@@ -897,7 +922,8 @@ export default function TakeQuizClient() {
                         >
                           <div className="flex items-start justify-between gap-3 mb-3">
                             <span className="font-bold text-sm text-gray-900">
-                              Q{i + 1}. {q.question}
+                              <span className="text-blue-600 font-extrabold mr-1.5">Q{i + 1}.</span>
+                              <MathRenderer text={q.question} inline />
                             </span>
                             {q.is_correct ? (
                               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold bg-emerald-100 text-emerald-800 shrink-0">
@@ -914,12 +940,14 @@ export default function TakeQuizClient() {
                             <div className="p-3 bg-white rounded-xl border border-gray-100">
                               <span className="text-[10px] font-bold text-gray-400 block mb-1 uppercase tracking-wider">Your Answer</span>
                               <span className={q.is_correct ? "font-bold text-emerald-700" : "font-bold text-rose-600"}>
-                                {q.selected || "(Not Attempted)"}
+                                <MathRenderer text={q.selected || "(Not Attempted)"} inline />
                               </span>
                             </div>
                             <div className="p-3 bg-white rounded-xl border border-gray-100">
                               <span className="text-[10px] font-bold text-gray-400 block mb-1 uppercase tracking-wider">Correct Answer</span>
-                              <span className="font-bold text-emerald-700">{q.correct_answer}</span>
+                              <span className="font-bold text-emerald-700">
+                                <MathRenderer text={q.correct_answer} inline />
+                              </span>
                             </div>
                           </div>
 
@@ -1331,17 +1359,40 @@ export default function TakeQuizClient() {
         </div>
       )}
 
+      {/* 🛡️ Strict Academic Integrity / Anti-Cheat Monitor */}
+      <AntiCheatMonitor
+        isActive={!results && !assignmentSubmittedData && !hasSubmitted && quizMode === "exam" && !loading}
+        isAssignment={isAssignment}
+        onAutoSubmit={(reason) => {
+          toast.warning(`Security Violation: ${reason}`);
+          submitTest(true);
+        }}
+      />
+
       <div className="max-w-4xl mx-auto p-4 sm:p-8 space-y-6">
         {/* Mode Switcher & Navigation Header */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white p-4 sm:px-6 sm:py-3.5 rounded-2xl border border-gray-200/80 shadow-xs no-print">
-          <button
-            type="button"
-            onClick={handleReturnDashboard}
-            className="inline-flex items-center gap-2 text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors cursor-pointer self-start sm:self-auto"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Back to Dashboard</span>
-          </button>
+          <div className="flex items-center gap-3 self-start sm:self-auto">
+            <button
+              type="button"
+              onClick={handleReturnDashboard}
+              className="inline-flex items-center gap-2 text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors cursor-pointer"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Back to Dashboard</span>
+            </button>
+
+            {/* 🔊 Audio / Sound Effects Toggle */}
+            <button
+              type="button"
+              onClick={toggleSound}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold transition-all cursor-pointer tap-press"
+              title={soundOn ? "Mute Sound Effects" : "Enable Sound Effects"}
+            >
+              {soundOn ? <Volume2 className="w-3.5 h-3.5 text-indigo-600" /> : <VolumeX className="w-3.5 h-3.5 text-gray-400" />}
+              <span className="hidden sm:inline">{soundOn ? "Sound ON" : "Muted"}</span>
+            </button>
+          </div>
 
           {/* Mode Switcher Pill Tabs or Locked Classroom Badge */}
           {isAssignment ? (
@@ -1980,7 +2031,8 @@ export default function TakeQuizClient() {
                     {quizData.mcq_questions.map((q: any, i: number) => (
                       <div key={i} className="p-5 sm:p-6 bg-white rounded-2xl border border-gray-200/80 shadow-xs hover:border-blue-200 transition-all">
                         <p className="font-bold text-base sm:text-lg mb-4 text-gray-900 leading-relaxed">
-                          Q{i + 1}. {q.question_text}
+                          <span className="text-blue-600 font-extrabold mr-1.5">Q{i + 1}.</span>
+                          <MathRenderer text={q.question_text} inline />
                         </p>
                         <div className="space-y-2.5">
                           {q.options.map((opt: string, j: number) => {
@@ -1991,7 +2043,7 @@ export default function TakeQuizClient() {
                                 key={j}
                                 className={`flex items-center justify-between p-3.5 sm:p-4 rounded-2xl border min-h-[52px] cursor-pointer transition-all tap-press select-none ${
                                   isSelected
-                                    ? "bg-blue-50/90 border-2 border-blue-600 shadow-xs text-blue-950"
+                                    ? "bg-blue-50/90 border-2 border-blue-600 shadow-xs text-blue-950 font-semibold"
                                     : "bg-white border-gray-200/90 hover:bg-gray-50/80 hover:border-gray-300 text-gray-800"
                                 }`}
                               >
@@ -2001,7 +2053,10 @@ export default function TakeQuizClient() {
                                     name={`mcq_${i}`}
                                     value={opt}
                                     checked={isSelected}
-                                    onChange={() => handleInputChange(`mcq_${i}`, opt)}
+                                    onChange={() => {
+                                      handleInputChange(`mcq_${i}`, opt);
+                                      playSelectSound();
+                                    }}
                                     className="sr-only"
                                   />
                                   <div
@@ -2012,7 +2067,7 @@ export default function TakeQuizClient() {
                                     {letter}
                                   </div>
                                   <span className="text-sm sm:text-base font-medium leading-snug flex-1">
-                                    {opt}
+                                    <MathRenderer text={opt} inline />
                                   </span>
                                   {isSelected && (
                                     <div className="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0 ml-2 shadow-xs">
@@ -2041,7 +2096,8 @@ export default function TakeQuizClient() {
                     {quizData.fill_blank_questions.map((q: any, i: number) => (
                       <div key={i} className="p-5 sm:p-6 bg-white rounded-2xl border border-gray-200/80 shadow-xs hover:border-purple-200 transition-all">
                         <p className="font-bold text-base sm:text-lg mb-4 text-gray-900 leading-relaxed">
-                          Q{i + 1}. {q.question_text}
+                          <span className="text-purple-600 font-extrabold mr-1.5">Q{i + 1}.</span>
+                          <MathRenderer text={q.question_text} inline />
                         </p>
                         <input
                           type="text"
@@ -2068,7 +2124,8 @@ export default function TakeQuizClient() {
                       <div key={i} className="p-5 sm:p-6 bg-white rounded-2xl border border-gray-200/80 shadow-xs hover:border-indigo-200 transition-all">
                         <div className="flex items-start justify-between gap-3 mb-4">
                           <p className="font-bold text-base sm:text-lg text-gray-900 leading-relaxed">
-                            Q{i + 1}. {q.question_text}
+                            <span className="text-indigo-600 font-extrabold mr-1.5">Q{i + 1}.</span>
+                            <MathRenderer text={q.question_text} inline />
                           </p>
                           <span className="text-xs font-extrabold px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 shrink-0">
                             2 Marks
@@ -2099,7 +2156,8 @@ export default function TakeQuizClient() {
                       <div key={i} className="p-5 sm:p-6 bg-white rounded-2xl border border-gray-200/80 shadow-xs hover:border-amber-200 transition-all">
                         <div className="flex items-start justify-between gap-3 mb-4">
                           <p className="font-bold text-base sm:text-lg text-gray-900 leading-relaxed">
-                            Q{i + 1}. {q.question_text}
+                            <span className="text-amber-600 font-extrabold mr-1.5">Q{i + 1}.</span>
+                            <MathRenderer text={q.question_text} inline />
                           </p>
                           <span className="text-xs font-extrabold px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200 shrink-0">
                             {q.marks || 6} Marks
