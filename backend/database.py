@@ -874,3 +874,165 @@ def delete_bookmark(bookmark_id, user_id):
     deleted = cursor.rowcount > 0
     conn.close()
     return deleted
+
+def get_teacher_detailed_analytics(teacher_id, quiz_id=None):
+    """Computes comprehensive class performance, question difficulty heatmap, and at-risk students."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    # Attempts query
+    if quiz_id:
+        cursor.execute('''
+            SELECT a.id, a.quiz_id, a.student_name, a.results, a.created_at, q.exam_metadata
+            FROM attempts a
+            JOIN quizzes q ON a.quiz_id = q.id
+            WHERE q.teacher_id = ? AND a.quiz_id = ?
+            ORDER BY a.id DESC
+        ''', (teacher_id, quiz_id))
+    else:
+        cursor.execute('''
+            SELECT a.id, a.quiz_id, a.student_name, a.results, a.created_at, q.exam_metadata
+            FROM attempts a
+            JOIN quizzes q ON a.quiz_id = q.id
+            WHERE q.teacher_id = ?
+            ORDER BY a.id DESC
+        ''', (teacher_id,))
+    
+    rows = cursor.fetchall()
+    
+    cursor.execute("SELECT COUNT(id) as count FROM quizzes WHERE teacher_id = ?", (teacher_id,))
+    total_quizzes = cursor.fetchone()["count"]
+    cursor.execute("SELECT COUNT(id) as count FROM classrooms WHERE teacher_id = ?", (teacher_id,))
+    total_classes = cursor.fetchone()["count"]
+    conn.close()
+    
+    total_attempts = len(rows)
+    all_scores = []
+    distribution = {"mastery": 0, "proficient": 0, "passing": 0, "needs_help": 0}
+    at_risk_students = []
+    question_stats = {}
+    recent_attempts = []
+    quiz_summary_map = {}
+    
+    for r in rows:
+        try:
+            meta = json.loads(r["exam_metadata"])
+        except Exception:
+            meta = {}
+        try:
+            res = json.loads(r["results"])
+        except Exception:
+            res = {}
+            
+        max_score = res.get("max_score", 0)
+        total_score = res.get("total_score", 0)
+        score_pct = round((total_score / max_score) * 100, 1) if max_score > 0 else 0
+        all_scores.append(score_pct)
+        
+        if score_pct >= 90:
+            distribution["mastery"] += 1
+        elif score_pct >= 75:
+            distribution["proficient"] += 1
+        elif score_pct >= 50:
+            distribution["passing"] += 1
+        else:
+            distribution["needs_help"] += 1
+            
+        if score_pct < 50:
+            at_risk_students.append({
+                "attempt_id": r["id"],
+                "student_name": r["student_name"],
+                "quiz_title": meta.get("exam_title", "Assessment Quiz"),
+                "quiz_id": r["quiz_id"],
+                "score_percent": score_pct,
+                "total_score": total_score,
+                "max_score": max_score,
+                "date": r["created_at"].split(" ")[0] if r["created_at"] else ""
+            })
+            
+        qid = r["quiz_id"]
+        qtitle = meta.get("exam_title", f"Quiz #{qid}")
+        if qid not in quiz_summary_map:
+            quiz_summary_map[qid] = {"id": qid, "title": qtitle, "subject": meta.get("subject", ""), "attempts": 0, "scores": []}
+        quiz_summary_map[qid]["attempts"] += 1
+        quiz_summary_map[qid]["scores"].append(score_pct)
+        
+        # MCQ analysis
+        for item in res.get("mcq", []):
+            q_text = item.get("question", "").strip()
+            if q_text:
+                if q_text not in question_stats:
+                    question_stats[q_text] = {"question": q_text, "type": "MCQ", "incorrect": 0, "total": 0}
+                question_stats[q_text]["total"] += 1
+                if not item.get("is_correct", False):
+                    question_stats[q_text]["incorrect"] += 1
+                    
+        # Fill in blank analysis
+        for item in res.get("fill_blank", []):
+            q_text = item.get("question", "").strip()
+            if q_text:
+                if q_text not in question_stats:
+                    question_stats[q_text] = {"question": q_text, "type": "Fill in Blank", "incorrect": 0, "total": 0}
+                question_stats[q_text]["total"] += 1
+                if not item.get("is_correct", False):
+                    question_stats[q_text]["incorrect"] += 1
+                    
+        recent_attempts.append({
+            "id": r["id"],
+            "student_name": r["student_name"],
+            "quiz_id": r["quiz_id"],
+            "quiz_title": meta.get("exam_title", "Assessment Quiz"),
+            "total_score": total_score,
+            "max_score": max_score,
+            "score_percent": score_pct,
+            "date": r["created_at"].split(" ")[0] if r["created_at"] else "",
+            "time": r["created_at"].split(" ")[1][:5] if r["created_at"] and " " in r["created_at"] else ""
+        })
+        
+    avg_score = round(sum(all_scores) / len(all_scores), 1) if all_scores else 0
+    highest_score = round(max(all_scores), 1) if all_scores else 0
+    lowest_score = round(min(all_scores), 1) if all_scores else 0
+    passed_count = sum(1 for s in all_scores if s >= 50)
+    pass_rate = round((passed_count / total_attempts) * 100, 1) if total_attempts > 0 else 0
+    
+    hardest_questions = []
+    for q_data in question_stats.values():
+        if q_data["total"] >= 1:
+            err_rate = round((q_data["incorrect"] / q_data["total"]) * 100, 1)
+            hardest_questions.append({
+                "question": q_data["question"],
+                "type": q_data["type"],
+                "error_rate": err_rate,
+                "incorrect_count": q_data["incorrect"],
+                "total_attempts": q_data["total"]
+            })
+    hardest_questions.sort(key=lambda x: x["error_rate"], reverse=True)
+    hardest_questions = hardest_questions[:8]
+    
+    quiz_perf_list = []
+    for qid, qdata in quiz_summary_map.items():
+        q_avg = round(sum(qdata["scores"]) / len(qdata["scores"]), 1) if qdata["scores"] else 0
+        quiz_perf_list.append({
+            "id": qid,
+            "title": qdata["title"],
+            "subject": qdata["subject"],
+            "attempts": qdata["attempts"],
+            "avg_score": q_avg
+        })
+        
+    return {
+        "overview": {
+            "total_quizzes": total_quizzes,
+            "total_classes": total_classes,
+            "total_attempts": total_attempts,
+            "avg_score": avg_score,
+            "pass_rate": pass_rate,
+            "highest_score": highest_score,
+            "lowest_score": lowest_score
+        },
+        "score_distribution": distribution,
+        "at_risk_students": at_risk_students[:15],
+        "hardest_questions": hardest_questions,
+        "quiz_performance": quiz_perf_list,
+        "recent_attempts": recent_attempts[:30]
+    }

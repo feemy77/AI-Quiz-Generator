@@ -170,6 +170,13 @@ class AssignQuizRequest(BaseModel):
     quiz_id: int
     due_date: Optional[str] = ""
 
+class ExplainQuestionRequest(BaseModel):
+    question: str
+    question_type: str
+    student_answer: Optional[str] = ""
+    correct_answer: Optional[str] = ""
+    explanation: Optional[str] = ""
+
 class BrandingRequest(BaseModel):
     academy_name: str
     logo_path: str = ""
@@ -1859,19 +1866,36 @@ def submit_attempt(quiz_id: int, req: SubmitAttemptRequest, request: Request, us
     for i, q in enumerate(quiz_data.get("short_questions", [])):
         student_ans = answers.get(f"short_{i}", "")
         grade = grade_long_answer(q["question_text"], q["correct_answer"], [], student_ans)
-        results["short"].append({"question": q["question_text"], "student_answer": student_ans, "model_answer": q["correct_answer"], "score_percent": grade["score_percent"], "feedback": grade["feedback"]})
+        results["short"].append({
+            "question": q["question_text"],
+            "student_answer": student_ans,
+            "model_answer": q["correct_answer"],
+            "score_percent": grade["score_percent"],
+            "feedback": grade["feedback"],
+            "strengths": grade.get("strengths", []),
+            "missed_points": grade.get("missed_points", [])
+        })
         results["max_score"] += 2
         results["total_score"] += (grade["score_percent"] / 100) * 2
 
     for i, q in enumerate(quiz_data.get("long_questions", [])):
         student_ans = answers.get(f"long_{i}", "")
         grade = grade_long_answer(q["question_text"], q["model_answer"], q.get("key_points", []), student_ans)
-        results["long"].append({"question": q["question_text"], "student_answer": student_ans, "model_answer": q["model_answer"], "score_percent": grade["score_percent"], "feedback": grade["feedback"]})
         lq_marks = q.get("marks")
         if not lq_marks or not isinstance(lq_marks, (int, float)):
             lq_marks = determine_long_question_marks(q)
         else:
             lq_marks = int(lq_marks)
+        results["long"].append({
+            "question": q["question_text"],
+            "student_answer": student_ans,
+            "model_answer": q["model_answer"],
+            "score_percent": grade["score_percent"],
+            "feedback": grade["feedback"],
+            "marks": lq_marks,
+            "strengths": grade.get("strengths", []),
+            "missed_points": grade.get("missed_points", [])
+        })
         results["max_score"] += lq_marks
         results["total_score"] += (grade["score_percent"] / 100) * lq_marks
 
@@ -2117,3 +2141,33 @@ def get_branding_api(user=Depends(require_teacher)):
 def update_branding_api(req: BrandingRequest, user=Depends(require_teacher)):
     database.update_teacher_branding(user["id"], req.academy_name, req.logo_path)
     return {"message": "Academy branding updated successfully!"}
+
+@app.post("/quiz/explain-question")
+async def explain_question_api(req: ExplainQuestionRequest):
+    """Provides instant AI Mentor pedagogical explanations for any question and candidate answer."""
+    from grading_engine import explain_question_with_ai
+    result = await run_in_threadpool(
+        explain_question_with_ai,
+        question=req.question,
+        question_type=req.question_type,
+        student_answer=req.student_answer or "",
+        correct_answer=req.correct_answer or "",
+        explanation=req.explanation or ""
+    )
+    return result
+
+@app.get("/teacher/analytics/detailed")
+def get_detailed_teacher_analytics_api(quiz_id: Optional[int] = None, user=Depends(require_teacher)):
+    """Computes comprehensive class performance, question difficulty heatmap, and at-risk students."""
+    return database.get_teacher_detailed_analytics(user["id"], quiz_id=quiz_id)
+
+@app.get("/teacher/attempt/{attempt_id}")
+def get_attempt_detail_for_teacher_api(attempt_id: int, user=Depends(require_teacher)):
+    """Allows teachers to inspect the full evaluation of any specific student attempt."""
+    detail = database.get_attempt_detail(attempt_id)
+    if not detail:
+        raise HTTPException(status_code=404, detail="Attempt submission not found.")
+    quiz = database.get_quiz(detail["quiz_id"])
+    if not quiz or quiz["teacher_id"] != user["id"]:
+        raise HTTPException(status_code=403, detail="Unauthorized access to this attempt.")
+    return {"attempt": detail, "exam_metadata": quiz["exam_metadata"]}

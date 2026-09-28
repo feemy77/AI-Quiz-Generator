@@ -68,6 +68,54 @@ export default function TakeQuizClient() {
   // Review Filter Tab
   const [reviewFilter, setReviewFilter] = useState<"all" | "incorrect" | "correct">("all");
 
+  // AI Mentor Explanations Cache
+  const [aiExplanations, setAiExplanations] = useState<Record<string, { loading: boolean; data?: any; error?: string; open?: boolean }>>({});
+
+  const toggleAiExplanation = async (key: string, question: string, questionType: string, studentAnswer: string, correctAnswer: string, explanation: string = "") => {
+    // If already exists, toggle open state
+    if (aiExplanations[key]?.data) {
+      setAiExplanations((prev) => ({
+        ...prev,
+        [key]: { ...prev[key], open: !prev[key].open }
+      }));
+      return;
+    }
+
+    setAiExplanations((prev) => ({
+      ...prev,
+      [key]: { loading: true, open: true }
+    }));
+
+    try {
+      const { ok, data, error } = await apiFetch("/quiz/explain-question", {
+        method: "POST",
+        body: JSON.stringify({
+          question,
+          question_type: questionType,
+          student_answer: studentAnswer,
+          correct_answer: correctAnswer,
+          explanation
+        })
+      });
+      if (ok && data) {
+        setAiExplanations((prev) => ({
+          ...prev,
+          [key]: { loading: false, data, open: true }
+        }));
+      } else {
+        setAiExplanations((prev) => ({
+          ...prev,
+          [key]: { loading: false, error: error || "Failed to fetch AI explanation.", open: true }
+        }));
+      }
+    } catch {
+      setAiExplanations((prev) => ({
+        ...prev,
+        [key]: { loading: false, error: "Network error connecting to AI Mentor.", open: true }
+      }));
+    }
+  };
+
   // Question Alternative Swapper States
   const [altExpanded, setAltExpanded] = useState<Record<string, boolean>>({});
   const [swapLoading, setSwapLoading] = useState<string | null>(null);
@@ -506,65 +554,253 @@ export default function TakeQuizClient() {
     const pct = Number(((results.total_score / (results.max_score || 1)) * 100).toFixed(1));
     const isPassing = pct >= 50;
 
+    // Smart Grade Calculation
+    const getGradeInfo = (p: number) => {
+      if (p >= 90) return { grade: "A+", label: "Mastery Level 🌟", color: "emerald", bg: "bg-emerald-50 text-emerald-700 border-emerald-200" };
+      if (p >= 80) return { grade: "A", label: "Distinction 🚀", color: "blue", bg: "bg-blue-50 text-blue-700 border-blue-200" };
+      if (p >= 70) return { grade: "B", label: "Proficient 👏", color: "indigo", bg: "bg-indigo-50 text-indigo-700 border-indigo-200" };
+      if (p >= 60) return { grade: "C", label: "Satisfactory 👍", color: "amber", bg: "bg-amber-50 text-amber-700 border-amber-200" };
+      if (p >= 50) return { grade: "D", label: "Passing ⚠️", color: "orange", bg: "bg-orange-50 text-orange-700 border-orange-200" };
+      return { grade: "F", label: "Needs Revision 💡", color: "rose", bg: "bg-rose-50 text-rose-700 border-rose-200" };
+    };
+
+    const gradeInfo = getGradeInfo(pct);
+
+    // Section Analytics Calculations
+    const mcqTotal = results.mcq?.length || 0;
+    const mcqCorrect = results.mcq?.filter((q: any) => q.is_correct).length || 0;
+    const mcqPct = mcqTotal > 0 ? Math.round((mcqCorrect / mcqTotal) * 100) : 0;
+
+    const fbTotal = results.fill_blank?.length || 0;
+    const fbCorrect = results.fill_blank?.filter((q: any) => q.is_correct).length || 0;
+    const fbPct = fbTotal > 0 ? Math.round((fbCorrect / fbTotal) * 100) : 0;
+
+    const shortTotal = results.short?.length || 0;
+    const shortMaxMarks = shortTotal * 2;
+    const shortEarnedMarks = results.short?.reduce((acc: number, q: any) => acc + ((q.score_percent || 0) / 100) * 2, 0) || 0;
+    const shortPct = shortMaxMarks > 0 ? Math.round((shortEarnedMarks / shortMaxMarks) * 100) : 0;
+
+    const longTotal = results.long?.length || 0;
+    const longMaxMarks = results.long?.reduce((acc: number, q: any) => acc + (q.marks || 6), 0) || 0;
+    const longEarnedMarks = results.long?.reduce((acc: number, q: any) => acc + ((q.score_percent || 0) / 100) * (q.marks || 6), 0) || 0;
+    const longPct = longMaxMarks > 0 ? Math.round((longEarnedMarks / longMaxMarks) * 100) : 0;
+
+    // Circumference for r=50 circle: 2 * pi * 50 = 314.159
+    const circleDashoffset = 314.16 - (314.16 * Math.min(100, Math.max(0, pct))) / 100;
+
     return (
       <div className="min-h-screen bg-gradient-to-b from-gray-50 via-slate-50 to-blue-50/20 p-4 sm:p-8 text-gray-900">
         <div className="max-w-4xl mx-auto space-y-6">
-          {/* Header Score Card */}
-          <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 text-center relative overflow-hidden">
+
+          {/* ========================================== */}
+          {/* 🌟 SMART RESULT ANALYTICS HERO CARD */}
+          {/* ========================================== */}
+          <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-gray-100 relative overflow-hidden">
             <div
               className={`absolute top-0 left-0 right-0 h-3 ${
                 isPassing ? "bg-gradient-to-r from-emerald-500 to-teal-500" : "bg-gradient-to-r from-amber-500 to-rose-500"
               }`}
             />
-            <div className="inline-flex items-center justify-center p-4 rounded-2xl bg-blue-50 text-blue-600 mb-4 shadow-sm">
-              <Award className="w-10 h-10" />
-            </div>
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight mb-2">
-              Assessment Completed!
-            </h1>
-            <p className="text-gray-500 font-medium mb-6">
-              Great effort, <span className="text-gray-800 font-bold">{studentName}</span>. Here is your final evaluated score.
-            </p>
 
-            <div className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-gray-50 border border-gray-200/80 mb-4 shadow-xs">
-              <span className="text-3xl sm:text-4xl font-extrabold text-blue-600">{results.total_score}</span>
-              <span className="text-2xl sm:text-3xl font-bold text-gray-400">/</span>
-              <span className="text-3xl sm:text-4xl font-extrabold text-gray-900">{results.max_score}</span>
-              <span
-                className={`ml-2 px-3.5 py-1 rounded-full text-sm font-bold border ${
-                  isPassing ? "bg-emerald-100 text-emerald-800 border-emerald-200" : "bg-amber-100 text-amber-800 border-amber-200"
-                }`}
-              >
-                {pct}%
-              </span>
+            <div className="flex flex-col md:flex-row items-center justify-between gap-8 pt-2">
+              {/* Left Column: Greeting & Summary */}
+              <div className="text-center md:text-left space-y-3 flex-1">
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold border shadow-2xs bg-blue-50 text-blue-700 border-blue-200">
+                  <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+                  <span>AI Multimodal Evaluation Completed</span>
+                </div>
+                <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight">
+                  Assessment Report
+                </h1>
+                <p className="text-gray-500 text-sm leading-relaxed max-w-lg">
+                  Candidate: <strong className="text-gray-800 font-bold">{studentName || "Student"}</strong>.
+                  {pct >= 75
+                    ? " Outstanding performance! You demonstrated comprehensive mastery across topics."
+                    : pct >= 50
+                    ? " Good job! You passed the assessment, with specific topics identified for revision below."
+                    : " Needs review. Check the AI Tutor explanations below to solidify core concepts."}
+                </p>
+
+                <div className="pt-2 flex flex-wrap items-center justify-center md:justify-start gap-2.5">
+                  <div className="px-4 py-2 rounded-xl bg-gray-50 border border-gray-200/80 flex items-center gap-2">
+                    <span className="text-xs text-gray-500 font-bold uppercase">Evaluated Score:</span>
+                    <span className="text-lg font-black text-blue-600">{results.total_score}</span>
+                    <span className="text-xs text-gray-400">/</span>
+                    <span className="text-sm font-bold text-gray-700">{results.max_score} Marks</span>
+                  </div>
+
+                  <span className={`px-4 py-2 rounded-xl text-xs font-black border ${gradeInfo.bg}`}>
+                    Grade: {gradeInfo.grade} ({gradeInfo.label})
+                  </span>
+                </div>
+              </div>
+
+              {/* Right Column: Animated Radial Donut Gauge */}
+              <div className="flex flex-col items-center justify-center shrink-0">
+                <div className="relative w-36 h-36 flex items-center justify-center">
+                  <svg className="w-36 h-36 transform -rotate-90">
+                    <circle
+                      cx="72"
+                      cy="72"
+                      r="50"
+                      stroke="currentColor"
+                      strokeWidth="10"
+                      className="text-gray-100"
+                      fill="transparent"
+                    />
+                    <circle
+                      cx="72"
+                      cy="72"
+                      r="50"
+                      stroke="currentColor"
+                      strokeWidth="10"
+                      strokeDasharray={314.16}
+                      strokeDashoffset={circleDashoffset}
+                      strokeLinecap="round"
+                      className={`transition-all duration-1000 ease-out ${
+                        pct >= 75 ? "text-emerald-500" : pct >= 50 ? "text-blue-500" : "text-rose-500"
+                      }`}
+                      fill="transparent"
+                    />
+                  </svg>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                    <span className="text-3xl font-black text-gray-900 tracking-tight">{pct}%</span>
+                    <span className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider">Overall</span>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {challengeCode && (
-              <div className="mt-4 inline-flex items-center gap-2 bg-indigo-50 border border-indigo-200 text-indigo-800 px-4 py-2 rounded-xl text-sm font-semibold">
-                <Sparkles className="w-4 h-4 text-indigo-600" />
-                Challenge completed! Your score has been submitted to the leaderboard.
+              <div className="mt-6 inline-flex items-center gap-2 bg-indigo-50 border border-indigo-200 text-indigo-800 px-4 py-2.5 rounded-xl text-xs font-semibold w-full">
+                <Sparkles className="w-4 h-4 text-indigo-600 shrink-0" />
+                <span>Challenge session recorded! Your results are live on the classroom leaderboard.</span>
               </div>
             )}
           </div>
 
+          {/* ========================================== */}
+          {/* 📊 SECTION PERFORMANCE BREAKDOWN CARDS */}
+          {/* ========================================== */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+            {/* MCQ Card */}
+            <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-2xs space-y-2">
+              <div className="flex items-center justify-between text-xs font-bold text-gray-500">
+                <span>Multiple Choice</span>
+                <span className="text-blue-600 font-extrabold">{mcqPct}%</span>
+              </div>
+              <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+                <div className="bg-blue-600 h-2 rounded-full transition-all duration-700" style={{ width: `${mcqPct}%` }} />
+              </div>
+              <div className="text-[11px] text-gray-500 flex justify-between">
+                <span>{mcqCorrect} of {mcqTotal} Correct</span>
+                <span className="font-semibold text-gray-700">{mcqCorrect}/{mcqTotal} Marks</span>
+              </div>
+            </div>
+
+            {/* Fill Blanks Card */}
+            <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-2xs space-y-2">
+              <div className="flex items-center justify-between text-xs font-bold text-gray-500">
+                <span>Fill in Blanks</span>
+                <span className="text-purple-600 font-extrabold">{fbPct}%</span>
+              </div>
+              <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+                <div className="bg-purple-600 h-2 rounded-full transition-all duration-700" style={{ width: `${fbPct}%` }} />
+              </div>
+              <div className="text-[11px] text-gray-500 flex justify-between">
+                <span>{fbCorrect} of {fbTotal} Correct</span>
+                <span className="font-semibold text-gray-700">{fbCorrect}/{fbTotal} Marks</span>
+              </div>
+            </div>
+
+            {/* Short Questions Card */}
+            <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-2xs space-y-2">
+              <div className="flex items-center justify-between text-xs font-bold text-gray-500">
+                <span>Short Answers</span>
+                <span className="text-indigo-600 font-extrabold">{shortPct}%</span>
+              </div>
+              <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+                <div className="bg-indigo-600 h-2 rounded-full transition-all duration-700" style={{ width: `${shortPct}%` }} />
+              </div>
+              <div className="text-[11px] text-gray-500 flex justify-between">
+                <span>{shortEarnedMarks.toFixed(1)} / {shortMaxMarks} Marks</span>
+                <span className="font-semibold text-gray-700">{shortTotal} Questions</span>
+              </div>
+            </div>
+
+            {/* Long Questions Card */}
+            <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-2xs space-y-2">
+              <div className="flex items-center justify-between text-xs font-bold text-gray-500">
+                <span>Long & Analytical</span>
+                <span className="text-emerald-600 font-extrabold">{longPct}%</span>
+              </div>
+              <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+                <div className="bg-emerald-600 h-2 rounded-full transition-all duration-700" style={{ width: `${longPct}%` }} />
+              </div>
+              <div className="text-[11px] text-gray-500 flex justify-between">
+                <span>{longEarnedMarks.toFixed(1)} / {longMaxMarks} Marks</span>
+                <span className="font-semibold text-gray-700">{longTotal} Questions</span>
+              </div>
+            </div>
+          </div>
+
+          {/* ========================================== */}
+          {/* 🎯 DIAGNOSTIC STRENGTHS & FOCUS AREAS */}
+          {/* ========================================== */}
+          <div className="bg-gradient-to-br from-blue-50/50 via-indigo-50/30 to-purple-50/20 p-5 rounded-3xl border border-blue-100 space-y-3">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-blue-900 flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+              <span>Smart Diagnostic Insights</span>
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+              <div className="p-3 bg-white/90 rounded-2xl border border-emerald-100 flex items-start gap-2.5">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                <div>
+                  <strong className="text-emerald-950 block font-bold mb-0.5">Key Strengths Identified:</strong>
+                  <p className="text-emerald-800 leading-relaxed">
+                    {mcqPct >= 80
+                      ? "Outstanding grasp on core factual definitions and objective concept identification."
+                      : shortPct >= 70
+                      ? "Solid understanding of analytical concepts and succinct technical formulations."
+                      : "Good effort across multiple question categories; fundamentals are in place."}
+                  </p>
+                </div>
+              </div>
+
+              <div className="p-3 bg-white/90 rounded-2xl border border-amber-100 flex items-start gap-2.5">
+                <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                <div>
+                  <strong className="text-amber-950 block font-bold mb-0.5">Recommended Revision Area:</strong>
+                  <p className="text-amber-800 leading-relaxed">
+                    {longPct < 60 && longTotal > 0
+                      ? "Focus on descriptive answers: include all necessary key points and structural clarity."
+                      : fbPct < 70 && fbTotal > 0
+                      ? "Carefully verify terminology and spelling in fill-in-the-blank items."
+                      : "Click 'Explain with AI Mentor' on any missed questions below for 1-on-1 tutoring!"}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Action Quick Links */}
-          <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="bg-white p-5 rounded-3xl shadow-sm border border-gray-100">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {!shareData ? (
                 <button
                   onClick={handleCreateChallenge}
                   disabled={actionLoading}
-                  className="flex items-center justify-center gap-3 p-4 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold rounded-2xl border border-indigo-200/60 transition-all shadow-sm"
+                  className="flex items-center justify-center gap-2.5 p-3.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold rounded-2xl border border-indigo-200/60 transition-all text-xs cursor-pointer tap-press"
                 >
-                  <Share2 className="w-5 h-5 text-indigo-600" />
-                  <span>Challenge a Friend</span>
+                  <Share2 className="w-4 h-4 text-indigo-600" />
+                  <span>Challenge a Friend (Live Link)</span>
                 </button>
               ) : (
                 <button
                   onClick={handleShare}
-                  className="flex items-center justify-center gap-3 p-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl shadow-md transition-all"
+                  className="flex items-center justify-center gap-2.5 p-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl shadow-sm transition-all text-xs cursor-pointer tap-press"
                 >
-                  <Share2 className="w-5 h-5" />
+                  <Share2 className="w-4 h-4" />
                   <span>Share Challenge Link</span>
                 </button>
               )}
@@ -572,14 +808,14 @@ export default function TakeQuizClient() {
               <button
                 onClick={handleCreateFlashcards}
                 disabled={actionLoading || !!flashcardMsg}
-                className={`flex items-center justify-center gap-3 p-4 rounded-2xl font-bold border transition-all ${
+                className={`flex items-center justify-center gap-2.5 p-3.5 rounded-2xl font-bold border transition-all text-xs cursor-pointer tap-press ${
                   flashcardMsg
                     ? "bg-emerald-50 text-emerald-700 border-emerald-200"
                     : "bg-purple-50 hover:bg-purple-100 text-purple-700 border-purple-200/60"
                 }`}
               >
-                <BookOpen className="w-5 h-5 text-purple-600" />
-                <span>{flashcardMsg ? "Flashcards Added to Dashboard!" : "Generate Spaced Flashcards"}</span>
+                <BookOpen className="w-4 h-4 text-purple-600" />
+                <span>{flashcardMsg ? "Flashcards Added to Dashboard! ✅" : "Generate Spaced Flashcards"}</span>
               </button>
             </div>
           </div>
@@ -591,7 +827,7 @@ export default function TakeQuizClient() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-200 pb-5 mb-6">
               <div>
                 <h2 className="text-2xl font-black text-gray-900 tracking-tight">Question-by-Question Review</h2>
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-xs text-gray-500 mt-1">
                   Examine your answers, correct solutions, and AI constructive feedback.
                 </p>
               </div>
@@ -604,7 +840,7 @@ export default function TakeQuizClient() {
                     reviewFilter === "all" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-900"
                   }`}
                 >
-                  All
+                  All ({results.max_score || totalExamQuestions})
                 </button>
                 <button
                   onClick={() => setReviewFilter("incorrect")}
@@ -628,59 +864,112 @@ export default function TakeQuizClient() {
             {/* Section A: MCQs Review */}
             {results.mcq && results.mcq.length > 0 && (
               <div className="mb-8">
-                <h3 className="text-lg font-bold text-blue-900 uppercase tracking-wider mb-4">
-                  Multiple Choice Questions
+                <h3 className="text-xs font-black text-blue-900 uppercase tracking-wider mb-4 flex items-center gap-2">
+                  <span>Multiple Choice Questions</span>
+                  <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-[10px]">1 Mark Each</span>
                 </h3>
                 <div className="space-y-4">
                   {results.mcq
                     .filter((q: any) =>
                       reviewFilter === "all" ? true : reviewFilter === "correct" ? q.is_correct : !q.is_correct
                     )
-                    .map((q: any, i: number) => (
-                      <div
-                        key={i}
-                        className={`p-5 rounded-2xl border transition-all ${
-                          q.is_correct ? "border-emerald-200 bg-emerald-50/20" : "border-rose-200 bg-rose-50/20"
-                        }`}
-                      >
-                        <div className="flex items-start justify-between gap-3 mb-3">
-                          <span className="font-bold text-base text-gray-900">
-                            Q{i + 1}. {q.question}
-                          </span>
-                          {q.is_correct ? (
-                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold bg-emerald-100 text-emerald-800 shrink-0">
-                              <CheckCircle2 className="w-3.5 h-3.5" /> Correct (+1)
+                    .map((q: any, i: number) => {
+                      const expKey = `mcq-${i}`;
+                      const expState = aiExplanations[expKey];
+
+                      return (
+                        <div
+                          key={i}
+                          className={`p-5 rounded-2xl border transition-all ${
+                            q.is_correct ? "border-emerald-200 bg-emerald-50/20" : "border-rose-200 bg-rose-50/20"
+                          }`}
+                        >
+                          <div className="flex items-start justify-between gap-3 mb-3">
+                            <span className="font-bold text-sm text-gray-900">
+                              Q{i + 1}. {q.question}
                             </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold bg-rose-100 text-rose-800 shrink-0">
-                              <XCircle className="w-3.5 h-3.5" /> Incorrect (+0)
-                            </span>
+                            {q.is_correct ? (
+                              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold bg-emerald-100 text-emerald-800 shrink-0">
+                                <CheckCircle2 className="w-3.5 h-3.5" /> Correct (+1)
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold bg-rose-100 text-rose-800 shrink-0">
+                                <XCircle className="w-3.5 h-3.5" /> Incorrect (+0)
+                              </span>
+                            )}
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs mb-3">
+                            <div className="p-3 bg-white rounded-xl border border-gray-100">
+                              <span className="text-[10px] font-bold text-gray-400 block mb-1 uppercase tracking-wider">Your Answer</span>
+                              <span className={q.is_correct ? "font-bold text-emerald-700" : "font-bold text-rose-600"}>
+                                {q.selected || "(Not Attempted)"}
+                              </span>
+                            </div>
+                            <div className="p-3 bg-white rounded-xl border border-gray-100">
+                              <span className="text-[10px] font-bold text-gray-400 block mb-1 uppercase tracking-wider">Correct Answer</span>
+                              <span className="font-bold text-emerald-700">{q.correct_answer}</span>
+                            </div>
+                          </div>
+
+                          {q.explanation && (
+                            <div className="p-3 bg-blue-50/60 rounded-xl text-xs text-blue-900 border border-blue-100 flex items-start gap-2 mb-2">
+                              <HelpCircle className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
+                              <span>
+                                <strong>Explanation:</strong> {q.explanation}
+                              </span>
+                            </div>
                           )}
-                        </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm mb-3">
-                          <div className="p-3 bg-white rounded-xl border border-gray-100">
-                            <span className="text-xs font-bold text-gray-400 block mb-1">Your Answer</span>
-                            <span className={q.is_correct ? "font-semibold text-emerald-700" : "font-semibold text-rose-600"}>
-                              {q.selected || "(Not Attempted)"}
-                            </span>
-                          </div>
-                          <div className="p-3 bg-white rounded-xl border border-gray-100">
-                            <span className="text-xs font-bold text-gray-400 block mb-1">Correct Answer</span>
-                            <span className="font-semibold text-emerald-700">{q.correct_answer}</span>
+                          {/* AI Mentor Deep Explanation Trigger */}
+                          <div className="mt-3 pt-2 border-t border-gray-200/60">
+                            <button
+                              type="button"
+                              onClick={() => toggleAiExplanation(expKey, q.question, "MCQ", q.selected || "", q.correct_answer, q.explanation || "")}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs transition-all cursor-pointer tap-press"
+                            >
+                              <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
+                              <span>{expState?.open ? "Hide AI Mentor Explanation" : "Explain with AI Mentor 🪄"}</span>
+                            </button>
+
+                            {expState?.open && (
+                              <div className="mt-3 p-4 rounded-2xl bg-indigo-50/70 border border-indigo-200 text-xs space-y-2 animate-fade-in">
+                                {expState.loading ? (
+                                  <div className="flex items-center gap-2 text-indigo-700 font-semibold py-2">
+                                    <div className="w-4 h-4 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+                                    <span>AI Mentor is synthesizing personalized explanation...</span>
+                                  </div>
+                                ) : expState.data ? (
+                                  <div className="space-y-2 text-indigo-950">
+                                    <div className="font-bold text-indigo-900 text-xs flex items-center gap-1.5">
+                                      <Award className="w-4 h-4 text-indigo-600" />
+                                      <span>Takeaway: {expState.data.summary}</span>
+                                    </div>
+                                    <p className="leading-relaxed bg-white/80 p-3 rounded-xl border border-indigo-100 text-gray-800">
+                                      {expState.data.detailed_explanation}
+                                    </p>
+                                    {expState.data.common_misconception && (
+                                      <div className="p-2.5 bg-amber-50/80 rounded-xl border border-amber-200 text-amber-900">
+                                        <strong className="block mb-0.5 text-[11px]">⚠️ Common Pitfall:</strong>
+                                        <span>{expState.data.common_misconception}</span>
+                                      </div>
+                                    )}
+                                    {expState.data.pro_tip && (
+                                      <div className="p-2.5 bg-emerald-50/80 rounded-xl border border-emerald-200 text-emerald-900">
+                                        <strong className="block mb-0.5 text-[11px]">💡 Pro Exam Tip:</strong>
+                                        <span>{expState.data.pro_tip}</span>
+                                      </div>
+                                    )}
+                                  </div>
+                                ) : (
+                                  <span className="text-rose-600">{expState.error || "Explanation unavailable."}</span>
+                                )}
+                              </div>
+                            )}
                           </div>
                         </div>
-
-                        {q.explanation && (
-                          <div className="p-3.5 bg-blue-50/50 rounded-xl text-xs text-blue-900 border border-blue-100/80 flex items-start gap-2">
-                            <HelpCircle className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
-                            <span>
-                              <strong>Explanation:</strong> {q.explanation}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    ))}
+                      );
+                    })}
                 </div>
               </div>
             )}
@@ -688,80 +977,137 @@ export default function TakeQuizClient() {
             {/* Section B: Fill in the Blank Review */}
             {results.fill_blank && results.fill_blank.length > 0 && (
               <div className="mb-8">
-                <h3 className="text-lg font-bold text-purple-900 uppercase tracking-wider mb-4">
-                  Fill in the Blanks
+                <h3 className="text-xs font-black text-purple-900 uppercase tracking-wider mb-4 flex items-center gap-2">
+                  <span>Fill in the Blanks</span>
+                  <span className="px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full text-[10px]">1 Mark Each</span>
                 </h3>
                 <div className="space-y-4">
                   {results.fill_blank
                     .filter((q: any) =>
                       reviewFilter === "all" ? true : reviewFilter === "correct" ? q.is_correct : !q.is_correct
                     )
-                    .map((q: any, i: number) => (
-                      <div
-                        key={i}
-                        className={`p-5 rounded-2xl border transition-all ${
-                          q.is_correct ? "border-emerald-200 bg-emerald-50/20" : "border-rose-200 bg-rose-50/20"
-                        }`}
-                      >
-                        <div className="flex items-start justify-between gap-3 mb-3">
-                          <span className="font-bold text-base text-gray-900">
-                            Q{i + 1}. {q.question}
-                          </span>
-                          {q.is_correct ? (
-                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold bg-emerald-100 text-emerald-800 shrink-0">
-                              <CheckCircle2 className="w-3.5 h-3.5" /> Correct (+1)
+                    .map((q: any, i: number) => {
+                      const expKey = `fb-${i}`;
+                      const expState = aiExplanations[expKey];
+
+                      return (
+                        <div
+                          key={i}
+                          className={`p-5 rounded-2xl border transition-all ${
+                            q.is_correct ? "border-emerald-200 bg-emerald-50/20" : "border-rose-200 bg-rose-50/20"
+                          }`}
+                        >
+                          <div className="flex items-start justify-between gap-3 mb-3">
+                            <span className="font-bold text-sm text-gray-900">
+                              Q{i + 1}. {q.question}
                             </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold bg-rose-100 text-rose-800 shrink-0">
-                              <XCircle className="w-3.5 h-3.5" /> Incorrect (+0)
-                            </span>
+                            {q.is_correct ? (
+                              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold bg-emerald-100 text-emerald-800 shrink-0">
+                                <CheckCircle2 className="w-3.5 h-3.5" /> Correct (+1)
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold bg-rose-100 text-rose-800 shrink-0">
+                                <XCircle className="w-3.5 h-3.5" /> Incorrect (+0)
+                              </span>
+                            )}
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs mb-3">
+                            <div className="p-3 bg-white rounded-xl border border-gray-100">
+                              <span className="text-[10px] font-bold text-gray-400 block mb-1 uppercase tracking-wider">Your Answer</span>
+                              <span className={q.is_correct ? "font-bold text-emerald-700" : "font-bold text-rose-600"}>
+                                {q.student_answer || "(Left Blank)"}
+                              </span>
+                            </div>
+                            <div className="p-3 bg-white rounded-xl border border-gray-100">
+                              <span className="text-[10px] font-bold text-gray-400 block mb-1 uppercase tracking-wider">Correct Answer</span>
+                              <span className="font-bold text-emerald-700">{q.correct_answer}</span>
+                            </div>
+                          </div>
+
+                          {q.explanation && (
+                            <div className="p-3 bg-purple-50/60 rounded-xl text-xs text-purple-900 border border-purple-100 flex items-start gap-2 mb-2">
+                              <HelpCircle className="w-4 h-4 text-purple-600 shrink-0 mt-0.5" />
+                              <span>
+                                <strong>Explanation:</strong> {q.explanation}
+                              </span>
+                            </div>
                           )}
-                        </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm mb-3">
-                          <div className="p-3 bg-white rounded-xl border border-gray-100">
-                            <span className="text-xs font-bold text-gray-400 block mb-1">Your Answer</span>
-                            <span className={q.is_correct ? "font-semibold text-emerald-700" : "font-semibold text-rose-600"}>
-                              {q.student_answer || "(Left Blank)"}
-                            </span>
-                          </div>
-                          <div className="p-3 bg-white rounded-xl border border-gray-100">
-                            <span className="text-xs font-bold text-gray-400 block mb-1">Correct Answer</span>
-                            <span className="font-semibold text-emerald-700">{q.correct_answer}</span>
+                          {/* AI Mentor Trigger */}
+                          <div className="mt-3 pt-2 border-t border-gray-200/60">
+                            <button
+                              type="button"
+                              onClick={() => toggleAiExplanation(expKey, q.question, "FillBlank", q.student_answer || "", q.correct_answer, q.explanation || "")}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs transition-all cursor-pointer tap-press"
+                            >
+                              <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
+                              <span>{expState?.open ? "Hide AI Mentor Explanation" : "Explain with AI Mentor 🪄"}</span>
+                            </button>
+
+                            {expState?.open && (
+                              <div className="mt-3 p-4 rounded-2xl bg-indigo-50/70 border border-indigo-200 text-xs space-y-2 animate-fade-in">
+                                {expState.loading ? (
+                                  <div className="flex items-center gap-2 text-indigo-700 font-semibold py-2">
+                                    <div className="w-4 h-4 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+                                    <span>AI Mentor is synthesizing personalized explanation...</span>
+                                  </div>
+                                ) : expState.data ? (
+                                  <div className="space-y-2 text-indigo-950">
+                                    <div className="font-bold text-indigo-900 text-xs flex items-center gap-1.5">
+                                      <Award className="w-4 h-4 text-indigo-600" />
+                                      <span>Takeaway: {expState.data.summary}</span>
+                                    </div>
+                                    <p className="leading-relaxed bg-white/80 p-3 rounded-xl border border-indigo-100 text-gray-800">
+                                      {expState.data.detailed_explanation}
+                                    </p>
+                                    {expState.data.common_misconception && (
+                                      <div className="p-2.5 bg-amber-50/80 rounded-xl border border-amber-200 text-amber-900">
+                                        <strong className="block mb-0.5 text-[11px]">⚠️ Common Pitfall:</strong>
+                                        <span>{expState.data.common_misconception}</span>
+                                      </div>
+                                    )}
+                                    {expState.data.pro_tip && (
+                                      <div className="p-2.5 bg-emerald-50/80 rounded-xl border border-emerald-200 text-emerald-900">
+                                        <strong className="block mb-0.5 text-[11px]">💡 Pro Exam Tip:</strong>
+                                        <span>{expState.data.pro_tip}</span>
+                                      </div>
+                                    )}
+                                  </div>
+                                ) : (
+                                  <span className="text-rose-600">{expState.error || "Explanation unavailable."}</span>
+                                )}
+                              </div>
+                            )}
                           </div>
                         </div>
-
-                        {q.explanation && (
-                          <div className="p-3.5 bg-purple-50/50 rounded-xl text-xs text-purple-900 border border-purple-100 flex items-start gap-2">
-                            <HelpCircle className="w-4 h-4 text-purple-600 shrink-0 mt-0.5" />
-                            <span>
-                              <strong>Explanation:</strong> {q.explanation}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    ))}
+                      );
+                    })}
                 </div>
               </div>
             )}
 
-            {/* Section C: Short & Long Answer AI Feedback */}
+            {/* Section C: Short & Long Answer AI Feedback (Rich Evaluator) */}
             {((results.short && results.short.length > 0) || (results.long && results.long.length > 0)) && (
               <div>
-                <h3 className="text-lg font-bold text-indigo-900 uppercase tracking-wider mb-4">
-                  Descriptive & Analytical Questions (AI Graded)
+                <h3 className="text-xs font-black text-indigo-900 uppercase tracking-wider mb-4 flex items-center gap-2">
+                  <span>Descriptive & Analytical Questions</span>
+                  <span className="px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded-full text-[10px]">AI Evaluated with Rubric</span>
                 </h3>
-                <div className="space-y-4">
+                <div className="space-y-5">
                   {[...(results.short || []), ...(results.long || [])].map((q: any, i: number) => {
                     const score = q.score_percent || 0;
+                    const expKey = `desc-${i}`;
+                    const expState = aiExplanations[expKey];
+
                     return (
-                      <div key={i} className="p-5 rounded-2xl border border-indigo-100 bg-indigo-50/20">
-                        <div className="flex items-start justify-between gap-3 mb-3">
-                          <span className="font-bold text-base text-gray-900">
+                      <div key={i} className="p-5 sm:p-6 rounded-3xl border border-indigo-100 bg-indigo-50/20 space-y-4">
+                        <div className="flex items-start justify-between gap-3">
+                          <span className="font-bold text-sm text-gray-900">
                             Q{i + 1}. {q.question}
                           </span>
                           <span
-                            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold shrink-0 ${
+                            className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-black shrink-0 ${
                               score >= 70
                                 ? "bg-emerald-100 text-emerald-800"
                                 : score >= 40
@@ -769,30 +1115,111 @@ export default function TakeQuizClient() {
                                 : "bg-rose-100 text-rose-800"
                             }`}
                           >
-                            AI Score: {score}%
+                            AI Evaluation: {score}%
                           </span>
                         </div>
 
-                        <div className="space-y-2 text-sm mb-3">
-                          <div className="p-3 bg-white rounded-xl border border-gray-100">
-                            <span className="text-xs font-bold text-gray-400 block mb-1">Your Submission</span>
-                            <p className="text-gray-800 whitespace-pre-wrap">{q.student_answer || "(No Answer Given)"}</p>
+                        {/* Side by side: Student answer vs Reference Answer */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                          <div className="p-3.5 bg-white rounded-2xl border border-gray-100 space-y-1">
+                            <span className="text-[10px] font-bold text-gray-400 block uppercase tracking-wider">Candidate Written Answer</span>
+                            <p className="text-gray-800 whitespace-pre-wrap leading-relaxed">{q.student_answer || "(No Answer Submitted)"}</p>
                           </div>
-                          <div className="p-3 bg-white rounded-xl border border-gray-100">
-                            <span className="text-xs font-bold text-gray-400 block mb-1">Model / Reference Answer</span>
-                            <p className="text-emerald-800 whitespace-pre-wrap font-medium">{q.model_answer}</p>
+                          <div className="p-3.5 bg-white rounded-2xl border border-gray-100 space-y-1">
+                            <span className="text-[10px] font-bold text-emerald-600 block uppercase tracking-wider">Reference Model Solution</span>
+                            <p className="text-emerald-900 whitespace-pre-wrap font-medium leading-relaxed">{q.model_answer}</p>
                           </div>
                         </div>
 
+                        {/* Strengths & Missing Key Points (Rich AI Evaluator) */}
+                        {((q.strengths && q.strengths.length > 0) || (q.missed_points && q.missed_points.length > 0)) && (
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                            {q.strengths && q.strengths.length > 0 && (
+                              <div className="p-3 bg-emerald-50/70 rounded-2xl border border-emerald-200">
+                                <span className="font-bold text-emerald-900 flex items-center gap-1 mb-1.5 text-[11px]">
+                                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                                  <span>Demonstrated Strengths</span>
+                                </span>
+                                <ul className="space-y-1 text-emerald-800 list-disc list-inside">
+                                  {q.strengths.map((s: string, sIdx: number) => (
+                                    <li key={sIdx}>{s}</li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+
+                            {q.missed_points && q.missed_points.length > 0 && (
+                              <div className="p-3 bg-amber-50/70 rounded-2xl border border-amber-200">
+                                <span className="font-bold text-amber-900 flex items-center gap-1 mb-1.5 text-[11px]">
+                                  <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
+                                  <span>Concepts to Improve</span>
+                                </span>
+                                <ul className="space-y-1 text-amber-800 list-disc list-inside">
+                                  {q.missed_points.map((m: string, mIdx: number) => (
+                                    <li key={mIdx}>{m}</li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
                         {q.feedback && (
-                          <div className="p-3.5 bg-white rounded-xl text-xs text-indigo-950 border border-indigo-200 flex items-start gap-2 shadow-xs">
+                          <div className="p-3.5 bg-white rounded-2xl text-xs text-indigo-950 border border-indigo-200 flex items-start gap-2.5 shadow-2xs">
                             <Sparkles className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
                             <div>
-                              <strong className="block text-indigo-900 mb-0.5">AI Examiner Feedback:</strong>
-                              <p className="leading-relaxed">{q.feedback}</p>
+                              <strong className="block text-indigo-900 mb-0.5 font-bold">Examiner Constructive Feedback:</strong>
+                              <p className="leading-relaxed text-gray-700">{q.feedback}</p>
                             </div>
                           </div>
                         )}
+
+                        {/* AI Mentor Deep Explanation Trigger */}
+                        <div className="pt-2 border-t border-gray-200/60">
+                          <button
+                            type="button"
+                            onClick={() => toggleAiExplanation(expKey, q.question, "Descriptive", q.student_answer || "", q.model_answer, q.feedback || "")}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs transition-all cursor-pointer tap-press"
+                          >
+                            <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
+                            <span>{expState?.open ? "Hide AI Mentor Explanation" : "Explain with AI Mentor 🪄"}</span>
+                          </button>
+
+                          {expState?.open && (
+                            <div className="mt-3 p-4 rounded-2xl bg-indigo-50/70 border border-indigo-200 text-xs space-y-2 animate-fade-in">
+                              {expState.loading ? (
+                                <div className="flex items-center gap-2 text-indigo-700 font-semibold py-2">
+                                  <div className="w-4 h-4 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+                                  <span>AI Mentor is synthesizing personalized explanation...</span>
+                                </div>
+                              ) : expState.data ? (
+                                <div className="space-y-2 text-indigo-950">
+                                  <div className="font-bold text-indigo-900 text-xs flex items-center gap-1.5">
+                                    <Award className="w-4 h-4 text-indigo-600" />
+                                    <span>Takeaway: {expState.data.summary}</span>
+                                  </div>
+                                  <p className="leading-relaxed bg-white/80 p-3 rounded-xl border border-indigo-100 text-gray-800">
+                                    {expState.data.detailed_explanation}
+                                  </p>
+                                  {expState.data.common_misconception && (
+                                    <div className="p-2.5 bg-amber-50/80 rounded-xl border border-amber-200 text-amber-900">
+                                      <strong className="block mb-0.5 text-[11px]">⚠️ Common Pitfall:</strong>
+                                      <span>{expState.data.common_misconception}</span>
+                                    </div>
+                                  )}
+                                  {expState.data.pro_tip && (
+                                    <div className="p-2.5 bg-emerald-50/80 rounded-xl border border-emerald-200 text-emerald-900">
+                                      <strong className="block mb-0.5 text-[11px]">💡 Pro Exam Tip:</strong>
+                                      <span>{expState.data.pro_tip}</span>
+                                    </div>
+                                  )}
+                                </div>
+                              ) : (
+                                <span className="text-rose-600">{expState.error || "Explanation unavailable."}</span>
+                              )}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     );
                   })}
@@ -800,6 +1227,7 @@ export default function TakeQuizClient() {
               </div>
             )}
           </div>
+
 
           <div className="flex flex-col sm:flex-row gap-3 no-print">
             <button

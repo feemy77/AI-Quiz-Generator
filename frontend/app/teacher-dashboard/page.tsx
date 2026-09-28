@@ -37,6 +37,11 @@ import {
   GraduationCap,
   Info,
   ChevronDown,
+  AlertTriangle,
+  TrendingUp,
+  Award,
+  Search,
+  Printer,
 } from "lucide-react";
 
 type SelectedFile = {
@@ -65,10 +70,26 @@ export default function TeacherDashboard() {
   const [logoBase64, setLogoBase64] = useState("");
   const [savingBranding, setSavingBranding] = useState(false);
 
+  // Detailed Analytics State
+  const [detailedAnalytics, setDetailedAnalytics] = useState<any>(null);
+  const [analyticsLoading, setAnalyticsLoading] = useState(false);
+  const [analyticsQuizFilter, setAnalyticsQuizFilter] = useState<string>("all");
+  const [analyticsSearchTerm, setAnalyticsSearchTerm] = useState<string>("");
+  const [selectedAttemptModal, setSelectedAttemptModal] = useState<{
+    show: boolean;
+    loading: boolean;
+    data: any | null;
+  }>({
+    show: false,
+    loading: false,
+    data: null,
+  });
+
   // Question Bank / Bookmarks State
   const [bookmarks, setBookmarks] = useState<any[]>([]);
   const [bookmarkFilter, setBookmarkFilter] = useState("all");
   const [copiedId, setCopiedId] = useState<number | null>(null);
+
 
   // Classroom Assignment Modal
   const [assignModal, setAssignModal] = useState<{
@@ -237,19 +258,21 @@ export default function TeacherDashboard() {
   const fetchDashboardData = async () => {
     setLoading(true);
     try {
-      const [quizRes, overviewRes, classRes, analyticsRes, brandRes, bookmarkRes] = await Promise.all([
+      const [quizRes, overviewRes, classRes, analyticsRes, brandRes, bookmarkRes, detailedAnalyticsRes] = await Promise.all([
         apiFetch("/teacher/quizzes"),
         apiFetch("/teacher/overview"),
         apiFetch("/teacher/classrooms"),
         apiFetch("/teacher/analytics/recent-attempts"),
         apiFetch("/teacher/branding"),
         apiFetch("/bookmarks"),
+        apiFetch("/teacher/analytics/detailed"),
       ]);
 
       if (quizRes.ok) setQuizzes(quizRes.data.quizzes || []);
       if (overviewRes.ok) setOverview(overviewRes.data);
       if (classRes.ok) setClasses(classRes.data.classes || []);
       if (analyticsRes.ok) setRecentAttempts(analyticsRes.data.attempts || []);
+      if (detailedAnalyticsRes.ok) setDetailedAnalytics(detailedAnalyticsRes.data);
       if (brandRes.ok && brandRes.data) {
         const aName = brandRes.data.academy_name || "";
         setAcademyName(aName);
@@ -263,6 +286,39 @@ export default function TeacherDashboard() {
       setLoading(false);
     }
   };
+
+  const handleAnalyticsFilterChange = async (quizId: string) => {
+    setAnalyticsQuizFilter(quizId);
+    setAnalyticsLoading(true);
+    try {
+      const qParam = quizId !== "all" ? `?quiz_id=${quizId}` : "";
+      const { ok, data } = await apiFetch(`/teacher/analytics/detailed${qParam}`);
+      if (ok && data) {
+        setDetailedAnalytics(data);
+      }
+    } catch (err) {
+      console.error("Failed to filter analytics:", err);
+    } finally {
+      setAnalyticsLoading(false);
+    }
+  };
+
+  const handleViewAttemptDetail = async (attemptId: number) => {
+    setSelectedAttemptModal({ show: true, loading: true, data: null });
+    try {
+      const { ok, data, error } = await apiFetch(`/teacher/attempt/${attemptId}`);
+      if (ok && data) {
+        setSelectedAttemptModal({ show: true, loading: false, data });
+      } else {
+        toast.error(error || "Could not load submission details.");
+        setSelectedAttemptModal({ show: false, loading: false, data: null });
+      }
+    } catch {
+      toast.error("Network error loading submission.");
+      setSelectedAttemptModal({ show: false, loading: false, data: null });
+    }
+  };
+
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const filesArray = Array.from(e.target.files || []);
@@ -2053,52 +2109,371 @@ export default function TeacherDashboard() {
                 </div>
               )}
 
-              {/* TAB: ANALYTICS */}
+              {/* TAB: ANALYTICS (VIP TEACHER ANALYTICS HUB) */}
               {activeTab === "analytics" && (
                 <div className="space-y-6">
-                  <div>
-                    <h2 className="text-2xl font-black text-gray-900 tracking-tight">Recent Student Attempts</h2>
-                    <p className="text-sm text-gray-500 mt-0.5">Live log of submitted exams across your classrooms.</p>
-                  </div>
+                  {/* Top Bar with Filter & Print Actions */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-gray-200/80 shadow-xs">
+                    <div>
+                      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200 mb-2">
+                        <BarChart3 className="w-3.5 h-3.5" />
+                        <span>Assessment Intelligence Hub</span>
+                      </div>
+                      <h2 className="text-2xl font-black text-gray-900 tracking-tight">Class Analytics & Gradebook</h2>
+                      <p className="text-xs text-gray-500 mt-0.5">Real-time performance distribution, question difficulty heatmap, and at-risk monitoring.</p>
+                    </div>
 
-                  <div className="bg-white rounded-3xl border border-gray-200/80 shadow-xs overflow-hidden">
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-left text-sm">
-                        <thead className="bg-gray-50 border-b border-gray-200 text-xs uppercase font-extrabold text-gray-500">
-                          <tr>
-                            <th className="px-6 py-4">Student</th>
-                            <th className="px-6 py-4">Quiz Title</th>
-                            <th className="px-6 py-4">Score</th>
-                            <th className="px-6 py-4">Date</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-100">
-                          {recentAttempts.map((a) => (
-                            <tr key={a.id} className="hover:bg-gray-50/60">
-                              <td className="px-6 py-4 font-bold text-gray-900">{a.student_name}</td>
-                              <td className="px-6 py-4 text-gray-700">{a.quiz_title}</td>
-                              <td className="px-6 py-4">
-                                <span
-                                  className={`px-2.5 py-1 rounded-full text-xs font-extrabold ${
-                                    a.score_percent >= 70
-                                      ? "bg-emerald-100 text-emerald-800"
-                                      : a.score_percent >= 50
-                                      ? "bg-amber-100 text-amber-800"
-                                      : "bg-rose-100 text-rose-800"
-                                  }`}
-                                >
-                                  {a.score_percent}%
-                                </span>
-                              </td>
-                              <td className="px-6 py-4 text-gray-400 text-xs">{a.date}</td>
-                            </tr>
+                    <div className="flex flex-wrap items-center gap-3">
+                      {/* Filter by Quiz */}
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-gray-500">Filter:</span>
+                        <select
+                          value={analyticsQuizFilter}
+                          onChange={(e) => handleAnalyticsFilterChange(e.target.value)}
+                          className="px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs font-bold text-gray-700 outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                        >
+                          <option value="all">All Assessments Combined</option>
+                          {quizzes.map((q) => (
+                            <option key={q.id} value={q.id}>
+                              {q.title} ({q.subject || "General"})
+                            </option>
                           ))}
-                        </tbody>
-                      </table>
+                        </select>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => window.print()}
+                        className="flex items-center gap-2 px-4 py-2.5 bg-gray-900 hover:bg-black text-white text-xs font-bold rounded-xl transition-all shadow-xs cursor-pointer tap-press no-print"
+                      >
+                        <Printer className="w-3.5 h-3.5" />
+                        <span>Print Report</span>
+                      </button>
                     </div>
                   </div>
+
+                  {analyticsLoading ? (
+                    <div className="flex flex-col items-center justify-center p-12 bg-white rounded-3xl border border-gray-200">
+                      <div className="w-8 h-8 border-3 border-blue-600 border-t-transparent rounded-full animate-spin mb-3" />
+                      <span className="text-xs font-bold text-gray-500">Aggregating class performance data...</span>
+                    </div>
+                  ) : (
+                    <>
+                      {/* 1. TOP KPI METRICS CARDS */}
+                      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div className="bg-white p-5 rounded-3xl shadow-xs border border-blue-100 flex flex-col justify-between space-y-3">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Total Submissions</span>
+                            <div className="p-2 rounded-xl bg-blue-50 text-blue-600">
+                              <Users className="w-4 h-4" />
+                            </div>
+                          </div>
+                          <div>
+                            <p className="text-3xl font-black text-blue-600">
+                              {detailedAnalytics?.overview?.total_attempts ?? overview.total_attempts}
+                            </p>
+                            <p className="text-[11px] text-gray-400 mt-0.5">Across enrolled students</p>
+                          </div>
+                        </div>
+
+                        <div className="bg-white p-5 rounded-3xl shadow-xs border border-emerald-100 flex flex-col justify-between space-y-3">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Class Average</span>
+                            <div className="p-2 rounded-xl bg-emerald-50 text-emerald-600">
+                              <TrendingUp className="w-4 h-4" />
+                            </div>
+                          </div>
+                          <div>
+                            <p className="text-3xl font-black text-emerald-600">
+                              {detailedAnalytics?.overview?.avg_score ?? overview.avg_score}%
+                            </p>
+                            <p className="text-[11px] text-gray-400 mt-0.5">Evaluated aggregate accuracy</p>
+                          </div>
+                        </div>
+
+                        <div className="bg-white p-5 rounded-3xl shadow-xs border border-purple-100 flex flex-col justify-between space-y-3">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Pass Rate (≥50%)</span>
+                            <div className="p-2 rounded-xl bg-purple-50 text-purple-600">
+                              <ShieldCheck className="w-4 h-4" />
+                            </div>
+                          </div>
+                          <div>
+                            <p className="text-3xl font-black text-purple-600">
+                              {detailedAnalytics?.overview?.pass_rate ?? 0}%
+                            </p>
+                            <p className="text-[11px] text-gray-400 mt-0.5">Met passing benchmark</p>
+                          </div>
+                        </div>
+
+                        <div className="bg-white p-5 rounded-3xl shadow-xs border border-amber-100 flex flex-col justify-between space-y-3">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Score Spread</span>
+                            <div className="p-2 rounded-xl bg-amber-50 text-amber-600">
+                              <Award className="w-4 h-4" />
+                            </div>
+                          </div>
+                          <div>
+                            <p className="text-2xl font-black text-gray-900">
+                              {detailedAnalytics?.overview?.highest_score ?? 0}% <span className="text-xs text-gray-400 font-normal">/ {detailedAnalytics?.overview?.lowest_score ?? 0}%</span>
+                            </p>
+                            <p className="text-[11px] text-gray-400 mt-0.5">Highest vs Lowest recorded</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* 2. SCORE DISTRIBUTION (HISTOGRAM / BELL CURVE) */}
+                      <div className="bg-white p-6 rounded-3xl border border-gray-200/80 shadow-xs space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h3 className="text-base font-black text-gray-900 tracking-tight">Grade Distribution Histogram</h3>
+                            <p className="text-xs text-gray-500 mt-0.5">Visual spread of candidate performance tiers.</p>
+                          </div>
+                          <span className="text-xs font-bold text-gray-500">
+                            Total: {detailedAnalytics?.overview?.total_attempts ?? 0} Attempts
+                          </span>
+                        </div>
+
+                        {(() => {
+                          const dist = detailedAnalytics?.score_distribution || { mastery: 0, proficient: 0, passing: 0, needs_help: 0 };
+                          const total = (detailedAnalytics?.overview?.total_attempts || 1);
+                          const masteryPct = Math.round((dist.mastery / total) * 100);
+                          const profPct = Math.round((dist.proficient / total) * 100);
+                          const passPct = Math.round((dist.passing / total) * 100);
+                          const helpPct = Math.round((dist.needs_help / total) * 100);
+
+                          return (
+                            <div className="space-y-3 pt-2">
+                              {/* Mastery Tier */}
+                              <div className="space-y-1">
+                                <div className="flex justify-between text-xs">
+                                  <span className="font-bold text-emerald-800 flex items-center gap-1.5">
+                                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block" />
+                                    <span>Mastery (90% - 100%)</span>
+                                  </span>
+                                  <span className="font-extrabold text-gray-700">{dist.mastery} students ({masteryPct}%)</span>
+                                </div>
+                                <div className="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
+                                  <div className="bg-emerald-500 h-3 rounded-full transition-all duration-700" style={{ width: `${masteryPct}%` }} />
+                                </div>
+                              </div>
+
+                              {/* Proficient Tier */}
+                              <div className="space-y-1">
+                                <div className="flex justify-between text-xs">
+                                  <span className="font-bold text-blue-800 flex items-center gap-1.5">
+                                    <span className="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block" />
+                                    <span>Proficient (75% - 89%)</span>
+                                  </span>
+                                  <span className="font-extrabold text-gray-700">{dist.proficient} students ({profPct}%)</span>
+                                </div>
+                                <div className="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
+                                  <div className="bg-blue-500 h-3 rounded-full transition-all duration-700" style={{ width: `${profPct}%` }} />
+                                </div>
+                              </div>
+
+                              {/* Passing Tier */}
+                              <div className="space-y-1">
+                                <div className="flex justify-between text-xs">
+                                  <span className="font-bold text-amber-800 flex items-center gap-1.5">
+                                    <span className="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block" />
+                                    <span>Passing Benchmark (50% - 74%)</span>
+                                  </span>
+                                  <span className="font-extrabold text-gray-700">{dist.passing} students ({passPct}%)</span>
+                                </div>
+                                <div className="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
+                                  <div className="bg-amber-500 h-3 rounded-full transition-all duration-700" style={{ width: `${passPct}%` }} />
+                                </div>
+                              </div>
+
+                              {/* Needs Help Tier */}
+                              <div className="space-y-1">
+                                <div className="flex justify-between text-xs">
+                                  <span className="font-bold text-rose-800 flex items-center gap-1.5">
+                                    <span className="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block" />
+                                    <span>Needs Academic Support (&lt; 50%)</span>
+                                  </span>
+                                  <span className="font-extrabold text-rose-600">{dist.needs_help} students ({helpPct}%)</span>
+                                </div>
+                                <div className="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
+                                  <div className="bg-rose-500 h-3 rounded-full transition-all duration-700" style={{ width: `${helpPct}%` }} />
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })()}
+                      </div>
+
+                      {/* 3. AT-RISK STUDENTS EARLY INTERVENTION PANEL */}
+                      <div className="bg-white p-6 rounded-3xl border border-gray-200/80 shadow-xs space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2.5">
+                            <div className="p-2 rounded-xl bg-rose-50 text-rose-600">
+                              <AlertTriangle className="w-5 h-5" />
+                            </div>
+                            <div>
+                              <h3 className="text-base font-black text-gray-900 tracking-tight">At-Risk Students Alert</h3>
+                              <p className="text-xs text-gray-500 mt-0.5">Students scoring under 50% requiring teacher intervention.</p>
+                            </div>
+                          </div>
+                          {detailedAnalytics?.at_risk_students?.length > 0 && (
+                            <span className="px-3 py-1 rounded-full text-xs font-black bg-rose-100 text-rose-800">
+                              {detailedAnalytics.at_risk_students.length} Flagged
+                            </span>
+                          )}
+                        </div>
+
+                        {detailedAnalytics?.at_risk_students && detailedAnalytics.at_risk_students.length > 0 ? (
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 pt-1">
+                            {detailedAnalytics.at_risk_students.map((st: any, idx: number) => (
+                              <div key={idx} className="p-4 rounded-2xl bg-rose-50/50 border border-rose-200/80 space-y-2">
+                                <div className="flex items-start justify-between">
+                                  <span className="font-black text-sm text-gray-900">{st.student_name}</span>
+                                  <span className="px-2 py-0.5 rounded-full text-[11px] font-black bg-rose-100 text-rose-800">
+                                    {st.score_percent}%
+                                  </span>
+                                </div>
+                                <p className="text-xs text-gray-600 line-clamp-1">{st.quiz_title}</p>
+                                <div className="flex items-center justify-between text-[11px] text-gray-500 pt-1 border-t border-rose-100">
+                                  <span>{st.date}</span>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleViewAttemptDetail(st.attempt_id)}
+                                    className="font-bold text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+                                  >
+                                    Inspect Paper →
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-200 text-xs text-emerald-800 flex items-center gap-2.5">
+                            <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+                            <span><strong>No at-risk candidates found!</strong> All students are currently performing at or above passing threshold.</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* 4. QUESTION DIFFICULTY HEATMAP (HARDEST TOPICS) */}
+                      {detailedAnalytics?.hardest_questions && detailedAnalytics.hardest_questions.length > 0 && (
+                        <div className="bg-white p-6 rounded-3xl border border-gray-200/80 shadow-xs space-y-4">
+                          <div className="flex items-center gap-2.5">
+                            <div className="p-2 rounded-xl bg-amber-50 text-amber-600">
+                              <Sparkles className="w-5 h-5" />
+                            </div>
+                            <div>
+                              <h3 className="text-base font-black text-gray-900 tracking-tight">Question Difficulty Heatmap (Top Missed)</h3>
+                              <p className="text-xs text-gray-500 mt-0.5">Questions with highest error rates across student attempts.</p>
+                            </div>
+                          </div>
+
+                          <div className="space-y-3">
+                            {detailedAnalytics.hardest_questions.map((hq: any, idx: number) => (
+                              <div key={idx} className="p-4 rounded-2xl bg-gray-50 border border-gray-200 space-y-2">
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                  <div className="flex items-center gap-2">
+                                    <span className="px-2 py-0.5 rounded-lg text-[10px] font-black bg-gray-200 text-gray-700 uppercase">
+                                      {hq.type}
+                                    </span>
+                                    <span className="font-bold text-xs text-gray-900 line-clamp-1">{hq.question}</span>
+                                  </div>
+                                  <span className="px-2.5 py-1 rounded-full text-xs font-black bg-rose-100 text-rose-800 shrink-0">
+                                    {hq.error_rate}% Error Rate ({hq.incorrect_count}/{hq.total_attempts} Missed)
+                                  </span>
+                                </div>
+                                <div className="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden">
+                                  <div className="bg-rose-500 h-1.5 rounded-full" style={{ width: `${hq.error_rate}%` }} />
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* 5. SEARCHABLE MASTER GRADEBOOK */}
+                      <div className="bg-white rounded-3xl border border-gray-200/80 shadow-xs overflow-hidden space-y-4 p-6">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b pb-4">
+                          <div>
+                            <h3 className="text-base font-black text-gray-900 tracking-tight">Submissions Log & Gradebook</h3>
+                            <p className="text-xs text-gray-500 mt-0.5">Individual candidate attempts with full paper inspection.</p>
+                          </div>
+
+                          <div className="relative w-full sm:w-64">
+                            <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                            <input
+                              type="text"
+                              value={analyticsSearchTerm}
+                              onChange={(e) => setAnalyticsSearchTerm(e.target.value)}
+                              placeholder="Search student or quiz..."
+                              className="w-full pl-9 pr-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-blue-500 font-medium"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="overflow-x-auto -mx-6">
+                          <table className="w-full text-left text-sm">
+                            <thead className="bg-gray-50 border-b border-gray-200 text-xs uppercase font-extrabold text-gray-500">
+                              <tr>
+                                <th className="px-6 py-3.5">Student Candidate</th>
+                                <th className="px-6 py-3.5">Assessment Title</th>
+                                <th className="px-6 py-3.5">Score</th>
+                                <th className="px-6 py-3.5">Evaluation</th>
+                                <th className="px-6 py-3.5">Date</th>
+                                <th className="px-6 py-3.5 text-right">Action</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100">
+                              {(detailedAnalytics?.recent_attempts || recentAttempts)
+                                .filter((a: any) => {
+                                  if (!analyticsSearchTerm.trim()) return true;
+                                  const term = analyticsSearchTerm.toLowerCase();
+                                  return (
+                                    (a.student_name || "").toLowerCase().includes(term) ||
+                                    (a.quiz_title || "").toLowerCase().includes(term)
+                                  );
+                                })
+                                .map((a: any) => (
+                                  <tr key={a.id} className="hover:bg-gray-50/70 transition-colors">
+                                    <td className="px-6 py-4 font-bold text-gray-900 text-xs sm:text-sm">{a.student_name}</td>
+                                    <td className="px-6 py-4 text-gray-700 text-xs sm:text-sm">{a.quiz_title}</td>
+                                    <td className="px-6 py-4 text-xs font-bold text-gray-900">
+                                      {a.total_score !== undefined ? `${a.total_score}/${a.max_score}` : "Evaluated"}
+                                    </td>
+                                    <td className="px-6 py-4">
+                                      <span
+                                        className={`px-2.5 py-1 rounded-full text-xs font-black ${
+                                          a.score_percent >= 75
+                                            ? "bg-emerald-100 text-emerald-800"
+                                            : a.score_percent >= 50
+                                            ? "bg-blue-100 text-blue-800"
+                                            : "bg-rose-100 text-rose-800"
+                                        }`}
+                                      >
+                                        {a.score_percent}%
+                                      </span>
+                                    </td>
+                                    <td className="px-6 py-4 text-gray-400 text-xs">{a.date}</td>
+                                    <td className="px-6 py-4 text-right">
+                                      <button
+                                        type="button"
+                                        onClick={() => handleViewAttemptDetail(a.id)}
+                                        className="px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-xs transition-all cursor-pointer tap-press"
+                                      >
+                                        Inspect Paper
+                                      </button>
+                                    </td>
+                                  </tr>
+                                ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
               )}
+
 
               {/* TAB: SETTINGS & BRANDING */}
               {activeTab === "settings" && (
@@ -3312,6 +3687,260 @@ export default function TeacherDashboard() {
                 className="flex-1 py-2.5 bg-rose-600 text-white font-bold rounded-xl text-xs hover:bg-rose-700 transition-colors shadow-xs"
               >
                 Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* FULL CANDIDATE PAPER INSPECTION MODAL */}
+      {selectedAttemptModal.show && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white max-w-3xl w-full max-h-[90vh] rounded-3xl shadow-2xl border border-gray-200 overflow-hidden flex flex-col">
+            {/* Modal Header */}
+            <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-blue-50/50 to-indigo-50/30">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-blue-100 text-blue-800">
+                    Official Submission Record
+                  </span>
+                  <span className="text-xs text-gray-400">•</span>
+                  <span className="text-xs font-bold text-gray-500">
+                    {selectedAttemptModal.data?.attempt?.created_at?.split(" ")[0]}
+                  </span>
+                </div>
+                <h3 className="text-xl font-black text-gray-900 tracking-tight">
+                  {selectedAttemptModal.data?.attempt?.student_name || "Student"}&apos;s Evaluation
+                </h3>
+                <p className="text-xs text-gray-500">
+                  {selectedAttemptModal.data?.exam_metadata?.exam_title || "Assessment Quiz"}
+                </p>
+              </div>
+
+              <div className="flex items-center gap-3">
+                {selectedAttemptModal.data?.attempt?.results && (
+                  <div className="text-right">
+                    <span className="text-2xl font-black text-blue-600">
+                      {selectedAttemptModal.data.attempt.results.total_score}
+                    </span>
+                    <span className="text-xs text-gray-400 font-bold">
+                      /{selectedAttemptModal.data.attempt.results.max_score} Marks
+                    </span>
+                  </div>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setSelectedAttemptModal({ show: false, loading: false, data: null })}
+                  className="p-2 rounded-xl text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 overflow-y-auto space-y-6 flex-1">
+              {selectedAttemptModal.loading ? (
+                <div className="flex flex-col items-center justify-center p-12 space-y-3">
+                  <div className="w-8 h-8 border-3 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                  <span className="text-xs font-bold text-gray-500">Loading paper responses and AI rubric...</span>
+                </div>
+              ) : selectedAttemptModal.data?.attempt?.results ? (
+                (() => {
+                  const res = selectedAttemptModal.data.attempt.results;
+                  return (
+                    <div className="space-y-6">
+                      {/* Section A: MCQs */}
+                      {res.mcq && res.mcq.length > 0 && (
+                        <div className="space-y-3">
+                          <h4 className="text-xs font-black text-blue-900 uppercase tracking-wider flex items-center gap-2">
+                            <span>Multiple Choice Questions</span>
+                            <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-[10px]">
+                              {res.mcq.filter((q: any) => q.is_correct).length}/{res.mcq.length} Correct
+                            </span>
+                          </h4>
+                          <div className="space-y-3">
+                            {res.mcq.map((q: any, idx: number) => (
+                              <div
+                                key={idx}
+                                className={`p-4 rounded-2xl border ${
+                                  q.is_correct ? "border-emerald-200 bg-emerald-50/20" : "border-rose-200 bg-rose-50/20"
+                                }`}
+                              >
+                                <div className="flex items-start justify-between gap-2 mb-2">
+                                  <span className="font-bold text-xs text-gray-900">
+                                    Q{idx + 1}. {q.question}
+                                  </span>
+                                  <span
+                                    className={`px-2 py-0.5 rounded-full text-[10px] font-black shrink-0 ${
+                                      q.is_correct ? "bg-emerald-100 text-emerald-800" : "bg-rose-100 text-rose-800"
+                                    }`}
+                                  >
+                                    {q.is_correct ? "+1 Mark" : "0 Marks"}
+                                  </span>
+                                </div>
+                                <div className="grid grid-cols-2 gap-2 text-xs">
+                                  <div className="p-2.5 bg-white rounded-xl border border-gray-100">
+                                    <span className="text-[10px] font-bold text-gray-400 block uppercase">Candidate Answer</span>
+                                    <span className={q.is_correct ? "font-bold text-emerald-700" : "font-bold text-rose-600"}>
+                                      {q.selected || "(Unattempted)"}
+                                    </span>
+                                  </div>
+                                  <div className="p-2.5 bg-white rounded-xl border border-gray-100">
+                                    <span className="text-[10px] font-bold text-gray-400 block uppercase">Correct Answer</span>
+                                    <span className="font-bold text-emerald-700">{q.correct_answer}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Section B: Fill in Blanks */}
+                      {res.fill_blank && res.fill_blank.length > 0 && (
+                        <div className="space-y-3">
+                          <h4 className="text-xs font-black text-purple-900 uppercase tracking-wider flex items-center gap-2">
+                            <span>Fill in the Blanks</span>
+                            <span className="px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full text-[10px]">
+                              {res.fill_blank.filter((q: any) => q.is_correct).length}/{res.fill_blank.length} Correct
+                            </span>
+                          </h4>
+                          <div className="space-y-3">
+                            {res.fill_blank.map((q: any, idx: number) => (
+                              <div
+                                key={idx}
+                                className={`p-4 rounded-2xl border ${
+                                  q.is_correct ? "border-emerald-200 bg-emerald-50/20" : "border-rose-200 bg-rose-50/20"
+                                }`}
+                              >
+                                <div className="flex items-start justify-between gap-2 mb-2">
+                                  <span className="font-bold text-xs text-gray-900">
+                                    Q{idx + 1}. {q.question}
+                                  </span>
+                                  <span
+                                    className={`px-2 py-0.5 rounded-full text-[10px] font-black shrink-0 ${
+                                      q.is_correct ? "bg-emerald-100 text-emerald-800" : "bg-rose-100 text-rose-800"
+                                    }`}
+                                  >
+                                    {q.is_correct ? "+1 Mark" : "0 Marks"}
+                                  </span>
+                                </div>
+                                <div className="grid grid-cols-2 gap-2 text-xs">
+                                  <div className="p-2.5 bg-white rounded-xl border border-gray-100">
+                                    <span className="text-[10px] font-bold text-gray-400 block uppercase">Candidate Answer</span>
+                                    <span className={q.is_correct ? "font-bold text-emerald-700" : "font-bold text-rose-600"}>
+                                      {q.student_answer || "(Left Blank)"}
+                                    </span>
+                                  </div>
+                                  <div className="p-2.5 bg-white rounded-xl border border-gray-100">
+                                    <span className="text-[10px] font-bold text-gray-400 block uppercase">Correct Answer</span>
+                                    <span className="font-bold text-emerald-700">{q.correct_answer}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Section C: Descriptive & AI Graded Answers */}
+                      {((res.short && res.short.length > 0) || (res.long && res.long.length > 0)) && (
+                        <div className="space-y-3">
+                          <h4 className="text-xs font-black text-indigo-900 uppercase tracking-wider">
+                            Descriptive Questions (AI Rubric Evaluation)
+                          </h4>
+                          <div className="space-y-4">
+                            {[...(res.short || []), ...(res.long || [])].map((q: any, idx: number) => {
+                              const score = q.score_percent || 0;
+                              return (
+                                <div key={idx} className="p-5 rounded-2xl border border-indigo-100 bg-indigo-50/20 space-y-3">
+                                  <div className="flex items-start justify-between gap-2">
+                                    <span className="font-bold text-xs text-gray-900">
+                                      Q{idx + 1}. {q.question}
+                                    </span>
+                                    <span
+                                      className={`px-2.5 py-1 rounded-full text-xs font-black shrink-0 ${
+                                        score >= 70
+                                          ? "bg-emerald-100 text-emerald-800"
+                                          : score >= 40
+                                          ? "bg-amber-100 text-amber-800"
+                                          : "bg-rose-100 text-rose-800"
+                                      }`}
+                                    >
+                                      AI Score: {score}%
+                                    </span>
+                                  </div>
+
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                                    <div className="p-3 bg-white rounded-xl border border-gray-100">
+                                      <span className="text-[10px] font-bold text-gray-400 block uppercase">Candidate Submission</span>
+                                      <p className="text-gray-800 whitespace-pre-wrap">{q.student_answer || "(No Answer Given)"}</p>
+                                    </div>
+                                    <div className="p-3 bg-white rounded-xl border border-gray-100">
+                                      <span className="text-[10px] font-bold text-emerald-600 block uppercase">Model Answer</span>
+                                      <p className="text-emerald-900 whitespace-pre-wrap font-medium">{q.model_answer}</p>
+                                    </div>
+                                  </div>
+
+                                  {q.feedback && (
+                                    <div className="p-3 bg-white rounded-xl text-xs text-indigo-950 border border-indigo-200">
+                                      <strong className="block mb-0.5 text-indigo-900 font-bold">Examiner Feedback:</strong>
+                                      <p className="text-gray-700 leading-relaxed">{q.feedback}</p>
+                                    </div>
+                                  )}
+
+                                  {((q.strengths && q.strengths.length > 0) || (q.missed_points && q.missed_points.length > 0)) && (
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                                      {q.strengths && q.strengths.length > 0 && (
+                                        <div className="p-2.5 bg-emerald-50 rounded-xl border border-emerald-200 text-emerald-900">
+                                          <strong className="block text-[11px] mb-1 font-bold">Strengths:</strong>
+                                          <ul className="list-disc list-inside space-y-0.5">
+                                            {q.strengths.map((s: string, sIdx: number) => (
+                                              <li key={sIdx}>{s}</li>
+                                            ))}
+                                          </ul>
+                                        </div>
+                                      )}
+                                      {q.missed_points && q.missed_points.length > 0 && (
+                                        <div className="p-2.5 bg-amber-50 rounded-xl border border-amber-200 text-amber-900">
+                                          <strong className="block text-[11px] mb-1 font-bold">Missed Concepts:</strong>
+                                          <ul className="list-disc list-inside space-y-0.5">
+                                            {q.missed_points.map((m: string, mIdx: number) => (
+                                              <li key={mIdx}>{m}</li>
+                                            ))}
+                                          </ul>
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()
+              ) : (
+                <div className="p-8 text-center text-xs text-gray-500">
+                  Detailed results are not available for this attempt.
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-4 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
+              <span className="text-xs text-gray-500">
+                Evaluation ID: #{selectedAttemptModal.data?.attempt?.id}
+              </span>
+              <button
+                type="button"
+                onClick={() => setSelectedAttemptModal({ show: false, loading: false, data: null })}
+                className="px-5 py-2.5 bg-gray-900 hover:bg-black text-white text-xs font-bold rounded-xl transition-all shadow-xs cursor-pointer tap-press"
+              >
+                Close Inspection
               </button>
             </div>
           </div>
