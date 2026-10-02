@@ -253,44 +253,14 @@ def require_teacher(user=Depends(get_current_user)):
         raise HTTPException(status_code=403, detail="Only teachers/admins can perform this action.")
     return user
 
-# --- AUTH ENDPOINTS ---
-@app.post("/auth/register")
-def register(req: RegisterRequest):
-    if database.get_user_by_email(req.email):
-        raise HTTPException(status_code=409, detail="An account with this email already exists.")
-    password_hash, salt = auth.hash_password(req.password)
-    user_id = database.create_user(req.name, req.email, password_hash, salt, "unassigned", "")
-    token = auth.generate_token()
-    database.create_session(token, user_id)
-    return {"token": token, "user_id": user_id, "role": "unassigned", "name": req.name}
+# --- MODULAR ROUTERS ---
+from routers.auth import router as auth_router
+from routers.classrooms import router as classrooms_router
+from routers.gamification import router as gamification_router
 
-@app.post("/auth/login")
-def login(req: LoginRequest):
-    user = database.get_user_by_email(req.email)
-    if not user or not auth.verify_password(req.password, user["password_hash"], user["salt"]):
-        raise HTTPException(status_code=401, detail="Invalid email or password.")
-    token = auth.generate_token()
-    database.create_session(token, user["id"])
-    return {"token": token, "user_id": user["id"], "role": user["role"], "name": user["name"]}
-
-@app.post("/auth/update-profile")
-def update_profile(req: UpdateProfileRequest, user=Depends(get_current_user)):
-    database.update_user_profile(user["id"], req.role, req.institution_name)
-    return {"message": "Profile updated successfully", "role": req.role}
-
-@app.post("/auth/switch-role")
-def switch_role(req: SwitchRoleRequest, user=Depends(get_current_user)):
-    if req.new_role not in ["student", "teacher"]:
-        raise HTTPException(status_code=400, detail="Role must be either 'student' or 'teacher'")
-    database.update_user_role(user["id"], req.new_role)
-    return {"ok": True, "role": req.new_role, "message": f"Switched to {req.new_role} mode"}
-
-@app.post("/auth/logout")
-def logout(authorization: Optional[str] = Header(None)):
-    if authorization and authorization.startswith("Bearer "):
-        auth_token = authorization.removeprefix("Bearer ").strip()
-        database.delete_session(auth_token)
-    return {"ok": True}
+app.include_router(auth_router)
+app.include_router(classrooms_router)
+app.include_router(gamification_router)
 
 @app.post("/quiz/analyze-document")
 async def analyze_document(file: UploadFile = File(...)):
@@ -1989,49 +1959,11 @@ def get_attempt_status(attempt_id: int):
         "results": attempt.get("results", {})
     }
 
-@app.post("/challenge/create")
-def create_challenge(req: ChallengeCreateRequest, user=Depends(get_current_user)):
-    quiz = database.get_quiz(req.quiz_id)
-    if not quiz: raise HTTPException(status_code=404, detail="Quiz not found.")
-    code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
-    challenge_id = database.create_challenge(user["id"], req.quiz_id, code)
-    return {"challenge_id": challenge_id, "code": code, "share_text": f"Join using code: {code}"}
-
 @app.get("/challenge/{code}")
 def get_challenge(code: str, request: Request):
     challenge = database.get_challenge_by_code(code.upper())
     if not challenge: raise HTTPException(status_code=404, detail="Invalid Challenge Code.")
     return get_quiz_for_student(challenge["quiz_id"], request)
-
-@app.get("/challenge/{code}/leaderboard")
-def get_challenge_leaderboard(code: str):
-    challenge = database.get_challenge_by_code(code.upper())
-    if not challenge: raise HTTPException(status_code=404, detail="Invalid Challenge.")
-    return {"code": code, "leaderboard": database.get_challenge_leaderboard(challenge["id"])}
-
-@app.get("/user/dashboard")
-def get_student_dashboard(user=Depends(get_current_user)):
-    return database.get_user_gamification(user["id"])
-
-@app.post("/quiz/{quiz_id}/flashcards")
-def create_flashcards(quiz_id: int, user=Depends(get_current_user)):
-    quiz = database.get_quiz(quiz_id)
-    if not quiz: raise HTTPException(status_code=404, detail="Quiz not found.")
-    for q in quiz.get("quiz_data", {}).get("mcq_questions", []):
-        database.create_flashcard(quiz_id, user["id"], front=q["question_text"], back=q["correct_answer"], q_type="mcq")
-    for q in quiz.get("quiz_data", {}).get("short_questions", []):
-        database.create_flashcard(quiz_id, user["id"], front=q["question_text"], back=q["correct_answer"], q_type="short")
-    return {"message": "Flashcards generated."}
-
-@app.get("/flashcards/due")
-def get_due_flashcards(user=Depends(get_current_user)):
-    due_cards = database.get_due_flashcards(user["id"])
-    return {"due_count": len(due_cards), "flashcards": due_cards}
-
-@app.post("/flashcards/review")
-def review_flashcard(req: FlashcardReviewRequest, user=Depends(get_current_user)):
-    database.update_flashcard_sm2(user["id"], req.flashcard_id, req.quality)
-    return {"message": "Review recorded."}
 
 @app.get("/teacher/quizzes")
 def get_teacher_quizzes_api(user=Depends(require_teacher)):
@@ -2084,126 +2016,6 @@ def get_teacher_overview(user=Depends(require_teacher)):
         "avg_score": avg_score
     }
 
-@app.post("/teacher/classrooms")
-def create_classroom_api(req: CreateClassroomRequest, user=Depends(require_teacher)):
-    join_code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=7))
-    class_id = database.create_classroom(user["id"], req.name, join_code)
-    return {
-        "message": "Classroom created successfully", 
-        "class_id": class_id, 
-        "join_code": join_code,
-        "name": req.name
-    }
-
-@app.get("/teacher/classrooms")
-def get_classrooms_api(user=Depends(require_teacher)):
-    conn = database.get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('''
-        SELECT c.id, c.name, c.join_code, c.created_at, 
-               (SELECT COUNT(id) FROM classroom_students WHERE classroom_id = c.id) as student_count
-        FROM classrooms c
-        WHERE c.teacher_id = ?
-        ORDER BY c.created_at DESC
-    ''', (user["id"],))
-    classes = [dict(row) for row in cursor.fetchall()]
-    conn.close()
-    for cl in classes:
-        cl["assignments"] = database.get_classroom_assignments(cl["id"])
-    return {"classes": classes}
-
-@app.post("/student/classrooms/join")
-def join_classroom_api(req: JoinClassroomRequest, user=Depends(get_current_user)):
-    if user["role"] == "teacher":
-        raise HTTPException(status_code=400, detail="Teachers cannot join classes as students.")
-    result = database.join_classroom(user["id"], req.join_code.upper())
-    if "error" in result:
-        raise HTTPException(status_code=400, detail=result["error"])
-    return {"message": "Successfully joined the classroom!", "classroom_id": result["classroom_id"]}
-
-@app.post("/teacher/classrooms/{class_id}/assign")
-def assign_quiz_to_classroom_api(class_id: int, req: AssignQuizRequest, user=Depends(require_teacher)):
-    """Teacher assigns a quiz to a classroom with an optional due date."""
-    conn = database.get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT id FROM classrooms WHERE id = ? AND teacher_id = ?", (class_id, user["id"]))
-    if not cursor.fetchone():
-        conn.close()
-        raise HTTPException(status_code=404, detail="Classroom not found or unauthorized.")
-    
-    cursor.execute("SELECT id FROM quizzes WHERE id = ? AND teacher_id = ?", (req.quiz_id, user["id"]))
-    if not cursor.fetchone():
-        conn.close()
-        raise HTTPException(status_code=404, detail="Quiz not found or unauthorized.")
-    conn.close()
-
-    assignment_id = database.create_assignment(class_id, req.quiz_id, req.due_date or "")
-    return {"message": "Quiz assigned successfully!", "assignment_id": assignment_id}
-
-@app.get("/teacher/classrooms/{class_id}/assignments")
-def get_classroom_assignments_api(class_id: int, user=Depends(require_teacher)):
-    """Fetches all assignments for a specific classroom with submission counts."""
-    assignments = database.get_classroom_assignments(class_id)
-    return {"assignments": assignments}
-
-@app.get("/teacher/assignments/{assignment_id}/submissions")
-def get_assignment_submissions_api(assignment_id: int, user=Depends(require_teacher)):
-    """Teacher fetches all student submissions, marks, and answers for a specific classroom assignment."""
-    data = database.get_assignment_submissions_for_teacher(assignment_id, user["id"])
-    if not data:
-        raise HTTPException(status_code=404, detail="Assignment not found or unauthorized.")
-    return data
-
-@app.get("/student/classrooms")
-def get_student_classrooms_api(user=Depends(get_current_user)):
-    """Returns classrooms joined by the student, along with all active assignments."""
-    classes = database.get_student_classrooms_and_assignments(user["id"])
-    return {"classrooms": classes}
-
-@app.get("/student/attempts")
-def get_student_attempts_api(user=Depends(get_current_user)):
-    """Returns historical quiz attempts and scores for the logged in student."""
-    attempts = database.get_student_attempts(user_id=user["id"], student_name=user["name"])
-    return {"attempts": attempts}
-
-@app.get("/teacher/analytics/recent-attempts")
-def get_recent_attempts_api(user=Depends(require_teacher)):
-    conn = database.get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('''
-        SELECT a.id, a.student_name, a.created_at, q.exam_metadata, a.results
-        FROM attempts a
-        JOIN quizzes q ON a.quiz_id = q.id
-        WHERE q.teacher_id = ?
-        ORDER BY a.id DESC
-        LIMIT 15
-    ''', (user["id"],))
-    attempts = []
-    for row in cursor.fetchall():
-        meta = json.loads(row["exam_metadata"])
-        res = json.loads(row["results"])
-        max_score = res.get("max_score", 0)
-        score = res.get("total_score", 0)
-        score_pct = round((score / max_score) * 100, 1) if max_score > 0 else 0
-        attempts.append({
-            "id": row["id"],
-            "student_name": row["student_name"],
-            "quiz_title": meta.get("exam_title", "Untitled Quiz"),
-            "score_percent": score_pct,
-            "date": row["created_at"].split(" ")[0]
-        })
-    conn.close()
-    return {"attempts": attempts}
-
-@app.get("/teacher/branding")
-def get_branding_api(user=Depends(require_teacher)):
-    branding = database.get_teacher_branding(user["id"])
-    return branding or {"academy_name": "", "logo_path": ""}
-
-@app.post("/teacher/branding")
-def update_branding_api(req: BrandingRequest, user=Depends(require_teacher)):
-    database.update_teacher_branding(user["id"], req.academy_name, req.logo_path)
-    return {"message": "Academy branding updated successfully!"}
 
 @app.post("/quiz/explain-question")
 async def explain_question_api(req: ExplainQuestionRequest):

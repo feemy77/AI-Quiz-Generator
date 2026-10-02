@@ -2,8 +2,11 @@
 @import "katex/dist/katex.min.css";
 
 :root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
+  --background: #090d16;
+  --foreground: #f8fafc;
+  --primary-glow: rgba(99, 102, 241, 0.25);
+  --accent-glow: rgba(168, 85, 247, 0.25);
+  --cyan-glow: rgba(6, 182, 212, 0.25);
 }
 
 @theme inline {
@@ -16,15 +19,17 @@
 html {
   scroll-behavior: smooth;
   -webkit-tap-highlight-color: transparent;
+  color-scheme: dark;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: #090d16;
+  color: #f8fafc;
   font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   padding-bottom: env(safe-area-inset-bottom, 0px);
+  min-height: 100vh;
 }
 
 /* 📱 Native Mobile Touch & Micro-Interactions */
@@ -38,6 +43,56 @@ body {
   transform: scale(0.97);
 }
 
+/* ✨ Glassmorphism & Cyber Glow Utilities */
+.glass-panel {
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-panel-glow {
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.85) 100%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+.card-hover {
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.card-hover:hover {
+  transform: translateY(-2px);
+  border-color: rgba(99, 102, 241, 0.4);
+  box-shadow: 0 12px 28px -6px rgba(99, 102, 241, 0.18);
+}
+
+.neon-border-indigo {
+  position: relative;
+}
+.neon-border-indigo::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  background: linear-gradient(90deg, #6366f1, #a855f7, #06b6d4);
+  border-radius: inherit;
+  z-index: -1;
+  opacity: 0.35;
+  transition: opacity 0.3s ease;
+}
+.neon-border-indigo:hover::after {
+  opacity: 0.8;
+}
+
+/* 🌈 Subtle Background Mesh & Orbs */
+.bg-mesh-gradient {
+  background-image: 
+    radial-gradient(at 10% 20%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
+    radial-gradient(at 90% 10%, rgba(168, 85, 247, 0.15) 0px, transparent 50%),
+    radial-gradient(at 50% 80%, rgba(6, 182, 212, 0.1) 0px, transparent 50%);
+}
+
 /* Hide scrollbar for clean mobile chip scrolling while retaining scrollability */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
@@ -47,23 +102,24 @@ body {
   scrollbar-width: none;
 }
 
-/* 🎨 Custom Sleek Scrollbar */
+/* 🎨 Custom Sleek Futuristic Scrollbar */
 ::-webkit-scrollbar {
-  width: 7px;
-  height: 7px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: #090d16;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #1e293b;
   border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: #334155;
 }
 
 /* 🖨️ Clean Print Styling for Exam Reports */

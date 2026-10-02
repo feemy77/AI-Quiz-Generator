@@ -1,11 +1,26 @@
 import sqlite3
 import json
 import os
+import logging
 from datetime import datetime
+from dotenv import load_dotenv
+
+load_dotenv()
+logger = logging.getLogger(__name__)
 
 DB_FILE = os.path.join(os.path.dirname(__file__), "quiz_app.db")
+DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
 
 def get_db_connection():
+    if DATABASE_URL and (DATABASE_URL.startswith("postgresql://") or DATABASE_URL.startswith("postgres://")):
+        try:
+            import psycopg2
+            from psycopg2.extras import RealDictCursor
+            conn = psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
+            return conn
+        except Exception as e:
+            logger.warning(f"PostgreSQL connection via DATABASE_URL failed: {e}. Falling back to SQLite.")
+
     conn = sqlite3.connect(DB_FILE, timeout=30.0)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON;")
@@ -192,6 +207,19 @@ def init_db():
         )
     ''')
 
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS bookmarked_questions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            quiz_id INTEGER,
+            question_type TEXT,
+            question_data TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY(user_id) REFERENCES users(id),
+            FOREIGN KEY(quiz_id) REFERENCES quizzes(id)
+        )
+    ''')
+
     conn.commit()
     conn.close()
     seed_demo_accounts()
@@ -275,6 +303,13 @@ def delete_session(token):
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("DELETE FROM sessions WHERE token = ?", (token,))
+    conn.commit()
+    conn.close()
+
+def update_user_password(email: str, password_hash: str, salt: str):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE users SET password_hash = ?, salt = ? WHERE email = ?", (password_hash, salt, email))
     conn.commit()
     conn.close()
 

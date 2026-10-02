@@ -28,3 +28,4 @@ requests
 python-pptx
 arabic-reshaper
 python-bidi
+psycopg2-binary
